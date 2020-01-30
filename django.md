@@ -143,3 +143,13 @@ MEDIA_URL = '/media/'
 - serving media files原理类似static media
 
 1.  media目录中存放文件, settings.py 中配置 ``MEDIA_ROOT``相关变量
+
+2. 在模板中 通过 ``{{MEDIA_URL}}`` context variable关联media file .
+   1. 如引用一个上传的文件 ``cat.jpg``, 在模板中img标签内,
+    ```html
+    <img src="{{MEDIA_URL}}cat.jpg" alt="Picture of a Cat."/>
+
+> static files不会改变，media files为user-defined, 可经常改变
+> 注意 img标签 <img src="" alt="" />空格
+> ---
+> 
