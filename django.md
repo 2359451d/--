@@ -1,7 +1,5 @@
 #   Django Workflows
 
-
-
 ---
 
 ##  新建django project
@@ -18,7 +16,7 @@
 
 ---
 ##  Template Tag
-> ``{% %}`` 形式
+> `` {% %} `` 形式
 
 ##  静态文件处理 static (media) files
 >静态media文件可看为app上部署的不会改变的重要文件
@@ -75,3 +73,73 @@ MEDIA_URL = '/media/'
   
     -  修改settings.py中 TEMPLATES列表中 'context_processors' 的值 
 >   ![context_processor](/static/contextprocessor.png)
+
+### 动态分析url?
+
+>已配置好 ``context_processor`` 机制
+>最后一步, 配置 ``serving of meadia``如何从``MEDIA_URL``中剖析``static content``
+    
+    通过修改project目录下的``urls.py``模块实现
+```python
+    # import以下函数模块
+    from django.conf import settings
+    from django.conf.urls.static import static
+    # urlpartterns尾部+static()函数
+    """ 用于告知static（）函数,
+    MEDIA_URL : what url should be served from) 
+    MEDIA_ROOT : where the files are stored on FS
+    """
+    urlpatterns = [
+        ...
+        ...
+    ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+```
+---
+- 完成以上步骤后, 能动态剖析/media(MEDIA_URL)/URL 并服务
+---
+##  Workflow
+### django基本workflow
+1.  创建模板, 在``settings.py``中配置
+    1.  **可能用到模板变量 ``{{ variable_name }}``**
+    2.  **与``{% %}``template tag区分**
+2.  创建视图 views.py
+3.  处理视图逻辑
+    1.  如可能涉及与 models.py 进行数据交互后存储为list, render至模板
+4.  view.py 中可传dict[]给template渲染
+5.  使用 render()   函数返回 rendered渲染后的HttpResponse().
+    1.  **注意引用request, template file , context dict[]**
+6.  映射`view -> url`, 即修改 urls.py  文件
+    1.  为每个新增的view创建相应映射
+    2.  或者映射未被使用的view
+---
+###  处理静态文件workflow
+1.  **存储static media file** 至项目``static``目录中, 依然要在  settings.py 中配置
+   
+      ```python
+      STATICFILES_DIRS = [STATIC_DIR,]
+
+      STATIC_DIR = os.path.join(BASE_DIR, 'static')
+      ```
+2.  **只要引用static文件，使用static template tag**
+    ```
+    {% load staticfiles %}
+    ```
+    提示**django模板引擎**会在template中使用静态文件
+
+    - 该段代码使我们能够访问 static目录下的资源 [通过static **template tag**] 
+    
+    - {% static url %}
+    原理= 调用 static 会结合settings.py文件中配置的 STATIC_URL 路径 & url(相对路径))
+    -   即 url = /static/images/rango.jpg
+    -   static = STATIC_URL
+    -  ```html
+        <img src="/static/images/rango.jpg" alt="Picture of Rango" />>
+
+    ```
+    {%static%} - static template tag可用于任意想放置静态文件的地方, 支持多格式   
+    ```
+
+### 动态处理media文件
+- serving media files原理类似static media
+
+1.  media目录中存放文件, settings.py 中配置 ``MEDIA_ROOT``相关变量
