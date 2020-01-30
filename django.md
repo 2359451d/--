@@ -16,7 +16,7 @@
 
 ---
 ##  Template Tag
-> `` {% %} `` 形式
+> {% xxx %} 形式
 
 ##  静态文件处理 static (media) files
 >静态media文件可看为app上部署的不会改变的重要文件
