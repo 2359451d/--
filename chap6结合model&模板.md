@@ -1,7 +1,16 @@
-#   Models ,Templates amd Views
+# CHAP6 Models ,Templates amd Views
 
-##  基于data的page Workflow
-    主要步骤
+## 本章预览图
+![demo](static/cp6.png)
+主要实现
+
+- 为category页面添加page页面链接
+- page页面显示列表&链接
+- 根据某特定属性排序模型数据
+
+## 基于data的page Workflow
+
+主要步骤
 
     1.  views.py 导入需要model
     2.  定义view function, query需要的model
