@@ -59,6 +59,7 @@ This is body_block's default content.
 {% endblock %}
 
 ```
+
 通过``django template blcok tag``指定后期会修改的block``django template command``格式是``{% and %}``
 
 ```html
