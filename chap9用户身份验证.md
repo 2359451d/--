@@ -21,7 +21,7 @@
 
 - 在使用 Django 提供的身份验证机制之前，要在项目的 settings.py 文件中添加相关的设置。检查有没有列出** django.contrib.auth 和
 django.contrib.contenttypes**
-![](2020-02-14-06-26-21.png)
+![](/static/2020-02-14-06-26-21.png)
 
 ``django.contrib.auth``提供对django验证系统的访问
 ``django.contrib.contenttypes``提供``auth``应用跟踪数据库中的模型
@@ -37,11 +37,11 @@ django.contrib.contenttypes**
 **``auth``应用默认使用``PBKDF2算法``计算存储密码后的哈希序列**. 
 
 如果想修改哈希值生成方式,可以在 settings.py 文件中更换该算法, 添加``PASSWORD_HASHERS``元组tuple,例如
-![](2020-02-14-06-34-35.png)
+![](/static/2020-02-14-06-34-35.png)
 :blue_heart:注意算法tuple的顺序，django默认使用第一个算法，如无效采用后面的``哈希算法hasher``
 
 - 如想采用更安全的哈希算法,可以通过``pip``安装``Bcrypt``依赖包,采用该包中算法
-  - ![](2020-02-14-06-37-48.png)
+  - ![](/static/2020-02-14-06-37-48.png)
 
 ---
 
@@ -53,7 +53,7 @@ Django提供多种``password validation``机制,预防用户密码容易破解.
 :blue_heart:**每个验证器有``OPTIONS``字典用于自定义选项**
 
 - 如用于自定义密码最小长度, 将该验证器的``OPTIONS``字典的``min_length``选项改为6
-![](2020-02-14-06-45-29.png)
+![](/static/2020-02-14-06-45-29.png)
 ---
 
 ## :bento: 9.4 User模型
@@ -108,7 +108,7 @@ class UserProfile(models.Model):
 
 :lemon:通过以上步骤,我们为User账户添加了2个额外属性字段
 
-- ![](2020-02-14-07-34-47.png)
+- ![](/static/2020-02-14-07-34-47.png)
   - 该两个字段都设定了``blank=True``表示该字段可以为空,不是必须提供
   - :blue_heart:**注意,``picture的ImageField``字段**有``upload_to``参数，与``MEDIA_ROOT``值关联, 确定用户上传的**media媒体头像文件**存储位置.
     - 如``MEDIA_ROOT = <workspace>/tango_with_django_project/media/`` && ``upload_to='profile_images'``则用户上传的头像存储在``<workspace>/tango_with_django_project/media/profile_images/``路径下
@@ -243,7 +243,7 @@ def register(request):
 
 :blue_heart:注意，UseProfileForm表单的``user``属性必须引用User模型实例，**不能让用户自行填写**
 
-![](2020-02-14-09-34-56.png)
+![](/static/2020-02-14-09-34-56.png)
 :green_heart:**并且要延迟commit，因为UserProfile模型中定义了与User模型的外键关联**，如果不延迟，不保证模型之间的关联，会造成``referential integrity error``
 
 ---
@@ -282,7 +282,7 @@ Rango says: <strong>register here!</strong><br />
 
 - 使用url模板标签，用于reverse映射url
   
-- ![](2020-02-14-09-48-39.png)调用``as_p``模板函数，**目的是在段落中显示各个表单元素，一行显示一个表单元素**
+- ![](/static/2020-02-14-09-48-39.png)调用``as_p``模板函数，**目的是在段落中显示各个表单元素，一行显示一个表单元素**
 
 - :blue_heart:``enctype``属性, 如果用户上传头像, 表单数据包含二进制数据,可能过大,因此传给服务器需要分块这些数据. 设定``enctype="multipart/form-data"``
   - <font color="red">表明让HTTP客户端(浏览器)分段打包&发送数据，不然服务器可能收不到用户提交的完整数据(数据过大情况)</font>
@@ -297,7 +297,7 @@ Rango says: <strong>register here!</strong><br />
 
 ### 添加url映射
 
-![](2020-02-14-10-16-29.png)
+![](/static/2020-02-14-10-16-29.png)
 
 ---
 
