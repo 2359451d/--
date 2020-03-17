@@ -5,7 +5,7 @@
 
 ---
 
-本章学习django提供的用户身份验证机制，使用``django.contrib.auth``中的``auth``应用. 该应用提供以下功能:
+本章学习django提供的用户身份验证机制（控制不同用户群体的权限），使用``django.contrib.auth``中的``auth``应用. 该应用提供以下功能:
 
 - User & User Model
 
