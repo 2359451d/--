@@ -261,7 +261,7 @@ file ``rango/register.html``中
 {% endblock %}
 
 {% block body_block %}
-<h1>Register for Rango</h1>    
+<h1>Register for Rango</h1>
 
 {% if registered %}
 Rango says: <strong>thank you for registering</strong>
