@@ -58,7 +58,20 @@
 
 注册成功后，重定向用户至`UserProfile`相关
 
+* 涉及覆写`redux`包，使用,继承该包中基于类的视图`class-based view`
+* ![](/static/2020-03-19-06-05-05.png)
+* 项目目录下url
+
 1. 创建模板`profile_registration.html`，渲染`UserProfileForm`表单
 2. 创建视图`register_profile()`
 3. 修改注册后重定向url
 
+## 复杂视图处理: class-based view
+
+支持覆写`get/post()`方法，实现视图的处理
+![](/static/2020-03-19-06-17-05.png)
+![](/static/2020-03-19-06-21-33.png)
+
+* 使复杂视图处理更直观
+
+![](/static/2020-03-19-06-26-39.png)
