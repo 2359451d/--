@@ -10,7 +10,7 @@
 
 ## 13.1 bing api
 
-响应数据可以`XML/JSON`格式返回. 
+响应数据可以`XML/JSON`格式返回.
 
 1. 注册api key密钥.
 

@@ -64,7 +64,7 @@
 
 检查是否正确安装django依赖
 
-`whcih django-admin.py`
+`which django-admin.py`
 
 * `/home/rangodemo2020/.virtualenvs/rangoenv/bin/django-admin.py`
 
@@ -94,6 +94,7 @@
 #### 配置VE路径
 
 ![](/static/2020-03-28-17-41-51.png)
+
 
 #### 配置CODE部分
 
