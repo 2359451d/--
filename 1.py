@@ -1,33 +1,40 @@
-# from drawingpanel import *
-# def Mandelbrot_Set(max_iter, c1, c2):#判断（c1，c2）是否在Mandelbrot集合里面
-#     x = y = 0
-#     for iter in range(max_iter):
-#         x, y = x*x - y*y + c1, 2*x*y + c2
-#         if x*x + y*y > 4:
-#             return iter+1
-#     return 0
-# def point(p,x,y):
-#     p.canvas.create_oval(x,y,x,y,fill='black')
-# def point1(p,x,y):
-#     p.canvas.create_oval(x,y,x,y,fill='red')
-# def main():
-#     width,height =900,600
-#     panel = DrawingPanel(width,height,background = 'white')
-#     for i in range(width):
-#         for j in range(height):
-#             c1 = -2+(i/width)*(1-(-2))
-#             c2 = -1+(j/height)*(1-(-1))
-#             judge = Mandelbrot_Set(10000,c1,c2)
-#             if judge==0:
-#                 point(panel,i,j)
-#                 panel.sleep(0.1)
-#     # for i in range(width):
-#     #     for j in range(height):
-#     #         c1 = -2+(i/width)*(1-(-2))
-#     #         c2 = -1+(j/height)*(1-(-1))
-#     #         judge = Mandelbrot_Set(10000,c1,c2)
-#     #         if 1<=judge<1000:
-#     #             point1(panel,i,j)
-#     #             panel.sleep(0.1)
+"""
 
-# main()
+cleaning robot. moves in a strange way.
+
+* starting point (x, y)
+* take a step (x, x+y) or (x+2y, y)
+
+- given a starting point (x1,y1) check wether it is possible
+to reach a specific point (x2, y2)
+
+# BASE CASE: if (a, b) > (x2,y2) goes too far
+
+"""
+
+start_x, start_y = 2, 3
+final_x, final_y = 20,4
+
+result = 0
+
+def canReach(start_x, start_y, final_x, final_y):
+    # base case: robot goes too far
+
+    if (start_x>final_x) or (start_y>final_y):
+        return 0
+
+    canReach(start_x, start_x + start_y, final_x, final_y)
+    canReach(start_x + start_y + start_y, start_y, final_x, final_y)
+    if start_x==final_x and start_y==final_y:
+        global result
+        result = 1
+
+def getResult():
+    canReach(start_x, start_y, final_x, final_y)
+    return result
+
+if __name__ == "__main__":
+    if (getResult()):
+        print("True")
+    else:
+        print("False")
