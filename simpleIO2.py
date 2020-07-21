@@ -34,6 +34,7 @@ if __name__ == "__main__":
         if prompt == '?':
             break
         if isNumeric(prompt):
+            # 48-57
             result = numericList[int(prompt)]
         elif isCapital(prompt):
             # 65-90
