@@ -1,3 +1,46 @@
+
+- [Revision](#revision)
+  - [Do While](#do-while)
+  - [Increment](#increment)
+  - [JVM: Method Area](#jvm-method-area)
+  - [JVM: Heap](#jvm-heap)
+  - [Some Tips of Compiling Process](#some-tips-of-compiling-process)
+  - [This](#this)
+  - [Method Override](#method-override)
+  - [Upcasting & Downcasting](#upcasting--downcasting)
+    - [instanceof](#instanceof)
+  - [Polymorphic](#polymorphic)
+  - [Super](#super)
+  - [final](#final)
+  - [abstract & interface](#abstract--interface)
+    - [difference](#difference)
+  - [package & import](#package--import)
+  - [finalize](#finalize)
+    - [Example](#example)
+  - [anonymous inner class](#anonymous-inner-class)
+  - [Array](#array)
+    - [initialising](#initialising)
+    - [array(length fixed) extension](#arraylength-fixed-extension)
+    - [copy](#copy)
+  - [main method](#main-method)
+  - [String](#string)
+    - [constructors](#constructors)
+    - [commonly used methods](#commonly-used-methods)
+    - [StringBuffer(thread-safe)](#stringbufferthread-safe)
+    - [StringBuilder(thread-unsafe)](#stringbuilderthread-unsafe)
+  - [Boxing & Unboxing](#boxing--unboxing)
+  - [Integer](#integer)
+    - [commonly used method](#commonly-used-method)
+  - [Date](#date)
+    - [SimpleDateFormat: Date Formatting](#simpledateformat-date-formatting)
+  - [Execution Time](#execution-time)
+  - [DecimalFormat: Numberic Formatting](#decimalformat-numberic-formatting)
+  - [BigDecimal: High Precision](#bigdecimal-high-precision)
+  - [Random](#random)
+  - [Exception & Error](#exception--error)
+    - [getMessage & printStackTrace](#getmessage--printstacktrace)
+    - [Declare Exception](#declare-exception)
+
 # Revision
 
 self-revision using: fundamentals of Java
@@ -472,3 +515,113 @@ StringBuffer底层是**byte[]数组（JDK8为char数组），初始化容量16**
 ## Date
 
 `java.util`包，对日期处理
+
+* 获取系统当前时间（精确到毫秒），可以直接使用无参数构造方法
+  * 其他构造函数`new Date(long)`，参数为一个毫秒（自1970/01/01 00 000）
+  * ![](/static/2020-08-01-00-11-33.png)
+* `toString`已被覆写，返回日期字符串
+
+### SimpleDateFormat: Date Formatting
+
+🍊 日期格式化，`Date`转格式化日期`String`
+
+![](/static/2020-07-31-23-56-53.png)
+
+* 将Date类型，按照一定格式进行转换（String）
+* `SimpleDateFormat` - `java.text`包下处理日期格式化的类
+
+日期格式pattern，传给`SimpleDateFormat(String pattern)`构造函数，返回一个`SimpleDateFormat`对象，最后将Date传入SimpleDateFormat的`.format(Date)`方法进行格式化，返回String对象
+
+![](/static/2020-07-31-23-47-50.png)
+![](/static/2020-07-31-23-48-37.png)
+
+🍊 格式化日期`String`如何转`Date`对象？
+
+![](/static/2020-07-31-23-56-22.png)
+
+* 将String pattern传入`SimpleDateFormat`对象【注意格式要与给定日期字符串相同】
+* 调用SimpleDateFormat的`.parse(String pattern)`方法，返回`Date`方法
+
+## Execution Time
+
+获取自`1970年1月1日 00：00：00 000`到系统当前时间的总毫秒数
+
+`long`类型`System.currentTimeMillis()`
+
+## DecimalFormat: Numberic Formatting
+
+数字格式化
+
+![](/static/2020-08-01-16-14-29.png)
+![](/static/2020-08-01-16-16-03.png)
+![](/static/2020-08-01-16-19-08.png)
+
+* `java.text`包，`DecimalFormat`专门负责数字格式化
+* `0` - 不够时补零
+
+## BigDecimal: High Precision
+
+`BigDecimal`属于大数据，精度极高，不属于基本数据类型，是引用数据类型（即，对象）
+
+财务软件中`double`不够用
+
+![](/static/2020-08-01-16-29-47.png)
+
+* 加法：`bigdecimal1.add(bigdecimal2)`
+
+## Random
+
+创建随机数对象
+
+* `Random r = new Random()`
+
+随机产生一个int类型取值范围内or给定范围内`0~bound-1`的数字
+
+* `int num = r.nextInt()`
+* `int num = r.nextInt(bound)`
+
+## Exception & Error
+
+![](/static/2020-08-01-19-15-16.png)
+
+* 都继承`Throwable`可抛出
+
+**错误**
+
+* 无法处理，终止程序执行
+
+**运行时异常【非受控异常**
+
+* 可捕捉处理，也可不处理
+
+**编译时期异常【受控异常】**
+
+* 编译时期必须处理，否则无法编译
+
+🍊 异常捕获顺序【小到大】
+
+![](/static/2020-08-01-19-36-06.png)
+
+🍊 子类异常不能超出父类异常范围
+
+### getMessage & printStackTrace
+
+获取异常对象具体信息
+
+* 获取描述信息`getMessage()`
+* 获取异常堆栈信息<font color="red">适用于调试阶段</font>`printStackTrace()`
+
+### Declare Exception
+
+如何**声明异常**？
+
+![](/static/2020-08-01-19-31-46.png)
+![](/static/2020-08-01-19-33-12.png)
+
+* <font color="red">方法定义处`throws`声明</font>抛给上级调用者处理
+  * 如声明异常为编译时期(受控异常)，那么调用方法必须处理该异常
+  * 非受控运行时期异常可以不捕捉
+
+如何**抛出异常**？
+
+* `throws new Exception("")`
