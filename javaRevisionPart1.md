@@ -346,6 +346,8 @@ class Person{
 
 ## String
 
+[jdk1.8之后常量池问题相关](https://tieba.baidu.com/p/6864756492)
+
 ### constructors
 
 `String s1 = "hello world"`;
