@@ -966,3 +966,330 @@ png)
 * `file.length()`获取文件大小，字节
 * `File[] file.listFiles()`获取当前目录下所有子文件
   * ![](/static/2020-08-07-18-40-39.png)
+
+## Multi-Threads
+
+多线程
+
+* 线程A&B，**堆内存&方法区内存共享**
+* **栈内存独立**，每个线程一个栈
+* JVM是一个进程，main是主线程，还有gc线程垃圾回收
+
+---
+
+实现多线程的方式？
+
+* 类继承`java.lang.Thread`重写`run`方法
+* <font color="red">类实现`Runnable`接口，推荐</font>
+
+### Thread
+
+方式
+
+* 类继承`Thread`，覆写`run`方法
+* 新建分支线程对象`MyThread myThread = new MyThread()`
+* 启动线程`myThread.start()`
+  * 并不会马上执行线程，而是使线程进入就绪。<font color="blue">作用是启动一个分支线程，会<b>先阻塞</b>，在JVM中开辟一个新的栈空间，只要开辟完成，`start()`立刻结束，线程启动成功，才继续执行后续代码</font>
+  * 启动成功的线程自动调用`run()`方法，并且该栈帧位于分支栈的栈底`%ebp`
+
+### Runnable
+
+类实现`java.lang.Runnable`接口，<font color="red">并不是一个线程类，只是一个可运行的类</font>
+
+🍊 推荐使用，因为可以实现多接口
+
+方式
+
+* 创建一个可运行对象(实现Runnable接口)`MyRunnable r =new MyRunnable()`
+* 将可运行对象封装成一个线程对象`Thread t = new Thread(r)`
+* 启动`t.start()`
+
+🍬 推荐合并写法`Thread t = new Thread(new MyRunnable())`
+
+* `t.start()`
+
+🍬 采用匿名内部类方式
+
+```java
+Thread t = new Thread(new Runnable(){
+  @Override
+  public void run(){
+    // ...
+  }
+})
+//启动
+t.start();
+```
+
+### Callable
+
+JDK8新特性，**这种方式实现可以获取线程返回值**，但效率较
+
+🍊 方式
+
+![](/static/2020-08-12-00-37-56.png)
+
+* 创建一个未来任务类对象`FutureTask task = new FutureTask(Callable<V>)`有返回值或`FutureTask task = new FutureTask(Runnable, V)`无返回值
+* 覆写`Callable`接口，`call()`
+  * ![](/static/2020-08-12-00-33-01.png)
+  * `java.util.concurrent.FutureTask`JUC包中，属于java并发包
+  * <font color="red">匿名类方式</font>
+* 将未来任务对象传入`Thread`创建线程对象
+  * `Thread t = new Thread(task)`
+
+🍊 如何获取返回值？
+
+* `task.get()`会使当前线程阻塞，待另一个线程执行完毕获取返回值
+
+### Some Methods
+
+1. 怎么获取当前线程对象
+2. 获取线程对象的名字
+3. 修改线程对象的名字
+
+#### run()
+
+注意`run()`中的异常不能用`throws`处理，只能`try...catch`
+
+* 因为`run()`方法在父类中没有抛出任何异常
+
+#### get/setName() & currentThread()
+
+🍊 名字相关【假设继承了`Thread`类】
+
+* 设置线程名字`t.setName("")`
+* 获取线程名字`t.getName("")`
+* 默认名字`Thread-0/1/2...`
+
+🍊 获取当前线程对象？
+
+![](/static/2020-08-08-23-13-11.png)
+
+* 静态方法，返回对当前执行的线程的引用
+* `Thread currentThread = Thread.currentThread()`
+* 获取当前线程名`currentThread.getName()`
+
+#### sleep() & interrupt()
+
+![](/static/2020-08-09-14-57-49.png)
+
+* 静态方法`Thread.sleep(long millis
+* 参数`long millis`毫秒
+* 让**当前线程**进入休眠，<font color="red">“阻塞状态”，放弃占有的CPU时间片，让给其他线程使用</font>
+
+🍊 终断线程的睡眠 - 唤醒
+
+![](/static/2020-08-09-15-29-40.png)
+
+* `t.interrupt()`终断t线程的睡眠
+* 依靠`java`异常处理机制。线程在睡眠状态被中断会抛出`IterruptedException`
+
+#### stop()
+
+`stop()`强行终止线程
+
+* 已过时，不建议使用。非线程安全。
+
+🍊 如何何理终止一个线程的执行？
+
+![](/static/2020-08-09-16-10-04.png)
+
+* 类中定义一个终断标记`flag`
+  * 中断时，从外部更改该类标记字符，从而间接终止
+
+### Methods Related to Scheduling
+
+🍊 调度相关方法
+
+#### Priority
+
+🍬 设置/获取线程优先级
+
+* `setPriority(int newPriority)`
+* `getPriority()`
+* 最低`1`，默认`5`，最高`10`
+  * <font color="red">优先级高的获取CPU时间片可能多（大概率）</font>
+* 最低优先级1`Thread.MIN_PRIORITY`
+* 最高优先级10`Thread.MAX_PRIORITY`
+* 默认优先级5`Thread.NORM_PRIORITY`
+
+#### Thread.yield()
+
+🍬 让位方法
+
+* `Thread.yield()`暂停当前正在执行的线程对象，并执行其他线程
+  * <font color="red">只能让同优先级的线程有执行的机会</font>
+* <font color="red">不是阻塞方法，让当前线程让位，让给其他线程使用</font>
+* 会让当前线程状态从`running->ready`
+
+#### Thread.join()
+
+🍬 合并线程
+
+* `void join()`当前线程进入<font color="red">【阻塞】，调用的线程进行执行，直到结束。当前线程才可以继续执行</font>
+* ![](/static/2020-08-09-19-15-51.png)
+* `t.join()`t“合并”到当前线程中，当前线程阻塞（如sleep）
+
+### Thread-Safe
+
+🍬 异步&同步
+
+* ![](/static/2020-08-10-15-55-19.png)
+
+🍊 什么时候数据在多线程环境下不安全？【线程安全问题】
+
+* 多线程并发
+* 有共享数据
+* 共享数据有修改行为
+
+🍊 如何解决？
+
+* 线程排队执行。这种机制称为 - **线程同步机制**
+* **线程同步=线程排队，牺牲效率，保证安全**
+
+#### Add Lock: synchronized()
+
+🍊 每个<font color="red">对象</font>都有一个锁
+
+![](/static/2020-08-10-16-41-39.png)
+![](/static/2020-08-10-17-09-16.png)
+
+语法
+
+```java
+// 在静态方法上使用synchronized，找类锁。只有1把锁。（保证静态变量安全）
+
+public synchronized void run(){...} //影响效率 - 锁只能为this，不灵活。但代码简洁
+
+/*
+使用同步块，一个对象一把锁
+*/
+synchronized(){
+  // ...
+}
+```
+
+* 括号中传入**数据(希望线程共享的对象)**,关键
+  * 该数据必须是多线程共享的数据，才能达到多线程排队
+* <font color="blue">方法中的局部变量位于各自线程栈的方法栈帧中，互不干扰。资源类（实现Runnable）的成员变量以及这个资源类对象本身，位于堆中，由多个线程共享，异步执行时会冲突</font>
+  * 实现线程类（继承Thread），需要额外堆中生成资源类对象，供线程对象共享
+
+局部变量示意图
+![](/static/2020-08-10-17-17-53.png)
+
+成员变量共享示意图
+![](/static/2020-08-10-17-17-13.png)
+
+#### Without Lock
+
+🍊 不加锁情况下，不采用线程同步方式
+
+![](/static/2020-08-10-17-24-05.png)
+![](/static/2020-08-10-17-24-30.png)
+
+* 通过**给每个线程创建独立资源对象**，避免线程安全问题
+
+#### Dead-Lock
+
+嵌套使用`synchronized`不当导致
+
+开发中如何解决线程安全问题？
+
+* 不一上来直接使用`synchronized`，会让执行效率降低，用户体验不好。
+* 尽量使用局部变量，代替实例变量(成员遍历)&静态变量
+  * 如果必须使用实例变量，则考虑创建多个对象，这样实例变量的内存不共享。对象不共享，没有安全问题。
+  * 如不使用局部变量，对象不能创建多个，使用`synchronized`，线程同步机制
+
+### Daemon Thread
+
+守护线程(后台线程)
+
+* 最具代表性的，**垃圾回收线程**
+
+🍊 特点
+
+* 一般为**死循环**
+* 用户线程只要结束，**守护线程自动结束**
+  * main是用户线程
+
+#### setDaemon(boolean)
+
+🍊 将线程设置为守护线程
+
+* `thread.setDaemon(true)`
+  * 只要用户线程结束，即使守护线程为死循环也会直接结束
+
+### Timer
+
+🍊 定时器作用
+
+* 间隔特定时间，执行特定程序
+* 多种实现方法
+  * `sleep(milliseconds)`设置睡眠时间，每到这个时间点醒来，执行特定任务，最原始方式
+  * <font color="red">直接使用定时器API，`java.util.Timer`，使用较少，因为很多高级框架都支持定时任务</font>
+  * `Spring`框架提供的`SpringTask`框架，只需要简单配置就可以完成定时器任务
+
+#### Methods
+
+![](/static/2020-08-11-22-40-38.png)
+
+* `timer.schedule(定时任务， 第一次执行时间， 间隔多久执行一次)`
+
+🍊 自定义定时任务类，继承`TimerTask`抽象类，本质是个线程
+
+* 覆写`run()`
+
+🍊 时间类相关
+
+* `SimpleDateFormat`&`Date`结合
+  * `parse()`返回`Date`
+  * `format()`返回`String`
+
+🍊 使用匿名内部类
+
+* ![](/static/2020-08-11-23-46-51.png)
+
+### wait() & notify() & notifyALL()
+
+🍊 是java中每个对象都有的方法，`Object`自带
+
+* `o.wait()`让正在o对象上活动的线程进入等待状态（<font color="red">阻塞</font>），无期限等待，直到被唤醒`o.notify()`
+* `o.notify()`可唤醒当前在o对象上等待的线程
+  
+🍊 notifyAll()
+
+* 唤醒o对象上所有处于等待的线程
+
+#### Producer & Consumer
+
+🍊 生产者消费者问题
+
+* 专门解决特定需求
+  * <font color="red">生产消费达到均衡</font>
+* 由仓库负责调用`wait()`&`notify()`
+  * 建立在`synchronized`线程同步基础上
+  * `o.wait()` - 会让正在o对象上**活动的线程t进入等待状态，并且释放之前占有的o对象的锁**
+  * `o.notify()` - 会让正在o对象上**等待的线程t被唤醒，只会通知，不会释放之前占有的o对象的锁**
+
+🍊 生产者消费者实现
+
+* 需求
+  * 生产多少，消费多少，仓库有容量
+
+🍊 生产者
+
+![](/static/2020-08-14-21-54-11.png)
+
+* 仓库未满，生产，唤醒消费者
+  * <font color="blue">可以通过while死循环配合同步块实现，有条件判断可以直接用notifyAll()</font>
+* 仓库满，Producer等待，释放仓库锁
+
+#### is wait() blocked?
+
+🍊 wait()是否使线程阻塞？
+
+![](https://picb.zhimg.com/v2-287f87ad5328f2aa5cd7fbd48dadcd8f_r.jpg?source=1940ef5c)
+
+* <font color="red">由上可知，wait()&join()本质都是使线程进入waiting等待状态</font>
+* 只有被唤醒的waiting线程才有权利进入阻塞状态抢锁
+  * 重新获取到对象的锁才能恢复执行
