@@ -1,6 +1,6 @@
 # Revision
 
-Revision part2: Collection, I/O, Multi-Threads, Reflection, Annotation
+Revision part2: Collection, I/O, Multi-Threads
 
 ## Generic Types
 
