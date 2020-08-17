@@ -78,6 +78,14 @@ java为保证类加载安全，使用双亲委派机制
 * `java.lang.reflect.Constructor` - 字节码中**构造方法**字节码
 * `java.lang.reflect.Field` - 字节码中**属性(成员变量:包括静态变量和实例变量)**字节码
 
+### cons
+
+反射两个缺点
+
+![](/static/2020-08-17-00-57-43.png)
+
+> 最佳方案是保守地使用反射——仅在它可以真正增加灵活性的地方 ——记录其在目标类中的使用
+
 ### how to get Class
 
 ![](/static/2020-08-15-15-32-13.png)
@@ -391,3 +399,122 @@ for(Class in: interfaces){
 🍊 反编译
 
 ![](/static/2020-08-16-16-05-24.png)
+
+## Annotation
+
+🍬 元注解
+
+![](/static/2020-08-16-22-45-07.png)
+
+* 标注注解类型的注解
+* `@Target`【接收value数组ElementType枚举属性，属性可并排，免写value】
+  * 用来标注，某个注解可以出现的位置
+  * `@Target(ElementType.METHOD)`被标注的注解只能出现在方法上
+  * `@Target(ElementType.TYPE)`被标注的注解只能出现在类上
+  * ![](/static/2020-08-17-01-03-32.png)
+* `@Retention`
+  * 标注，某个注解最终保存的位置
+  * `@Retention(RetentionPolicy.SOURCE)`该注解只保留在java源文件中
+  * `@Retention(RetentionPolicy.CLASS)`该注解只保留在class文件中
+  * `@Retention(RetentionPolicy.RUNTIME)`该注解只保留在class文件中并且可以被反射机制触发
+  * ![](/static/2020-08-17-01-10-08.png)
+
+🍊 其他元注解
+
+* `@Documented`
+  * 跟 Javadoc 的作用是差不多的，其实它存在的好处是开发人员可以定制Javadoc 不
+支持的文档属性，并在开发中应用
+  * ![](/static/2020-08-17-01-13-00.png)
+* `@Inherited`
+  * 默认父类中的 Annotation 并不会被继承到子类中
+  * <font color="red">加上后，您定义的Annotation类型在被继承后仍可以保留至子类中</font>
+  * ![](/static/2020-08-17-01-15-50.png)
+
+🍊 注解
+
+* 引用类型
+* 编译后也为`.class`文件
+* 自定义注解类语法
+  * `[修饰符列表] @interface 注解类型名{}`
+* 使用方法
+  * `@注解类型名`
+  * 可用于类，属性，方法，变量，注解类型上
+
+🍊 JDK内置注解`java.lang`
+
+* `@Deprecated`
+  * 标注过时方法，编译时提示信息
+* `@Override`
+  * 只能注解方法，给编译器参考，会进行编译检查。如果方法名不属于父类重写，编译器报错
+* `@SuppressWarnings`，需要1个额外参数
+  * 它对编译器说明某个方法中**若有警告信息，则加以抑制**，不用在编译完成后出现警告
+  * ![](/static/2020-08-17-01-01-26.png)
+  * ![](/static/2020-08-17-01-07-26.png)
+
+### use
+
+注解作用
+
+![](/static/2020-08-17-00-59-26.png)
+
+### Fields
+
+🍊 注解中可以定义属性
+
+![](/static/2020-08-16-23-07-53.png)
+
+🍬 如果一个注解中有属性，必须给属性赋值（除非有`default`默认值）
+
+![](/static/2020-08-16-23-09-15.png)
+![](/static/2020-08-16-23-11-15.png)
+![](/static/2020-08-16-23-17-54.png)
+![](/static/2020-08-16-23-24-20.png)
+
+* `@Annotation(field1=xxx, field2=xxx)`
+  * 如为数组，`@Annotation(field={xxx,xxx})`
+  * 如数组中只有一个元素，则大括号可省略
+* 如果属性有默认值，则可无视
+* <font color="red">属性名只有`value`时，可以直接写值，而不用写`value=xxx`</font>
+* <font color="blue">属性类型只能为，【基本类型，Class，String，枚举】及其数组形式</font>
+
+---
+
+### Reflection of Annotation
+
+🍬 <font color="red">前提是注解类的元注解声明，该注解保存在class文件中，且能响应反射</font>
+
+* `@Retention(RetentionPolicy.RUNTIME)`
+
+🍊 反射获取注解 & 获取注解属性
+
+![](/static/2020-08-17-00-03-15.png)
+![](/static/2020-08-17-00-03-37.png)
+
+```java
+Class c = Class.forName(...);
+c.isAnnotationPresent(MyAnnotation.class);//判断c类上是否有MyAnnotation注解
+MyAnnotation my = c.getAnnotation(MyAnnotation.class);//注解对象
+String a = myAnnotation.value();// 获取value属性
+
+```
+
+* `isAnnotationPresent​(Class<? extends Annotation> annotationClass)`
+* `getAnnotation​(Class<A> annotationClass)`
+
+---
+
+🍊 获取某类方法上的完整的注解信息
+
+![](/static/2020-08-17-00-08-23.png)
+
+```java
+Class c = Class.forName(...);
+Method m = c.getDeclaredMethod("doSome");//获取该类doSome方法
+
+//判断该方法是否被MyAnnotation注解
+if(m.isAnnotationPresent(MyAnnotation.class)){
+  MyAnnotation my = m.getAnnotation(MyAnnotation.class);//获取注解对象
+  my.username();//注解的username属性
+  my.password();//注解password属性
+}
+```
