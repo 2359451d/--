@@ -2,6 +2,101 @@
 
 Revision part2: Collection, I/O, Multi-Threads
 
+- [Revision](#revision)
+  - [Generic Types](#generic-types)
+  - [Utility Class: Collections](#utility-class-collections)
+  - [Collection](#collection)
+    - [Contains & Remove](#contains--remove)
+    - [Interface: Collection & Iterator](#interface-collection--iterator)
+      - [Iterator](#iterator)
+    - [List](#list)
+      - [Commonly Used Method](#commonly-used-method)
+      - [ArrayList](#arraylist)
+      - [LinkedList](#linkedlist)
+        - [SingleLinkedList](#singlelinkedlist)
+        - [DoublyLinkedList](#doublylinkedlist)
+      - [Vector](#vector)
+    - [Set](#set)
+      - [HashTable](#hashtable)
+      - [HashSet](#hashset)
+      - [TreeSet(SortedSet)](#treesetsortedset)
+        - [Self-Balanced Binary Tree](#self-balanced-binary-tree)
+        - [Customize Sorting: Comparable & Comparator](#customize-sorting-comparable--comparator)
+    - [Map](#map)
+      - [equals & hashcode](#equals--hashcode)
+        - [Distribute Hash Values Evenly/Unevenly](#distribute-hash-values-evenlyunevenly)
+      - [Commonly Used Methods](#commonly-used-methods)
+      - [HashMap](#hashmap)
+        - [JDK8: New Traits - Threshould](#jdk8-new-traits---threshould)
+        - [put](#put)
+        - [get](#get)
+      - [HashTable: Key null？](#hashtable-key-null)
+        - [Properties(used with I/O)](#propertiesused-with-io)
+    - [Summary: initial capacity](#summary-initial-capacity)
+  - [I/O](#io)
+    - [close() & flush()](#close--flush)
+    - [InputStream && OutputStream](#inputstream--outputstream)
+    - [FileInputStream](#fileinputstream)
+      - [single byte - read()](#single-byte---read)
+      - [multi-byte read(byte[] b)](#multi-byte-readbyte-b)
+      - [other methods](#other-methods)
+    - [FileOutputStream](#fileoutputstream)
+      - [methods](#methods)
+      - [file copy](#file-copy)
+    - [Reader & Writer](#reader--writer)
+      - [FileReader](#filereader)
+      - [FileWriter](#filewriter)
+      - [file copy](#file-copy-1)
+    - [BufferedReader & BufferedWriter](#bufferedreader--bufferedwriter)
+      - [BufferedReader](#bufferedreader)
+        - [conversion: InputStreamReader](#conversion-inputstreamreader)
+      - [BufferedWriter](#bufferedwriter)
+        - [conversion: OutputStreamWriter](#conversion-outputstreamwriter)
+    - [BufferedInputStream & BufferedOutputStream](#bufferedinputstream--bufferedoutputstream)
+    - [DataInputStream & DataOutputStream](#datainputstream--dataoutputstream)
+      - [DataOutputStream](#dataoutputstream)
+      - [DataInputStream](#datainputstream)
+    - [PrintStream & PrintWriter](#printstream--printwriter)
+      - [PrintStream](#printstream)
+        - [print to log file](#print-to-log-file)
+      - [System.in](#systemin)
+    - [ObjectInputStream & ObjectOutputStream](#objectinputstream--objectoutputstream)
+      - [ObjectOutputStream](#objectoutputstream)
+      - [ObjectInputStream](#objectinputstream)
+      - [multi-serialization](#multi-serialization)
+    - [RandomAccessFile](#randomaccessfile)
+      - [Methods](#methods-1)
+      - [Mode](#mode)
+      - [Example: Write/Read at Specific Pos](#example-writeread-at-specific-pos)
+      - [Example: Appending](#example-appending)
+  - [File](#file)
+  - [NIO.2](#nio2)
+  - [NIO2: Path,Paths,Files](#nio2-pathpathsfiles)
+  - [Multi-Threads](#multi-threads)
+    - [Thread](#thread)
+    - [Runnable](#runnable)
+    - [Callable](#callable)
+    - [Some Methods](#some-methods)
+      - [run()](#run)
+      - [get/setName() & currentThread()](#getsetname--currentthread)
+      - [sleep() & interrupt()](#sleep--interrupt)
+      - [stop()](#stop)
+    - [Methods Related to Scheduling](#methods-related-to-scheduling)
+      - [Priority](#priority)
+      - [Thread.yield()](#threadyield)
+      - [Thread.join()](#threadjoin)
+    - [Thread-Safe](#thread-safe)
+      - [Add Lock: synchronized()](#add-lock-synchronized)
+      - [Without Lock](#without-lock)
+      - [Dead-Lock](#dead-lock)
+    - [Daemon Thread](#daemon-thread)
+      - [setDaemon(boolean)](#setdaemonboolean)
+    - [Timer](#timer)
+      - [Methods](#methods-2)
+    - [wait() & notify() & notifyALL()](#wait--notify--notifyall)
+      - [Producer & Consumer](#producer--consumer)
+      - [is wait() blocked?](#is-wait-blocked)
+
 ## Generic Types
 
 ![](/static/2020-08-03-16-46-40.png)
@@ -937,6 +1032,115 @@ png)
 
 * 集合实现了`Serializable`接口
 
+### RandomAccessFile
+
+🍊 随机存取文件流
+
+* 直接继承`Object`，和其他四大IO流无关
+* `java.io`，实现了`DataInput`&`DataOutput`
+* 支持随机访问方式，程序可以**跳到文件任意地方读、写文件**
+  * <font color="red">写出时: 如文件存在，默认情况下，会从文件头部开始进行覆盖(有多少覆盖多少，不是清空原内容再覆盖)</font>
+  * `write`都实现覆盖效果，如需要追加需要提前读入数据
+* 如文件不存在，会创建
+
+🍊 重要特性
+
+* `RandomAccessFile`包含一个**文件记录指针**，可以用于标识当前读写处的位置
+* `RandomAccessFile`可以自由移动记录指针
+
+#### Methods
+
+🍬 通常方法类似四大类
+
+* `read(byte[])`多字节缓冲数组读入
+* `read()`单字节
+* `readLine()`逐行读
+* `write()`单字节写
+* `write(byte[])`多字节写缓冲数组写入
+
+🍬 特殊方法
+
+* `public native long getFilePointer() throws IOException`
+  * 获取**文件记录指针**，的当前位置
+* `public void seek(long pos) throws IOException`
+  * 将文件记录指针定位到`pos`位置
+
+#### Mode
+
+🍊 模式 Mode
+
+* `r`只读方式打开
+  * 不会创建文件，读取一个存在的文件。不存在抛出异常
+* `rw`打开以便读取&写入
+  * 文件不存在会创建文件，存在不会创建
+* `rwd`打开以便读取&写入，同步文件内容的更新
+* `rws`打开以便读取&写入，同步文件内容和元数据的更新
+
+```java
+// 可以直接构造器创建
+// public RandomAccessFile(String name, String mode)
+// public RandomAccessFile(File file, String mode)
+RandomAccessFile in = null;
+RandomAccessFile out = null;
+try {
+    in = new RandomAccessFile("1.jpg","r");
+    out = new RandomAccessFile("1.jpg","r");
+    byte[] buffer = new byte[1024];
+    int readCount = 0;
+    while((readCount=in.read(buffer))!=-1){
+        out.write(buffer, 0, readCount);
+    }
+} catch (FileNotFoundException e) {
+    e.printStackTrace();
+} catch (IOException e) {
+    e.printStackTrace();
+}finally {
+    try {
+        out.close();
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
+```
+
+#### Example: Write/Read at Specific Pos
+
+```java
+RandomAccessFile out = null;
+out = new RandomAccessFile("1.jpg","rw");
+out.seek(3);// 移动文件记录指针位置，至角标为3的位置
+out.write("abc".getBytes()); // 覆盖数据
+out.close();
+```
+
+#### Example: Appending
+
+🍬 如果需要在文件尾部追加，可以通过`File`类获取文件内长度，再定位记录指针
+
+```java
+RandomAccessFile in = null;
+in = new RandomAccessFile("1.txt","rw");
+File f = new File("1.txt");
+long length = f.length();
+
+in.seek(3);// 调整记录指针位置->3
+// 保存指针3后所有数据至StringBuffer中
+StringBuilder builder = new StringBuilder((int) length);
+byte[] buffer = new byte[1024];
+int readCount = 0;
+while((readCount=(in.read(buffer)))!=-1){
+    builder.append(new String(buffer, 0, readCount));
+}
+
+in.seek(3);// 调回指针，写入新数据
+in.write("abc".getBytes());
+
+// 将保存至StringBuilder的数据写回文件
+in.write(builder.toString().getBytes());
+
+in.close();
+```
+
 ## File
 
 ![](/static/2020-08-07-17-09-26.png)
@@ -966,6 +1170,44 @@ png)
 * `file.length()`获取文件大小，字节
 * `File[] file.listFiles()`获取当前目录下所有子文件
   * ![](/static/2020-08-07-18-40-39.png)
+
+## NIO.2
+
+> new IO, Non-Blocking IO. jdk1.4引入的新IO API，可代替标准的JAVA IO API.
+> **与原来的IO作用相同，但使用方式不同。**NIO2,JDK7推出
+>
+> NIO支持面向缓冲区(IO面向流)，基于通道的IO操作，**NIO读写更加高效**
+
+javaAPI提供两套NIO
+
+* 针对标准输入输出NIO
+* 网络编程NIO
+* ![](/static/2020-08-21-21-21-03.png)
+
+---
+
+## NIO2: Path,Paths,Files
+
+早期File类访问FS功能有限，性能低，出错时仅返回失败，不提供具体异常信息
+
+* NIO.2引入`Path`接口
+  * <font color="red">表示目录结构中文件的位置，可看为File类的升级版本。引用的资源也可以不存在</font>
+  * ![](/static/2020-08-21-21-33-40.png)
+
+* 同时，`java.nio.file`包下提供
+  * `Files`工具类，提供大量静态工具方法操作文件
+    * ![](/static/2020-08-21-21-34-59.png)
+    * ![](/static/2020-08-21-21-35-32.png)
+  * `Paths`工具类，提供两个返回`Path`的静态工厂方法
+    * `static Path get(String first, String... more)`
+    * `static Path get(URI uri)`
+
+```java
+// 旧IO
+File f = new File(String path);
+
+Path p = Paths.get(String path)
+```
 
 ## Multi-Threads
 

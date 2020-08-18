@@ -4,6 +4,34 @@ Part 3: Path, Reflection, Annotation, JDK14 new traits
 
 ![](/static/2020-08-16-18-27-19.png)
 
+- [Revision](#revision)
+  - [Variable args](#variable-args)
+  - [Path](#path)
+  - [ClassLoader](#classloader)
+    - [Parents Delegate](#parents-delegate)
+  - [Reflection](#reflection)
+    - [cons](#cons)
+    - [how to get Class](#how-to-get-class)
+    - [create instance](#create-instance)
+      - [newInstance()](#newinstance)
+      - [I/O & Properties](#io--properties)
+        - [ResourceBundle: getBundle()](#resourcebundle-getbundle)
+      - [static block & Class.forName() bottom](#static-block--classforname-bottom)
+    - [Field](#field)
+      - [getName()](#getname)
+      - [getType() & getModifiers()](#gettype--getmodifiers)
+      - [access objects' fields: set & get](#access-objects-fields-set--get)
+    - [Method(*)](#method)
+      - [getDeclaredMethods() & getMethods()](#getdeclaredmethods--getmethods)
+      - [call the methods accords to reflection](#call-the-methods-accords-to-reflection)
+      - [Constructors](#constructors)
+    - [get Parent & Interface](#get-parent--interface)
+    - [Decompile](#decompile)
+  - [Annotation](#annotation)
+    - [use](#use)
+    - [Fields](#fields)
+    - [Reflection of Annotation](#reflection-of-annotation)
+
 ## Variable args
 
 可变长度参数
