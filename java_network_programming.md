@@ -236,3 +236,157 @@ public void Server(){
 
 * 模拟客户端发送文件给服务器，服务端保存到本地，并返回“发送成功”给客户端
 * 并关闭相应连接
+
+🍬 注意，目前使用的IO类操作都为BIO，会阻塞
+
+* 以下例子client如不显式注明数据传输结束对应的流会阻塞，server会断定client数据还未传输完毕也会阻塞
+* 调用`socket.shutDownOutput()`方法，关闭搭向某套接字间的输出流
+  * <font color="red">仅会关闭流，不会关闭套接字</font>
+
+```java
+public void Client() throws IOException {
+    Socket socket = new Socket(InetAddress.getByName("localhost"), 9090);
+    OutputStream out = socket.getOutputStream();
+    FileInputStream in = new FileInputStream(Thread.currentThread().getContextClassLoader().getResource("Zoom_3710129000_01.png").getFile());
+
+    byte[] buffer = new byte[1024];// read all the bytes once(at a time)
+    int readCount=0;
+    while((readCount=in.read(buffer))!=-1){
+        out.write(buffer,0,readCount);// write the data in buffer to the outputStream
+    }
+    socket.shutdownOutput();// terminate sending ,or gonna be blocked
+
+    // receiving the feedback
+    InputStream inputStream = socket.getInputStream();
+    // avoiding the garbled case
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    byte[] buffer2 = new byte[1024];
+    int len=0;
+    while((len=inputStream.read(buffer2))!=-1){
+        os.write(buffer2,0,len);
+    }
+    System.out.println(os.toString());// print out the data at a time
+
+    os.close();
+    out.close();
+    in.close();
+    socket.close();
+}
+```
+
+```java
+public void Server() throws IOException {
+    ServerSocket server = new ServerSocket(9090);
+    FileOutputStream out = new FileOutputStream(new File("1.png"));
+    Socket client = server.accept();
+    InputStream in = client.getInputStream();
+    byte[] buffer = new byte[1024];
+    int readCount=0;
+
+    while((readCount=in.read(buffer))!=-1){
+        out.write(buffer,0,readCount);
+    }
+
+    OutputStream outputStream = client.getOutputStream();
+    outputStream.write("Successfully received!".getBytes());
+
+    outputStream.close();
+    out.close();
+    in.close();
+    client.close();
+    server.close();
+}
+```
+
+## UDP
+
+* 使用`DatagramSocket`套接字
+* 数据封装进`DatagramPacket`中
+  * 发送端指定ip对象&端口号，通过套接字直接`socket.send(DatagramPacket)`
+  * 接收方套接字绑定端口号，通过套接字接收数据，封装进`DatagramPacket`
+
+```java
+public void sender() throws IOException {
+    DatagramSocket socket = new DatagramSocket();
+    // data
+    String str = "UDP method transmission";
+    byte[] data = str.getBytes();
+    // IP InetAddress object
+    InetAddress ip = InetAddress.getByName("lcoalhost");
+    DatagramPacket packet = new DatagramPacket(data,0,data.length, ip,9090
+    );
+    socket.send(packet);// send the datagram packets through the socket
+    socket.close();
+}
+```
+
+```java
+public void receiver() throws IOException {
+    DatagramSocket socket = new DatagramSocket(9090);// bind to the port
+    byte[] buffer = new byte[1024];
+    DatagramPacket packet = new DatagramPacket(buffer,0,buffer.length);
+    socket.receive(packet);
+    System.out.println(new String(packet.getData(), 0, packet.getLength()));
+
+    socket.close();
+}
+```
+
+## URL network programming
+
+不通过client-server方式，直接通过url进行通信
+
+* 如浏览器访问资源
+
+🍊 URL(uniform resource locator)
+
+* 统一资源定位符，表示inernet上某一资源的地址
+* 基本结构
+  * `protocol://hostname:port/filename#anchorname?argumentslist`
+  * 如`http://192.168.1.100:8080/helloworld/index.jsp#a?username=shkstart&password=123`
+  * `#anchorname`即锚点，用于定位
+  * 参数列表格式:`参数名=参数值&参数名=参数值....`
+
+🍊 构造函数
+
+![](/static/2020-08-23-18-54-52.png)
+
+🍊 常用方法
+
+* <font color="red">一个URL对象生成后，属性是不能改变的，但可以通过它给定的方法来获取这些属性</font>
+
+![](/static/2020-08-23-18-57-19.png)
+
+```java
+URL url = new URL("https://developers.redhat.com/products/openjdk/download");
+System.out.println(url.getProtocol());
+System.out.println(url.getHost());
+System.out.println(url.getPort());
+System.out.println(url.getPath());
+System.out.println(url.getFile());
+System.out.println(url.getQuery());
+```
+
+---
+
+### Example
+
+获取url资源至本地
+
+```java
+URL url = new URL("https://developers.redhat.com/themes/custom/rhdp2/logo.svg");
+HttpURLConnection connection = (HttpURLConnection) url.openConnection();// get the connection instance
+connection.connect();// establish the connection: real access to the server
+InputStream in = connection.getInputStream();
+FileOutputStream out = new FileOutputStream(new File("logo.svg"));
+
+byte[] buffer = new byte[1024];
+int readCount=0;
+while((readCount=in.read(buffer))!=-1){
+    out.write(buffer,0,readCount);
+}
+System.out.println("Successfully downloaded!");
+in.close();
+out.close();
+connection.disconnect();
+```
