@@ -37,6 +37,7 @@
   - [DecimalFormat: Numberic Formatting](#decimalformat-numberic-formatting)
   - [BigDecimal: High Precision](#bigdecimal-high-precision)
   - [Random](#random)
+  - [UUID](#uuid)
   - [Exception & Error](#exception--error)
     - [getMessage & printStackTrace](#getmessage--printstacktrace)
     - [Declare Exception](#declare-exception)
@@ -581,6 +582,22 @@ StringBuffer底层是**byte[]数组（JDK8为char数组），初始化容量16**
 
 * `int num = r.nextInt()`
 * `int num = r.nextInt(bound)`
+
+## UUID
+
+`java.util`包中，128bit的唯一标识符类
+
+![](/static/2020-08-24-14-43-30.png)
+
+> 是让分布式系统中的所有元素，都能有唯一的辨识信息，而不需要通过中央控制端来做辨识信息的指定。如此一来，每个人都可以创建不与其它人冲突的UUID。在这样的情况下，就不需考虑数据库创建时的名称重复问题
+
+🍬 所以有时候订单编号为String类型，而不是int
+
+* 随机生成UUID`public static UUID randomUUID()`
+
+🍬 剔除减号
+
+* `str.replace("-","")`
 
 ## Exception & Error
 
