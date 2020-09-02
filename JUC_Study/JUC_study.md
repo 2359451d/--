@@ -18,6 +18,8 @@
     - [Condition](#condition)
       - [CAS](#cas)
     - [ReentrantLock](#reentrantlock)
+      - [公平锁 & 非公平锁](#公平锁--非公平锁)
+      - [Commonly Used Methods](#commonly-used-methods)
       - [AQS](#aqs)
       - [Signal bit 标志位](#signal-bit-标志位)
       - [Producer & Consumer Example](#producer--consumer-example)
@@ -26,6 +28,10 @@
   - [JMM](#jmm)
     - [可见性例子 - volatile](#可见性例子---volatile)
   - [加载代码练习](#加载代码练习)
+  - [Lock补充](#lock补充)
+    - [lockInterruptibly()](#lockinterruptibly)
+    - [tryLock()](#trylock)
+    - [解决死锁](#解决死锁)
 
 ## SaleTicket Example
 
@@ -222,6 +228,64 @@ public boolean add(E e) {
 * `if V=A set B`
 
 ### ReentrantLock
+
+#### 公平锁 & 非公平锁
+
+大多情况下，锁申请都为非公平的。公平锁不会导致线程饥饿
+
+* 内部锁synchronized非公平锁
+* 可重入锁reentrantLock提供公平锁
+  * `ReentrantLock(boolean fair)`，为`true`时，公平锁
+
+🍬 如果为非公平锁，系统倾向于让一个线程再次获得之前持有得锁。高效分配策略，不公平
+
+🍬 <font color="red">公平锁需要系统维护一个有序对列，成本高，性能低，非特定需求不使用公平锁</font>】
+
+* 按照时间顺序，先到先得
+
+#### Commonly Used Methods
+
+🍊 实例方法
+
+`boolean isFair()`
+
+* 判断锁，**是否为公平锁**
+
+`boolean isHeldByCurrentThread()`
+
+* 判断锁，是否被当前线程占有
+* **一般在释放锁之前，进行判断，再释放**
+
+`boolean isLocked()`
+
+* 锁是否被任何线程持有
+
+---
+
+`int getHoldCount()`
+
+* 返回当前线程调用lock()方法的次数
+
+`int getQueueLength()`
+
+* 返回等待获得锁线程数（预估）
+
+`int getWaitQueueLength(Condition condition)`
+
+* 返回**在Condition等待队列中等待的线程数**（预估）
+
+`boolean hasWaiters(Condition condition)`
+
+* 查询**是否有线程正在等待指定的condition**？
+* ![](/static/2020-09-03-14-57-03.png)
+
+`boolean hasQueuedThread(Thread thread)`
+
+* 查询参数**指定的线程是否在等待获得锁**
+
+`boolean hasQueuedThreads()`
+
+* 查询**是否还有线程在等待获得锁**
 
 #### AQS
 
@@ -504,3 +568,55 @@ java内存模型，
 优先
 
 * 静态>构造块>构造方法
+  * 其中静态代码块按执行顺序执行
+
+## Lock补充
+
+### lockInterruptibly()
+
+`lockInterruptibly()`方法
+
+* 如果当前线程未被中断，获得锁
+* 如果当前线程被中断，则报异常
+
+![](/static/2020-09-02-21-54-18.png)
+
+对比synchronized内部锁，如果一个线程在等待锁，只有两个结果
+
+* 要么得到锁，继续执行
+* 要么保持等待，一直等锁（不会被终断）
+
+可重入锁，支持等待锁过程中，对锁取消的请求
+
+---
+
+### tryLock()
+
+`tryLock()`
+
+* 仅在**调用时**锁定未被其他线程持有的锁
+* 如果调用方法时，锁对象被被其他线程持有，则放弃，返回`false`。否则，返回`true`表示抢占成功
+
+---
+
+`tryLock(long time, TimeUnit unit)`
+
+* 在给定**等待时长内锁没有被另外的线程持有，且当前线程未被中断**，则获得锁。否则直接取消获得锁
+* 可以实现锁的限时等待，避免死锁
+
+![](/static/2020-09-03-12-38-31.png)
+
+### 解决死锁
+
+`lockInterruptibly`避免死锁
+
+![](/static/2020-09-02-22-07-34.png)
+
+---
+
+`tryLock`避免死锁
+
+![](/static/2020-09-03-13-01-43.png)
+![](/static/2020-09-03-13-02-51.png)
+![](/static/2020-09-03-13-03-39.png)
+![](/static/2020-09-03-13-06-42.png)
