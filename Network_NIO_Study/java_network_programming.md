@@ -1,5 +1,16 @@
 # JAVA网络编程（Socket Programming）
 
+- [JAVA网络编程（Socket Programming）](#java网络编程socket-programming)
+  - [IP: InetAddress](#ip-inetaddress)
+  - [Port](#port)
+  - [TCP Networking Programming](#tcp-networking-programming)
+    - [Example 1](#example-1)
+    - [Example 2](#example-2)
+    - [Example 3](#example-3)
+  - [UDP](#udp)
+  - [URL network programming](#url-network-programming)
+    - [Example](#example)
+
 网络编程中的两个问题
 
 * 如何定位网络上一台/多台主机，定位主机上特定应用
@@ -365,6 +376,15 @@ System.out.println(url.getPort());
 System.out.println(url.getPath());
 System.out.println(url.getFile());
 System.out.println(url.getQuery());
+
+/*
+https
+developers.redhat.com
+-1
+/products/openjdk/download
+/products/openjdk/download
+null
+ */
 ```
 
 ---
