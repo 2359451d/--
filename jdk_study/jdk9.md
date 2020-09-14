@@ -2,6 +2,8 @@
 
 study note
 
+![](/static/2020-09-14-16-21-47.png)
+
 - [JDK9 New Features](#jdk9-new-features)
   - [模块化系统: Jigsaw -> modularity](#模块化系统-jigsaw---modularity)
     - [模块化实现目标](#模块化实现目标)
