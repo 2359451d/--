@@ -14,7 +14,7 @@ jdk new features
 - [X] ~~*jdk8*~~ [2020-08-30]
 - [X] ~~*jdk9*~~ [2020-09-12]
 - [X] ~~*jdk10*~~ [2020-09-12]
-- [ ] jdk11
+- [X] ~~*jdk11*~~ [2020-09-14]
 - [ ] jdk12
 - [ ] jdk13
 - [ ] jdk14
@@ -22,3 +22,8 @@ jdk new features
 J2EE
 
 Distributive Techniques
+
+DBMS
+
+- [ ] MySQL
+- [ ] Oracle
