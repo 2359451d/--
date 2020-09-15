@@ -2,6 +2,8 @@
 
 study note
 
+![](/static/2020-09-14-16-21-47.png)
+
 - [JDK9 New Features](#jdk9-new-features)
   - [模块化系统: Jigsaw -> modularity](#模块化系统-jigsaw---modularity)
     - [模块化实现目标](#模块化实现目标)
@@ -15,7 +17,28 @@ study note
   - [语法改进：钻石操作符升级](#语法改进钻石操作符升级)
   - [语法改进：tryresource升级](#语法改进tryresource升级)
   - [语法改进：UnderScore下划线的使用限制](#语法改进underscore下划线的使用限制)
-  - [String存储结构变更](#string存储结构变更)
+  - [String存储结构变更: byte[]](#string存储结构变更-byte)
+    - [扩展：StringBuffer & StringBuilder](#扩展stringbuffer--stringbuilder)
+  - [集合工厂方法：快速创建只读集合](#集合工厂方法快速创建只读集合)
+    - [jdk9快速创建只读集合](#jdk9快速创建只读集合)
+  - [增强的Stream API](#增强的stream-api)
+    - [takeWhile()](#takewhile)
+    - [dropWhile()](#dropwhile)
+    - [Stream.ofNullable()](#streamofnullable)
+    - [Stream.iterate()重载](#streamiterate重载)
+    - [Optional: stream()](#optional-stream)
+  - [多分辨率图像API](#多分辨率图像api)
+  - [全新HTTP客户端API](#全新http客户端api)
+    - [使用例子](#使用例子-1)
+  - [Deprecated相关API](#deprecated相关api)
+  - [JAVA智能编译工具: sjavac](#java智能编译工具-sjavac)
+  - [统一的JVM日志系统](#统一的jvm日志系统)
+  - [javadoc对H5的支持](#javadoc对h5的支持)
+  - [js引擎升级：Nashorn](#js引擎升级nashorn)
+  - [java动态编译器](#java动态编译器)
+  - [Summary](#summary)
+    - [jdk9看不到什么](#jdk9看不到什么)
+    - [展望](#展望)
 
 ## 模块化系统: Jigsaw -> modularity
 
@@ -236,9 +259,301 @@ System.out.println(_);
 
 🍊 **jdk9不支持**使用`_`单独命名标识符，如果使用会报错
 
-## String存储结构变更
+## String存储结构变更: byte[]
 
 之前String底层是`char[]`数组实现
 
-* jdk9改为`byte[]`数组
-* 
+- <font color="red">jdk9改为`byte[]`数组</font>
+  - 因为大多string对象仅有一个latin字符，只占用1B内存，而char单位为2B
+- 加上编码标记`encoding flag`，节约了一些空间
+
+```java
+public final class String implements java.io.Serializable, Comparable<String>, CharSequence{
+    @Stable
+    private final byte[] value;
+}
+```
+
+### 扩展：StringBuffer & StringBuilder
+
+![](/static/2020-09-11-22-11-10.png)
+
+🍊 区别
+
+- `String`
+  - 不可变的字符序列
+- `StringBuffer`
+  - 可变的字符序列
+  - **线程安全，效率低**
+- `StringBuilder`(jdk5)
+  - 可变的字符序列
+  - **非线程安全，效率高**
+
+## 集合工厂方法：快速创建只读集合
+
+🍊 普通地、如何创建一个**只读，不可改变的集合？**
+
+- 需要**构造&分配`new`**，然后**添加元素`put/add`**，最后**包装成一个不可修改的集合`Collections.unmodifiableXXX()`**
+  - 写法多余
+
+```java
+List<String> namesList = new ArrayList <>();
+namesList.add("Joe");
+namesList.add("Bob");
+namesList.add("Bill");
+
+namesList = Collections.unmodifiableList(namesList);//将集合变为只读的
+System.out.println(namesList);
+```
+
+稍微简化的处理
+
+```java
+List<String> list = Collections.unmodifiableList(Arrays.asList("a","b","c"));
+Set<String> set = Collections.unmodifiableSet(new HashSet<>(Arrays.asList("a","b","c")));
+```
+
+jdk9增强钻石表达式对匿名类操作后的写法
+
+```java
+//匿名HashMap对象
+Map<String,Integer> map  = Collections.unmodifiableMap(new HashMap<>(){
+    //以下为向该匿名类中添加的代码块
+    {
+        put("a",1);
+        put("b",2);
+        put("c",3);
+    }
+});
+
+map.forEach((k,v)->System.out.println(k+":"+v));
+```
+
+### jdk9快速创建只读集合
+
+🍊 jdk9支持**接口的静态方法`of()`**
+
+- 可以将不同数量的参数传输到此工厂方法中
+- 支持`List`&`Set`&`Map`
+  - 此时得到的集合是**不可变的(只读)**
+  - 尝试添加会抛出`UnsupportedOperationException`异常
+
+```java
+//接口的静态方法
+List<Integer> list = List.of(1,2,3);
+Set<String> set = Set.of("a", "b", "c");
+
+Map<String, Integer> map1 = Map.of("Tom", 12, "Jerry", 21,         "Lilei", 33, "HanMeimei", 18);
+
+Map<String, Integer> map2 = Map.ofEntries(
+    Map.entry("Tom", 89),
+    Map.entry("Jim", 78),
+    Map.entry("Tim", 98)
+);
+```
+
+## 增强的Stream API
+
+Stream接口添加了**4个新方法**
+
+- `dropWhile`
+- `takeWhile`
+- `ofNullable`
+- `iterate`新重载方法，提供`Predicate`决定何时结束迭代
+
+🍊 Optional & Stream之间的结合得到改进
+
+- 可以通过`Optional`新方法`stream()`
+  - 将一个`Optional`对象转换为一个`Stream`对象，**允许为空**
+
+### takeWhile()
+
+从stream中获取一部分数据，接收`Predicate`进行选择
+
+- 在有序的Stream中，**返回从开头开始尽量多的元素**
+- 遇到**第一个不符合条件的，就结束流操作**
+  - <font color="red">与filter不同，filter会返回所有符合条件的元素</font>
+
+```java
+List<Integer> list = Arrays.asList(45,43,76,87,42,77,90,73,67,88);
+list.stream()
+    .takeWhile(x -> x < 50)
+    .forEach(System.out::println);
+```
+
+### dropWhile()
+
+与`takeWhile()`相反，
+
+![](/static/2020-09-12-15-16-14.png)
+
+- 返回**剩余的元素**
+
+### Stream.ofNullable()
+
+jdk8的**stream不能完全为`null`**，否则报空指针异常
+
+- `ofNullable()`允许创建单元素stream，
+  - 可**包含非空元素**
+  - 也可以创建**一个空Stream**
+
+```java
+//不允许单元素为null的情况
+//Stream.of(null);
+
+Stream.of("aa","bb",null);//3
+List.of("AA",null).stream().count();//2
+
+//ofNullable()：允许值为null
+Stream.ofNullable(null).count();//count: 0
+Stream.ofNullable("hello world").count();//count: 1
+```
+
+### Stream.iterate()重载
+
+🍊 复习: Stream对象创建&实例化
+
+- 通过集合的`stream()`方法
+- 通过数组工具类`Arrays`
+- Stream静态方法`Stream.of()`
+
+~~🍬 提供一个新的获取stream对象的方法~~
+
+~~- `iterator()`~~
+
+~~- `generate()`~~
+
+🍬 iterate()重载，添加`Predicate`接口参数
+
+- 用于**控制终止迭代条件**
+- `public static<T> Stream<T> iterate(T seed, Predicate<? super T> hasNext, UnaryOperator<T> next)`
+
+```java
+//原来的控制终止方式
+//迭代器，生成1~max的前10个数字的流并打印
+Stream.iterate(1, i->i+1).limit(10)
+    .forEach(System.out::println);
+
+//现在的终止方式
+Stream.iterate(1,i->i<100,i->i+1)
+    .forEach(System.out::println);
+```
+
+### Optional: stream()
+
+`Optional`类新增`stream()`方法
+
+- 可完成Optional类到Stream对象的转换
+- `public Stream<T> stream()`
+
+```java
+List<String> list = List.of("Tom","Jerry","Tim");
+Optional<List<String>> optional = Optional.ofNullable(list);
+
+Stream<List<String>> stream = optional.stream();//optional转stream
+Stream.flatMap(x->x.stream())
+    .forEach(System.out::println);
+```
+
+## 多分辨率图像API
+
+产生背景
+
+![](/static/2020-09-12-16-24-05.png)
+
+使用说明
+
+![](/static/2020-09-12-16-28-13.png)
+
+- 自动实现同一张图像的多分辨率变体
+  - 适配不同平台的图像显示效果
+
+## 全新HTTP客户端API
+
+HTTP/1.1和HTTP/2基本区别
+
+![](/static/2020-09-12-16-31-18.png)
+
+jdk9的全新httpAPI
+
+![](/static/2020-09-12-16-32-10.png)
+
+- `HttpClient`全新支持`WebSocket`&`HTTP/2`
+  - 用于替代`HttpURLConnection`
+
+### 使用例子
+
+```java
+HttpClient client = HttpClient.newHttpClient();
+
+HttpRequest req = HttpRequest.newBuilder(URI.create("xxx.com"))
+    .GET()
+    .build();
+HttpResponse<String> response = client.send(req,HttpResponse.BodyHandler.asString());
+
+System.out.println(response.statusCode());
+System.out.println(response.version().name());
+System.out.println(response.body());
+```
+
+## Deprecated相关API
+
+![](/static/2020-09-12-17-41-56.png)
+
+- `Applet API`
+- `appleviewer`
+
+## JAVA智能编译工具: sjavac
+
+![](/static/2020-09-12-17-44-46.png)
+
+1. sjavac提升javac工具，以便作为jdk默认编译工具
+2. jdk9更新javac工具，以便运行java9代码于低版本java中
+
+## 统一的JVM日志系统
+
+![](/static/2020-09-12-18-00-39.png)
+
+- 日志是解决问题的有效途径
+- 但是vm的**日志碎片化**和日志选项，很难对VM进行调试
+
+🍊 解决方法
+
+- 对VM组件全引入进一个单一系统，**实现统一**
+
+## javadoc对H5的支持
+
+![](/static/2020-09-12-18-04-46.png)
+
+## js引擎升级：Nashorn
+
+![](/static/2020-09-12-18-07-12.png)
+
+- 之前使用Rhino项目，为js提供运行环境
+  - 执行效率较低
+- jdk9提供轻量级，更高效的js运行时
+  - Nashorn项目
+
+## java动态编译器
+
+![](/static/2020-09-12-18-10-48.png)
+
+- 解决启动慢，吃内存问题
+
+![](/static/2020-09-12-18-13-34.png)
+
+## Summary
+
+### jdk9看不到什么
+
+![](/static/2020-09-12-18-14-31.png)
+
+---
+
+![](/static/2020-09-12-18-16-24.png)
+![](/static/2020-09-12-18-16-37.png)
+
+### 展望
+
+![](/static/2020-09-12-18-17-51.png)
+![](/static/2020-09-12-18-18-02.png)
