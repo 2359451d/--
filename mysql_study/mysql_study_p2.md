@@ -379,6 +379,20 @@ insert into t_student(no,name,gender,classno,dob) values(1,'zhangsan','1','gaosa
 
 `drop table if exists t_name;`
 
+- oracle不支持这种写法
+
+`drop table t_name;`
+
+- **如果表不存在，会报错**
+
+`delete from t_name`
+
+- 删除所有记录
+
+`truncate table t_name`
+
+- 删除大表数据，表被截断，不可回滚，永久丢失
+
 ## 表的复制 & 查询结果插入表
 
 🍊 表的复制
@@ -438,3 +452,4 @@ delete删大表效率低,没有释放数据的真实空间
 
 - `truncate table t_name;`
 - <font color="red">表被截断,不可回滚,永久丢失</font>
+
