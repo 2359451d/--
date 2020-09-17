@@ -31,7 +31,17 @@ study note
       - [演示：read committed](#演示read-committed)
       - [演示：repetable read](#演示repetable-read)
       - [演示：serializable](#演示serializable)
+  - [explain：查看sql语句执行计划](#explain查看sql语句执行计划)
   - [索引：index](#索引index)
+    - [创建 & 删除索引](#创建--删除索引)
+    - [为什么索引效率高](#为什么索引效率高)
+    - [何时考虑给字段添加索引](#何时考虑给字段添加索引)
+    - [索引底层原理](#索引底层原理)
+    - [索引分类](#索引分类)
+  - [View: 视图](#view-视图)
+    - [创建 & 删除视图](#创建--删除视图)
+    - [面向视图操作](#面向视图操作)
+    - [视图作用（seldom used）](#视图作用seldom-used)
 
 ## 约束 Constraint
 
@@ -455,7 +465,125 @@ Transactions: NO
 
 - 需要**阻塞排队**，效率低，**但安全**
 
+## explain：查看sql语句执行计划
+
+`explain sql`
+
+![](/static/2020-09-17-00-13-49.png)
+
 ## 索引：index
 
+🍬 注意
 
+- <font color="red">主键&具有unique约束的字段会自动添加索引</font>
+  - **根据PK查询效率较高，尽量根据PK检索**
+- <font color="blue">使用模糊查询索引可能会失效，如`%A%`第一个通配符使用`%`，效率低</font>
 
+什么是索引？
+
+- 类似目录，通过索引可以快速找到对应资源
+- 两种检索方式
+  - **全表扫描**
+  - **根据索引检索（效率高）**
+
+### 创建 & 删除索引
+
+🍊 **添加索引给字段**
+
+`create index <index_name> on <t_name>(field);`
+
+- 给sal字段添加索引
+  - **`create index emp_sal_index on emp(sal);`**
+- `select ename,sal from emp where ename='SMITH';`
+  - 无索引时，会**扫描全表，ename所有的值**
+  - **ename添加索引时**，会**根据索引扫描，快速定位**
+
+🍊 **删除索引**
+
+`drop index <index_name> on t_name;`
+
+### 为什么索引效率高
+
+🍊 为什么索引提高检索效率？
+
+- 原理：缩小扫描范围
+
+🍬 不能乱添加索引
+
+- <font color="red">索引也是数据库中的对象，需要不断维护，有维护成本</font>
+- 比如，表中数据经常被修改，不适合添加索引
+  - **因为数据一旦修改，索引需要重新排序维护**
+
+### 何时考虑给字段添加索引
+
+🍊 满足什么条件给字段添加索引？
+
+- **数据量庞大**
+  - 根据客户需求
+- **字段很少有DML操作**
+  - 因为字段进行DML，索引也需要维护
+- **字段经常出现在where子句中**
+
+### 索引底层原理
+
+使用B树
+
+![](/static/2020-09-17-00-55-18.png)
+
+- 通过B树**缩小扫描范围，提高检索效率**
+- 每个索引对象实质就是一个树对象
+  - **存放数据&对应物理地址**
+- <font color="red">索引对象底层会自动排序&分区</font>，索引对象根据存储引擎的不同，**存放在内存/硬盘**
+  - 一旦**通过索引对象，获取【数据关联的物理地址】**后，替换DQL where条件**直接定位原表中数据**，效率最高
+
+### 索引分类
+
+- 单一索引
+  - **单个字段**添加索引
+- 复合索引
+  - **多个字段联合**添加1个索引
+- 主键索引
+  - **PK**会**自动添加**索引
+- 唯一索引
+  - **unique约束的字段会自动添加**索引
+
+## View: 视图
+
+from different perspetive to see the data
+站在不同角度看待数据（同一张表的）
+
+🍬 **对视图进行增删改查会影响到原表数据**if do crud on view, it will change the original data
+
+- 通过视图影响数据，而不是直接操作原表
+
+### 创建 & 删除视图
+
+创建视图
+
+- `create view <view_name> as <DQL>;`
+  - only **DQL support** view creation, but we can do **crud operations on view**
+
+删除视图
+
+- `drop view <view_name>;`
+
+### 面向视图操作
+
+**select** the view
+
+- `select ... from <view_name>;`
+
+**update the view(crud**,to change the original table indirectly)
+
+- `update <view_name> set field=...,field=... where ...;`
+
+**delete the data from view(crud**, to delete the original table data indirectly)
+
+- `delete from <view_name> where...`
+
+### 视图作用（seldom used）
+
+![](/static/2020-09-17-13-52-26.png)
+
+- **视图可以隐藏表的实现细节**。<font color="red">保密级别较高的系统，数据库只对外提供相关视图</font>，java程序员只对视图对象进行CRUD（view can shield the details of the table, and for the high-level confidentiality of the system, db only provides the view to the external access & java developers only operates CRUD on views）
+  - **对外只知道有别名的字段，不知道原表的原字段名**(external only see the renaming of the fields, but cannot know the original(actual) name of that)
