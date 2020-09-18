@@ -2,6 +2,7 @@
 
 - [MySQL Study](#mysql-study)
   - [distinct: 字段去重](#distinct-字段去重)
+  - [+号 & concat](#号--concat)
   - [连接查询](#连接查询)
     - [连接查询的分类](#连接查询的分类)
     - [连接查询原理&笛卡尔积](#连接查询原理笛卡尔积)
@@ -15,21 +16,29 @@
       - [右(外)连接](#右外连接)
     - [3表连接查询](#3表连接查询)
   - [子查询](#子查询)
+    - [不同子查询特点 & 使用](#不同子查询特点--使用)
+    - [安全等于：<=>](#安全等于)
     - [where：嵌套子查询](#where嵌套子查询)
     - [from: 嵌套子查询](#from-嵌套子查询)
     - [select：嵌套子查询](#select嵌套子查询)
+    - [having: 子查询](#having-子查询)
   - [union](#union)
   - [limit(*) & 分页查询](#limit--分页查询)
     - [通用的标准分页sql](#通用的标准分页sql)
-  - [创建表](#创建表)
-    - [字段数据类型](#字段数据类型)
+  - [DML：数据操作语言](#dml数据操作语言)
+    - [insert：表插入数据](#insert表插入数据)
+    - [表的复制 & 查询结果插入表](#表的复制--查询结果插入表)
+    - [update: 修改表数据](#update-修改表数据)
+    - [delete: 删除表数据](#delete-删除表数据)
+  - [truncate: 怎么删除大表](#truncate-怎么删除大表)
+    - [truncate vs delete](#truncate-vs-delete)
+  - [DDL: 数据定义语言](#ddl-数据定义语言)
+    - [创建/删除库](#创建删除库)
+    - [alter: 修改表结构](#alter-修改表结构)
+    - [drop table: 删除表](#drop-table-删除表)
+  - [create：创建表](#create创建表)
+    - [字段常见数据类型](#字段常见数据类型)
       - [char vs varchar](#char-vs-varchar)
-  - [insert：表插入数据](#insert表插入数据)
-  - [drop table: 删除表](#drop-table-删除表)
-  - [表的复制 & 查询结果插入表](#表的复制--查询结果插入表)
-  - [update: 修改表数据](#update-修改表数据)
-  - [delete: 删除表数据](#delete-删除表数据)
-    - [truncate: 怎么删除大表](#truncate-怎么删除大表)
 
 ## distinct: 字段去重
 
@@ -42,6 +51,22 @@
 
 - 统计岗位的数量
   - `select count(distinct job) from emp;`
+
+## +号 & concat
+
+java中`+`
+
+- 运算符
+- 连接符，只要有一个操作数为str
+
+mysql中`+`
+
+- <font color="red">只能作为运算符</font>
+- **拼接需要用`concat`**
+
+🍊 concat使用:实现拼接
+
+`SELECT CONCAT(para1,para2,...)` AS ...;
 
 ## 连接查询
 
@@ -191,8 +216,47 @@ where
 ![](/static/2020-09-14-22-52-12.png)
 
 - select
+  - 支持标量子查询，结果集1行1列
 - from
-- where
+  - 表子查询，多行多列
+- where & having
+  - 标量子查询：1行1列
+  - 列子查询：多行1列
+  - 行子查询：1行多列<font color="red">（也可以是多行多列）</font>
+- exists
+  - 表子查询：多行多列
+
+🍊 分类：**根据查询结果的行数不同**
+
+- **单行子查询**
+  - 结果级只有一行，可使用`> < = ,. >= <=`
+  - 无法使用子查询的情况：<font color="red">子查询结果为一组值，子查询结果为空</font>
+- **多行子查询**
+  - 结果集有多行，可使用`any all in not in`
+  - `in`: 属于子查询结果中的任意一个就可以
+  - `any/all`: 通常可以用其他查询代替
+
+### 不同子查询特点 & 使用
+
+1. 子查询在小括号内
+2. 一般在条件右侧
+3. **标量子查询**，一般配合单行操作符使用
+   1. > < >= <> <=
+4. **列子查询**，一般配合多行操作符
+   1. in any/some all
+
+### 安全等于：<=>
+
+is null对比安全等与`<=>`
+
+![](/static/2020-09-18-12-32-59.png)
+
+- is null
+  - 只能判断null值
+  - 可读性好
+- <=>
+  - 既能判断null又能判断普通数值
+  - 可读性差
 
 ### where：嵌套子查询
 
@@ -223,11 +287,18 @@ where
   - 无嵌套写法`select e.ename, d.dname from emp e join dept d where e.deptno = d.deptno;`
   - 嵌套写法`select e.ename,(select d.dname from dept d where e.deptno = d.deptno) as dname from emp e;`
 
+### having: 子查询
+
+having也支持子查询
+
 ## union
 
 可以**将查询结果集相加**
 
 - <font color="red">注意：第一个查询结果的【列数量】需要和第二个一致</font>
+- <font color="blue">列的类型几乎相同</font>
+- `union`去重
+- `union all`不去重
 
 🍊 例子
 
@@ -272,7 +343,154 @@ where
   - `pageNo`：显示第几页
 - 取`limit (pageNo-1)*pageSize,pageSize`
 
-## 创建表
+## DML：数据操作语言
+
+### insert：表插入数据
+
+**语法格式**
+
+```mysql
+<!-- 普通格式，字段可以乱序（value对应的情况下） -->
+insert into t_name(field,field,field,...) values (value,value,value,...);
+```
+
+```mysql
+<!-- 省略field格式，字段-value,不可以乱序(一一对应表结构) -->
+<!-- value不可以不填 -->
+insert into t_name values(value,value,value);
+```
+
+```mysql
+<!-- 一次插入多行数据 -->
+insert into t_name(field,field,field,...) values(value,value,value,...) , (value,value,value,...);
+
+```
+
+- 要求：**字段数量&值数量相同，数据类型相同**
+- <font color="red">只插部分字段，其他字段会初始化为`NULL`</font>
+- <font color="red">一旦执行，会新插入一条记录</font>
+  - **想要修改不能用insert**, 即使是`NULL`，<font color="blue">后期只能使用`UPDATE`（DML）进行更新</font>
+
+🍊 例子
+
+```msyql
+insert into t_student(no,name,gender,classno,dob) values(1,'zhangsan','1','gaosan1ban','1950-10-12');
+```
+
+### 表的复制 & 查询结果插入表
+
+🍊 表的复制
+
+`create table t_name as DQL(select语句)`
+
+```mysql
+create table emp1 as select * from emp;
+```
+
+- 将后面的查询结果当作表创建
+
+---
+
+🍊 查询结果插入到一张表中
+
+![](/static/2020-09-15-16-33-57.png)
+
+`insert into t_name DQL(select语句)`
+
+- 将后面的查询结果插入表
+  - 字段需要对应
+
+### update: 修改表数据
+
+语法格式
+
+`update t_name set field=value,field=value,... where condition`
+
+- 注意:<font color="red">没有where条件,整张表更新</font>
+
+🍊 例子
+
+- 将部门10的LOC修改为SHANGHAI,部门名称修改为RENSHIBU
+  - `update t_student set loc='SHANGHAI',DNAME='RENSHIBU' where deptno=10;`
+- 更新所有记录
+  - `update dept1 set loc='x',dname='y';`
+
+### delete: 删除表数据
+
+语法格式
+
+`delete from t_name where condition;`
+
+- <font color="red">注意:没有条件全部删除</font>
+
+🍊 例子
+
+- 删除10部门数据
+  - `delete from dept1 where deptno=10;`
+- 删除所有记录
+  - `delete from dept1;`
+
+## truncate: 怎么删除大表
+
+delete删大表效率低,没有释放数据的真实空间
+
+- `truncate table t_name;`
+- <font color="red">表被截断,不可回滚,永久丢失</font>
+
+### truncate vs delete
+
+#1.truncate不能加where条件，而delete可以加where条件
+
+#2.truncate的效率高一丢丢
+
+#3.truncate 删除带自增长的列的表后，如果再插入数据，数据从1开始
+#delete 删除带自增长列的表后，如果再插入数据，数据从上一次的断点处开始
+
+#4.truncate删除不能回滚，delete删除可以回滚
+
+## DDL: 数据定义语言
+
+### 创建/删除库
+
+创建库
+
+`create database 库名`
+
+删除库
+
+`drop database 库名`
+
+### alter: 修改表结构
+
+语法
+
+`ALTER TABLE t_name ADD|MODIFY|DROP|CHANGE COLUMN field_name [field_type]`
+
+🍊 修改字段名
+
+`ALTER TABLE t_name CHANGE COLUMN field_name`
+
+- 例子，更改studentinfo表的sex字段为gender，字段类型CHAR`ALTER TABLE studentinfo CHANGE COLUMN sex gender CHAR;`
+
+### drop table: 删除表
+
+`drop table if exists t_name;`
+
+- oracle不支持这种写法
+
+`drop table t_name;`
+
+- **如果表不存在，会报错**
+
+`delete from t_name`
+
+- 删除所有记录(仅数据记录，不会删表)
+
+`truncate table t_name`
+
+- 删除大表数据，表被截断，不可回滚，永久丢失
+
+## create：创建表
 
 建表语句的语法格式
 
@@ -282,6 +500,10 @@ create table <tb_name>(
     field data_type,
     field data_type,
     ...
+);
+
+CREATE TABLE IF NOT EXISTS t_name(
+  ....
 );
 ```
 
@@ -318,7 +540,7 @@ create table t_student(
 );
 ```
 
-### 字段数据类型
+### 字段常见数据类型
 
 🍊 常见字段数据类型
 
@@ -331,6 +553,14 @@ create table t_student(
 - `char` 定长字符串 （String）
 - `varchar` 可变长字符串 （StringBuffer/StringBuilder）
 - `date` 日期类型 （对应`java.sql.Date`类型）
+  ![](/static/2020-09-18-16-22-50.png)
+  ![](/static/2020-09-18-16-23-17.png)
+  ![](/static/2020-09-18-16-25-27.png)
+  - `date`
+  - **`datetime`8个字节（navicat不支持）**
+  - **`timestamp`4个字节时间戳，受时区影响**
+  - `time`
+  - `year`
 - `BLOB` 二进制大对象（图片，视频等流媒体信息）Binary Large Object
 - `CLOB` 字符大对象（较大文本，如4G字符串）Char Large Object
 
@@ -342,114 +572,3 @@ char & varchar怎么选择？
   - 如，性别，生日，都为`char`
 - 当**一个字段数据长度不确定**
   - 如，简介，姓名，都为`varchar`
-
-## insert：表插入数据
-
-**语法格式**
-
-```mysql
-<!-- 普通格式，字段可以乱序（value对应的情况下） -->
-insert into t_name(field,field,field,...) values (value,value,value,...);
-```
-
-```mysql
-<!-- 省略field格式，字段-value,不可以乱序(一一对应表结构) -->
-<!-- value不可以不填 -->
-insert into t_name values(value,value,value);
-```
-
-```mysql
-<!-- 一次插入多行数据 -->
-insert into t_name(field,field,field,...) values(value,value,value,...) , (value,value,value,...);
-
-```
-
-- 要求：**字段数量&值数量相同，数据类型相同**
-- <font color="red">只插部分字段，其他字段会初始化为`NULL`</font>
-- <font color="red">一旦执行，会新插入一条记录</font>
-  - **想要修改不能用insert**, 即使是`NULL`，<font color="blue">后期只能使用`UPDATE`（DML）进行更新</font>
-
-🍊 例子
-
-```msyql
-insert into t_student(no,name,gender,classno,dob) values(1,'zhangsan','1','gaosan1ban','1950-10-12');
-```
-
-## drop table: 删除表
-
-`drop table if exists t_name;`
-
-- oracle不支持这种写法
-
-`drop table t_name;`
-
-- **如果表不存在，会报错**
-
-`delete from t_name`
-
-- 删除所有记录
-
-`truncate table t_name`
-
-- 删除大表数据，表被截断，不可回滚，永久丢失
-
-## 表的复制 & 查询结果插入表
-
-🍊 表的复制
-
-`create table t_name as DQL(select语句)`
-
-```mysql
-create table emp1 as select * from emp;
-```
-
-- 将后面的查询结果当作表创建
-
----
-
-🍊 查询结果插入到一张表中
-
-![](/static/2020-09-15-16-33-57.png)
-
-`insert into t_name DQL(select语句)`
-
-- 将后面的查询结果插入表
-  - 字段需要对应
-
-## update: 修改表数据
-
-语法格式
-
-`update t_name set field=value,field=value,... where condition`
-
-- 注意:<font color="red">没有where条件,整张表更新</font>
-
-🍊 例子
-
-- 将部门10的LOC修改为SHANGHAI,部门名称修改为RENSHIBU
-  - `update t_student set loc='SHANGHAI',DNAME='RENSHIBU' where deptno=10;`
-- 更新所有记录
-  - `update dept1 set loc='x',dname='y';`
-
-## delete: 删除表数据
-
-语法格式
-
-`delete from t_name where condition;`
-
-- <font color="red">注意:没有条件全部删除</font>
-
-🍊 例子
-
-- 删除10部门数据
-  - `delete from dept1 where deptno=10;`
-- 删除所有记录
-  - `delete from dept1;`
-
-### truncate: 怎么删除大表
-
-delete删大表效率低,没有释放数据的真实空间
-
-- `truncate table t_name;`
-- <font color="red">表被截断,不可回滚,永久丢失</font>
-

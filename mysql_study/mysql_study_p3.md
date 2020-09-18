@@ -23,8 +23,10 @@ study note
     - [InnoDB](#innodb)
     - [MEMORY(\HEPA)](#memoryhepa)
   - [事务：Transaction](#事务transaction)
+    - [事务相关步骤](#事务相关步骤)
     - [事务特性](#事务特性)
-      - [事务隔离性](#事务隔离性)
+      - [事务隔离性：事务并发](#事务隔离性事务并发)
+    - [事务分类](#事务分类)
     - [演示事务](#演示事务)
       - [关闭事务自动提交: start transaction](#关闭事务自动提交-start-transaction)
       - [设置&查看：事务隔离级别](#设置查看事务隔离级别)
@@ -39,8 +41,12 @@ study note
     - [索引底层原理](#索引底层原理)
     - [索引分类](#索引分类)
   - [View: 视图](#view-视图)
+    - [View vs Table](#view-vs-table)
     - [创建 & 删除视图](#创建--删除视图)
     - [面向视图操作](#面向视图操作)
+    - [视图无法更新的情况](#视图无法更新的情况)
+    - [视图逻辑结构更新](#视图逻辑结构更新)
+    - [视图结构查看](#视图结构查看)
     - [视图作用（seldom used）](#视图作用seldom-used)
 
 ## 约束 Constraint
@@ -370,6 +376,8 @@ Transactions: NO
 
 什么是事务？
 
+> 通过一组逻辑操作单元（一组DML——sql语句），将数据从一种状态切换到另外一种状态
+
 - **完整的业务逻辑单元**，不可再分
   - 比如银行账户转账，需要2条update语句，**必须同时成功，或者同时失败，需要使用数据库事务机制**
 - <font color="red">为了保证数据的完整性，安全性</font>
@@ -379,6 +387,12 @@ Transactions: NO
 - insert
 - delete
 - update
+
+### 事务相关步骤
+
+1、开启事务`start transation;`
+2、编写事务的一组逻辑操作单元（多条sql语句）`DML`
+3、提交事务或回滚事务`commit/rollback;`
 
 ### 事务特性
 
@@ -393,7 +407,7 @@ Transactions: NO
 - D - **持久性**
   - 最终数据**必须持久化到硬盘文件中**，事务才算成功结束
 
-#### 事务隔离性
+#### 事务隔离性：事务并发
 
 存在隔离级别，**理论上**级别包括4个
 
@@ -415,6 +429,21 @@ Transactions: NO
 
 🍬 mysql默认隔离级别：**可重复读**
 
+### 事务分类
+
+隐式事务
+
+- **没有明显开启和结束事务的标志**
+  - 如DML语句本身就是一个事务（不关闭自动提交事务情况下）
+
+显示事务
+
+- **有明显的开启&结束事务的标志**
+- 开启事务
+  - `set autocommit=0`&`start transaction;`取消自动提交事务的功能
+  - `DML`
+  - `commit/rollback;`提交事务或回滚事务
+
 ### 演示事务
 
 🍊 mysql事务默认情况下自动提交
@@ -425,6 +454,7 @@ Transactions: NO
 
 🍬 怎么**关闭自动提交**？
 
+- `set autocommit=0;`&
 - `start transaction;`
 - 不关闭，每执行一条DML就提交更新一次事务
 
@@ -556,6 +586,14 @@ from different perspetive to see the data
 
 - 通过视图影响数据，而不是直接操作原表
 
+### View vs Table
+
+🍊 视图&表的区别
+
+- 视图：不占用物理空间，仅仅保存sql逻辑
+- 表：占用物理空间
+- 视图&表的使用方式完全相同
+
 ### 创建 & 删除视图
 
 创建视图
@@ -581,7 +619,45 @@ from different perspetive to see the data
 
 - `delete from <view_name> where...`
 
+### 视图无法更新的情况
+
+包含以下关键字的sql
+
+- 分组函数
+- distinct
+- group by
+- having
+- union
+- union all
+
+### 视图逻辑结构更新
+
+```mysql
+#方式一：创建or替换（整个替换）
+CREATE OR REPLACE VIEW test_v7
+AS
+SELECT last_name FROM employees
+WHERE employee_id>100;
+```
+
+```mysql
+#方式二:整表结构更新
+ALTER VIEW test_v7
+AS
+SELECT employee_id FROM employees;
+```
+
+### 视图结构查看
+
+`DESC view_name;`
+`show create view test_v7;`
+
 ### 视图作用（seldom used）
+
+🍬 总结：视图优点
+
+- sql语句提高重用性，效率高
+- <font color="red">和表实现分离，实现安全性（对view的字段别名CRUD操作，可以不直接接触表的情况下，修改表)</font>
 
 ![](/static/2020-09-17-13-52-26.png)
 

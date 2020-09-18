@@ -4,6 +4,7 @@
   - [sql & DB & DBMS: 区别和关系](#sql--db--dbms-区别和关系)
   - [表的理解](#表的理解)
   - [SQL语句分类](#sql语句分类)
+    - [注释 & MYSQL语法规范](#注释--mysql语法规范)
   - [导入初始化数据(数据表)](#导入初始化数据数据表)
     - [对sql脚本的理解](#对sql脚本的理解)
   - [MYSQL常用命令](#mysql常用命令)
@@ -17,17 +18,25 @@
   - [DQL：条件查询](#dql条件查询)
     - [算术运算符 & between..and](#算术运算符--betweenand)
     - [is null & not null](#is-null--not-null)
+      - [is null pk <=>](#is-null-pk-)
     - [and & or：优先级](#and--or优先级)
     - [in](#in)
     - [like: 模糊查询](#like-模糊查询)
   - [数据排序: order by](#数据排序-order-by)
   - [分组函数(多行处理函数)](#分组函数多行处理函数)
     - [count(*) & count()](#count--count)
-    - [单行处理函数 & NULL运算](#单行处理函数--null运算)
-      - [ifnull()空处理函数(单行)](#ifnull空处理函数单行)
-    - [group by & having](#group-by--having)
+  - [单行处理函数 & NULL运算](#单行处理函数--null运算)
+    - [ifnull()空处理函数(单行)](#ifnull空处理函数单行)
+  - [group by & having](#group-by--having)
       - [多字段分组查询](#多字段分组查询)
       - [having vs where](#having-vs-where)
+  - [常见函数：补充](#常见函数补充)
+    - [单行函数](#单行函数)
+      - [字符函数](#字符函数)
+      - [数学函数](#数学函数)
+      - [日期函数](#日期函数)
+    - [流程控制函数: IF & CASE](#流程控制函数-if--case)
+      - [其他函数](#其他函数)
 
 ## sql & DB & DBMS: 区别和关系
 
@@ -85,6 +94,16 @@ table - 表
 - DCL - 数据控制语言
   - grant**授权**
   - revoke**撤销权限**
+
+### 注释 & MYSQL语法规范
+
+1.不区分大小写,但建议关键字大写，表名、列名小写
+2.每条命令最好用分号结尾
+3.每条命令根据需要，可以进行缩进 或换行
+4.注释
+  单行注释：#注释文字
+  单行注释：-- 注释文字
+  多行注释：/* 注释文字  */
 
 ## 导入初始化数据(数据表)
 
@@ -243,6 +262,19 @@ where
 - 判断**津贴是否为空**
   - `Select ename,sal,comm from emp where comm is null;`![](/static/2020-09-13-06-04-25.png)
 
+#### is null pk <=>
+
+is null对比安全等与`<=>`
+
+![](/static/2020-09-18-12-32-59.png)
+
+- is null
+  - 只能判断null值
+  - 可读性好
+- <=>
+  - 既能判断null又能判断普通数值
+  - 可读性差
+
 ### and & or：优先级
 
 ![](/static/2020-09-13-05-52-05.png)
@@ -311,6 +343,17 @@ where
 
 ## 分组函数(多行处理函数)
 
+🍊 好处
+
+- 隐藏了实现细节
+- 提高代码重用性
+
+语法
+
+`select func_name(para_lists) from ...`
+
+- 如果没用到table, from子句可以省
+
 🍊 <font color="red">所有分组函数对“某一组”数据进行操作</font>
 
 - 又称，**多行处理函数**
@@ -355,10 +398,11 @@ where
 
 - `count(*)`
   - 统计总记录条数，与**字段无关**
+  - <font color="red">推荐使用</font>
 - `count(field)`
   - 统计某字段中**不为NULL的数据总数量**
 
-### 单行处理函数 & NULL运算
+## 单行处理函数 & NULL运算
 
 🍊 注意
 
@@ -374,7 +418,7 @@ where
   - `select ename, (sal+comm)*12 as year from emp;`
     - 假设`sal=800`，`comm=NULL`，则`sal+comm=NULL`
 
-#### ifnull()空处理函数(单行)
+### ifnull()空处理函数(单行)
 
 🍊 注意
 
@@ -391,7 +435,7 @@ where
 - **计算每个员工的年薪，处理NULL**
   - `select ename, (sal+ifnull(comm,0))*12 as yearsal from emp;`
 
-### group by & having
+## group by & having
 
 `group by`
 
@@ -429,3 +473,202 @@ where
   - `select max(sal),deptno from emp where sal>2500 group by deptno;`**建议能够使用where过滤的就使用where进行过滤**
 - 找出**每个部门平均薪资，并要求平均薪资>2000**
   - `select avg(sal),deptno from emp group by deptno having avg(sal) >2000;`
+
+## 常见函数：补充
+
+🍊 分类
+
+- **单行函数**
+  - 如concat，length,ifnull
+- **分组函数（多行）**
+  - 通常做统计处理
+
+🍊 好处
+
+- 隐藏了实现细节
+- 提高代码重用性
+
+语法
+
+`select func_name(para_lists) from ...`
+
+- 如果没用到table, from子句可以省
+
+### 单行函数
+
+数据处理
+
+#### 字符函数
+
+concat **拼接**
+
+substr **截取子串**
+
+upper **转换成大写**
+
+lower **转换成小写**
+
+trim **去前后指定的空格和字符**
+
+ltrim **去左边空格**
+
+rtrim **去右边空格**
+
+replace **替换**
+
+lpad **指定字符实现左填充，指定长度**
+
+rpad **指定字符实现右填充，指定长度**
+
+instr **返回子串第一次出现的索引**
+
+length **获取字节个数**
+
+---
+
+🍊 例子
+
+- `length`获取参数值的**字节个数**
+  - `SELECT LENGTH('john');`4(utf-8)
+- `concat`
+  - `SELECT CONCAT(last_name,'-',first_name) 姓名`
+- `upper` & `lower`
+  - 姓变大写，名变小写，并拼接`SELECT CONCAT(UPPER(last_name),LOWER(first_name)) '姓名' FROM employee;`
+- `substr(ing)`str截取
+  - ![](/static/2020-09-18-14-24-38.png)
+  - ![](/static/2020-09-18-14-32-27.png)
+- `instr`**返回子串第一次出现的索引**，找不到返回0
+  - ![](/static/2020-09-18-14-40-24.png)
+- trim **去前后指定的空格和字符**
+  - ![](/static/2020-09-18-14-53-42.png)
+- lpad **指定字符实现左填充，指定总长度**
+  - ![](/static/2020-09-18-14-57-51.png)
+  - ![](/static/2020-09-18-15-08-23.png)
+- rpad **指定字符实现右填充，指定总长度**
+  - ![](/static/2020-09-18-15-02-15.png)
+
+#### 数学函数
+
+round 四舍五入
+
+![](/static/2020-09-18-15-34-13.png)
+
+ceil向上取整（返回>=该参数的最小整数）
+
+![](/static/2020-09-18-15-35-17.png)
+
+floor向下取整（返回<=该参数的最大整数）
+
+![](/static/2020-09-18-15-36-27.png)
+
+truncate截断（小数点后保留几位）
+
+![](/static/2020-09-18-15-37-04.png)
+
+mod取余，相当于`%`
+
+![](/static/2020-09-18-15-37-19.png)
+
+rand 随机数
+
+#### 日期函数
+
+now当前系统日期+时间
+
+- `SELECT NOW();`
+
+curdate当前系统日期
+
+- `SELECT CURDATE();`
+
+curtime当前系统时间
+
+- `SELECT CURTIME();`
+
+获取指定部分的年月日，小时分钟秒
+
+![](/static/2020-09-18-15-42-41.png)
+![](/static/2020-09-18-15-43-44.png)
+
+- YEAR()
+- MONTH() & MONTHNAME()
+
+---
+
+str_to_date 将字符转换成日期
+
+![](/static/2020-09-18-15-44-24.png)
+![](/static/2020-09-18-15-44-55.png)
+![](/static/2020-09-18-15-47-34.png)
+![](/static/2020-09-18-15-49-09.png)
+
+- 类似jdk8新时间日期API，`DateTimeFormatter.parse()`
+
+date_format将日期转换成字符
+
+![](/static/2020-09-18-15-52-41.png)
+
+### 流程控制函数: IF & CASE
+
+if函数
+
+- `SELECT IF(EXP,V1,V2)`类似三目操作符`BOOEXP ? V1,V2`
+  - SELECT IF(10>5,'BIG','SMALL')
+
+---
+
+case函数/**结构**
+
+- <font color="red">注意，then后面跟语句需要加`;`</font>
+
+```mysql
+//适用于等值判断，相当于switch
+
+SELECT ...
+
+CASE EXP/FIELD
+WHEN 常量1 then 显示的值或语句
+WHEN 常量2 then 现实的值或语句
+...
+else 默认值要显示的值或语句
+end （AS '别名'）
+
+FROM ...
+```  
+
+![](/static/2020-09-18-16-02-20.png)
+
+---
+
+🍬 第二种case使用，相当于多重if
+
+```mysql
+SELECT ...
+
+case
+when condition1 then value1/exp1
+when condition2 then value2/exp2
+...
+else value/exp;
+end (as ...)
+
+FROM ...
+
+```
+
+![](/static/2020-09-18-16-07-09.png)
+
+
+#### 其他函数
+
+version版本
+
+- `SHOW VERSION();`
+
+database当前库
+
+- `SHOW DATABASE();`
+
+user当前连接用户
+
+- `SHOW USER();`

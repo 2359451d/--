@@ -23,7 +23,8 @@ J2EE
 
 Distributive Techniques
 
-DBMS
+DBMS .etc
 
-- [ ] MySQL
+- [X] ~~*MySQL*~~ [2020-09-18]
 - [ ] Oracle
+- [ ] JDBC
