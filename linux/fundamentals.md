@@ -26,6 +26,16 @@
     - [如何找回root密码](#如何找回root密码)
   - [Useful Command](#useful-command)
     - [Help](#help)
+    - [dir](#dir)
+    - [date & time](#date--time)
+    - [find](#find)
+    - [zip & unzip](#zip--unzip)
+  - [Group Management & Authority](#group-management--authority)
+    - [文件所有者 & 所在组](#文件所有者--所在组)
+    - [组的创建](#组的创建)
+  - [权限](#权限)
+    - [rwx权限](#rwx权限)
+    - [权限管理：修改](#权限管理修改)
 
 ## 目录结构
 
@@ -369,3 +379,237 @@ files related to the group & user
 - `help`
   - 获得shell内置命令的帮助信息
 
+### dir
+
+文件目录类
+
+- `pwd`
+  - 查看**当前目录的绝对路径**
+- `ls`
+  - `ls -a`显示当前目录的所有文件&目录，**包括隐藏**
+  - `ls -l`**列表**的方式显示
+- `cd`
+  - `cd ~`切换到家目录`cd`
+  - `cd ..`回到上级目录
+  - `cd /`回到根
+- `mkdir`
+  - **创建目录**
+  - `mkdir -p`**创建多级目录**
+- `rmdir`
+  - **删除空目录**
+  - `rm -rf`如果目录下有文件，强制删除
+- `touch`
+  - **创建空文件**
+- `cp`
+  - **拷贝指令，拷贝文件到指定目录**
+  - `cp source dest`
+  - `cp -r source dest`递归复制整个文件夹
+  - <font color="red">`\cd`强制覆盖文件内容，并不提示</font>
+- `rm`
+  - **移除文件或目录**
+  - `rm -r`递归删除整个文件夹
+  - `rm -f`强制删除不提示
+- `mv`
+  - **移动文件或重名**
+  - `mv oldfile newfile`重命名
+  - `mv dir1 dir2`移动文件
+- `cat`
+  - **查看文件内容**
+  - `cat -n`显示行号
+  - `cat file | more`分页显示
+- `more`
+  - **基于VI编辑器的文本过滤器，支持按页显示**
+  - `more filename`查看文件
+  - ![](/static/2020-09-24-12-09-49.png)
+- <font color="red">`less`</font>
+  - **与more类似，但比more强大。支持各种终端显示，【根据需要显示内容，显示大型文件效率高】**
+  - ![](/static/2020-09-24-12-19-20.png)
+- `>` & `>>`
+  - **输出重定向（覆盖原内容）** & **追加**
+  - `ls -l > filename`列表的内容，覆盖写
+  - `ls -al >> filename`列表的内容，追加写
+  - `cat file1 > file2`文件1的内容覆盖写入2
+  - `echo "" >> file`
+- `echo`
+  - 输出内容到控制台
+  - `echo $PATH`输出**环境变量**
+- `head`
+  - 显示文件开头部分
+  - `head -n number`指定前n行
+- `tail`
+  - 显示文件末尾部分
+  - `tail -n number`指定后n行
+  - <font color="red">`tail -f filename`实时追踪该文档的所有更新(vim删除原文件，换成同名新文件，无法监控)</font>
+- `in` - soft link
+  - 软链接（符号链接），**类似win的快捷方式**，主要存放其他文件的路径
+  - `ln -s [源文件或目录][软连接名]`给**源文件创建一个软连接**
+  - `cd 软连接`
+  - <font color="red">`rm -rf softlink` 不要带/，不然会把软连接里面的内容删除</font>
+- `history`
+  - 查看已经执行过的历史命令
+  - `history`查看完后，`!指令编号`执行历史编号为n的指令
+
+---
+
+绝对路径
+
+- 从根目录开始定位`/dirname`
+
+相对路径
+
+- 从当前工作目录开始定位到需要的目录`../home`
+
+### date & time
+
+时间日期类相关指令
+
+- 当前时间`date`
+- 当前年`date + %Y`
+- 当前月`date + %m`
+- 当前天`date + %d`
+- `date "+ %Y-%m-%d %H:%M:%S"`显示字符串格式
+- 设置当前系统时间`date -s "2018-10-10 11:22:22"`
+
+---
+
+cal指令
+
+- **查看日历指令**
+- `cal`显示当前日历
+- `cal 2020`显示某一年的日历
+
+### find
+
+搜索查找类指令
+
+find
+
+- 从**指定目录向下递归遍历各个子目录**，将**满足条件的文件&目录显示在终端**
+- `find dir -name filename`根据名称查找文件
+  - **通配符查找**`find dir -name *.txt`
+- `find dir -user user`查找属于指定用户名的所有文件
+- `find dir -size [range]`按指定大小查找文件，**有单位**
+  - `find dir -size +n`大于
+  - `find dir -size n`等于
+  - `find dir -size -n`小于
+
+locate
+
+- **快速定位文件路径**，实现建立系统中所有文件的**数据库**
+- <font color="red">必须先用`updatedb`指令创建locate数据库</font>
+- `locate filename`
+
+grep
+
+![](/static/2020-09-24-19-49-59.png)
+
+- **过滤查找**
+- `grep -i`忽略大小写
+- `grep -n`显示匹配行&行号
+
+### zip & unzip
+
+压缩&解压缩指令
+
+`gzip`
+
+- 压缩
+- `gzip filename`压缩完成后，<font color="red">源文件不保留</font>
+
+`gunzip`
+
+- 解压
+
+---
+
+<font color="red">`zip/unzip`（经常使用）</font>
+
+- `zip -r zipname dir`递归压缩，**压缩目录**
+- `unzip -d dir filename`可以**指定解压后文件的存放目录**
+
+---
+
+`tar`
+
+![](/static/2020-09-24-19-13-47.png)
+
+- 打包指令 & 解压也可以
+- `tar -zcvf zipname file... file...`打包&压缩
+- `tar -zxvf zipname`解压
+- `tar -zxvf zipname -C dir`**解压到指定目录（必须存在）**
+
+## Group Management & Authority
+
+组管理 & 权限管理
+
+🍊 组的基本介绍
+
+> 在linux中的每个用户必须属于一个组，不能独立于组外。在linux中每个文件有所有者、所在组、其它组的概念
+
+每个文件，都有相关概念：
+
+- 所有者
+- 所在组
+- 其他组
+
+### 文件所有者 & 所在组
+
+file owner
+
+- **查看文件所有者**`ls -ahl` all list human
+- **修改文件所有者**`chown user filename`
+  - `-R`递归修改文件夹下所有文件的所有者
+- **修改文件所在组**`chgrp groupname filename`
+- <font color="red">同时改变文件的用户所有者&所有组`chown newowner:newgroup file`</font>
+  - `-R`递归修改文件夹下所有文件的所有组
+
+---
+
+- **改变用户所在组**`usermod -g groupname username`
+- **改变用户登录的初始目录**`usermod -d dir username`
+
+### 组的创建
+
+groupadd
+
+## 权限
+
+基本介绍
+
+![](/static/2020-09-24-20-52-27.png)
+![](/static/2020-09-24-20-52-52.png)
+![](/static/2020-09-24-20-54-38.png)
+
+### rwx权限
+
+作用在**文件 & 目录**上不完全相同
+
+![](/static/2020-09-24-22-28-35.png)
+
+- 文件
+  - r可读
+  - w可写（**但不能删除，除非对该文件所在目录有w权限**）
+  - x可执行
+- 目录
+  - r可读`ls`（查看该目录内容）
+  - w可写，可以修改，创建，删除，重命名目录
+  - x可以进入该目录
+
+### 权限管理：修改
+
+修改权限
+
+![](/static/2020-09-24-22-37-51.png)
+
+- `chmod`
+- `=`
+- `+`
+- `-`
+
+通过数字修改权限
+
+![](/static/2020-09-24-22-46-21.png)
+
+- `r` - 4
+- `w` - 2
+- `x` - 1
