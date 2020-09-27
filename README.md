@@ -27,4 +27,8 @@ DBMS .etc
 
 - [X] ~~*MySQL*~~ [2020-09-18]
 - [ ] Oracle
-- [ ] JDBC
+- [X] ~~*JDBC*~~ [2020-09-27]
+
+other
+
+* [X] ~~*Linux & Shell*~~ [2020-09-26]
