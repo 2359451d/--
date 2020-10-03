@@ -47,6 +47,7 @@ public abstract class Vehicle {
 	}
 	public void setName(String name) {
 		this.name = name;
+		List list = new ArrayList();
 	}	
 }
 
