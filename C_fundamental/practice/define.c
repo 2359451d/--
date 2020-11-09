@@ -11,7 +11,7 @@
 
  */
 // const double PI = 3.1415926;
-// #include<stdio.h>
+#include<stdio.h>
 #define PI 3.1415926 //宏，预处理
 #define PRT printf("%f\n",PI); \ 
             printf("%f\n", PI)// '\'代表该定义未结束, 注意想象一下【替换后分号结构】
