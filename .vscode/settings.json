@@ -6,5 +6,7 @@
         "*.html": "html",
         "*.py": "python",
         "limits": "c"
-    }
+    },
+    "vscode_vibrancy.opacity": 75,
+    "vscode_vibrancy.theme": "Default Dark"
 }
