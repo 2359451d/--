@@ -1,42 +1,42 @@
 # MySQL Study
 
-- [MySQL Study](#mysql-study)
-  - [sql & DB & DBMS: 区别和关系](#sql--db--dbms-区别和关系)
-  - [表的理解](#表的理解)
-  - [SQL语句分类](#sql语句分类)
-    - [注释 & MYSQL语法规范](#注释--mysql语法规范)
-  - [导入初始化数据(数据表)](#导入初始化数据数据表)
-    - [对sql脚本的理解](#对sql脚本的理解)
-  - [MYSQL常用命令](#mysql常用命令)
-    - [查询当前使用的数据库](#查询当前使用的数据库)
-    - [查看库表](#查看库表)
-    - [查看表结构 & 表数据](#查看表结构--表数据)
-    - [查看创建表的语句](#查看创建表的语句)
-    - [终止语句 & 退出mysql](#终止语句--退出mysql)
-  - [DQL: 简单查询](#dql-简单查询)
-    - [列重命名：字符串的使用](#列重命名字符串的使用)
-  - [DQL：条件查询](#dql条件查询)
-    - [算术运算符 & between..and](#算术运算符--betweenand)
-    - [is null & not null](#is-null--not-null)
-      - [is null pk <=>](#is-null-pk-)
-    - [and & or：优先级](#and--or优先级)
-    - [in](#in)
-    - [like: 模糊查询](#like-模糊查询)
-  - [数据排序: order by](#数据排序-order-by)
-  - [分组函数(多行处理函数)](#分组函数多行处理函数)
-    - [count(*) & count()](#count--count)
-  - [单行处理函数 & NULL运算](#单行处理函数--null运算)
-    - [ifnull()空处理函数(单行)](#ifnull空处理函数单行)
-  - [group by & having](#group-by--having)
-      - [多字段分组查询](#多字段分组查询)
-      - [having vs where](#having-vs-where)
-  - [常见函数：补充](#常见函数补充)
-    - [单行函数](#单行函数)
-      - [字符函数](#字符函数)
-      - [数学函数](#数学函数)
-      - [日期函数](#日期函数)
-    - [流程控制函数: IF & CASE](#流程控制函数-if--case)
-      - [其他函数](#其他函数)
+* [MySQL Study](#mysql-study)
+  * [sql & DB & DBMS: 区别和关系](#sql--db--dbms-区别和关系)
+  * [表的理解](#表的理解)
+  * [SQL语句分类](#sql语句分类)
+    * [注释 & MYSQL语法规范](#注释--mysql语法规范)
+  * [导入初始化数据(数据表)](#导入初始化数据数据表)
+    * [对sql脚本的理解](#对sql脚本的理解)
+  * [MYSQL常用命令](#mysql常用命令)
+    * [查询当前使用的数据库](#查询当前使用的数据库)
+    * [查看库表](#查看库表)
+    * [查看表结构 & 表数据](#查看表结构--表数据)
+    * [查看创建表的语句](#查看创建表的语句)
+    * [终止语句 & 退出mysql](#终止语句--退出mysql)
+  * [DQL: 简单查询](#dql-简单查询)
+    * [列重命名：字符串的使用](#列重命名字符串的使用)
+  * [DQL：条件查询](#dql条件查询)
+    * [算术运算符 & between..and](#算术运算符--betweenand)
+    * [is null & not null](#is-null--not-null)
+      * [is null pk <=>](#is-null-pk-)
+    * [and & or：优先级](#and--or优先级)
+    * [in](#in)
+    * [like: 模糊查询](#like-模糊查询)
+  * [数据排序: order by](#数据排序-order-by)
+  * [分组函数(多行处理函数)](#分组函数多行处理函数)
+    * [count(*) & count()](#count--count)
+  * [单行处理函数 & NULL运算](#单行处理函数--null运算)
+    * [ifnull()空处理函数(单行)](#ifnull空处理函数单行)
+  * [group by & having](#group-by--having)
+      * [多字段分组查询](#多字段分组查询)
+      * [having vs where](#having-vs-where)
+  * [常见函数：补充](#常见函数补充)
+    * [单行函数](#单行函数)
+      * [字符函数](#字符函数)
+      * [数学函数](#数学函数)
+      * [日期函数](#日期函数)
+    * [流程控制函数: IF & CASE](#流程控制函数-if--case)
+      * [其他函数](#其他函数)
 
 ## sql & DB & DBMS: 区别和关系
 
@@ -658,17 +658,16 @@ FROM ...
 
 ![](/static/2020-09-18-16-07-09.png)
 
-
 #### 其他函数
 
 version版本
 
-- `SHOW VERSION();`
+* `SELECT VERSION();`
 
 database当前库
 
-- `SHOW DATABASE();`
+* `SELECT DATABASE();`
 
 user当前连接用户
 
-- `SHOW USER();`
+* `SELECT USER();`
