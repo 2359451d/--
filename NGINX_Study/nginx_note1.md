@@ -545,4 +545,3 @@ nginx启动之后有2个进程，worker &master
 
 * 发送一个请求，占用worker几个连接数？
   * 2（静态资源）or4（tomcat）个
-

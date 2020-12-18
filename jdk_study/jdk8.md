@@ -41,7 +41,7 @@
     - [className::staticMethod](#classnamestaticmethod)
     - [className::instanceMethod](#classnameinstancemethod)
     - [className::new](#classnamenew)
-    - [type[]::new](#typenew)
+    - [type[]::new(#typenew)
   - [Stream](#stream)
     - [获取流的方式](#获取流的方式)
     - [注意事项(*)](#注意事项)
@@ -94,7 +94,7 @@
 
 对比匿名内部类
 
-![](/static/2020-08-17-15-41-44.png)
+![](../static/2020-08-17-15-41-44.png)
 
 * 语法冗余，有时候可读性差
 
@@ -127,8 +127,8 @@ new Thread(() ->{
 * 无参无返回
   * lambda负责对接口中抽象方法的重写
 
-![](/static/2020-08-17-15-51-36.png)
-![](/static/2020-08-17-15-52-28.png)
+![](../static/2020-08-17-15-51-36.png)
+![](../static/2020-08-17-15-52-28.png)
 
 ```java
 // lambda表达式主要负责重写方法
@@ -140,8 +140,8 @@ goSwimming(() ->{
 
 * 有参有返回
 
-![](/static/2020-08-17-16-05-48.png)
-![](/static/2020-08-17-16-11-53.png)
+![](../static/2020-08-17-16-05-48.png)
+![](../static/2020-08-17-16-11-53.png)
 
 ```java
 goSmoking((String name)->{
@@ -158,12 +158,12 @@ goSmoking((String name)->{
 * 小括号内**仅有1个参数，小括号可省略**
 * 大括号**仅有1个语句，可省大括号，return，分号**
 
-![](/static/2020-08-17-17-44-37.png)
+![](../static/2020-08-17-17-44-37.png)
 
 #### Example: Comparator
 
 Comparator的匿名内部类&lambda实现
-![](/static/2020-08-17-16-22-08.png)
+![](../static/2020-08-17-16-22-08.png)
 
 ```java
   Collcetions.sort(person, (Person o1, Person o2)->{
@@ -203,7 +203,7 @@ Comparator的匿名内部类&lambda实现
 
 🍊 匿名内部类反编译
 
-![](/static/2020-08-17-16-44-19.png)
+![](../static/2020-08-17-16-44-19.png)
 
 * 形成新的类，`$`
 
@@ -216,7 +216,7 @@ Comparator的匿名内部类&lambda实现
 
 * lambda会在类中新生成一个私有的静态方法，代码**运行时**会放到这个新增的方法中
   * 即，lambda**运行时**会生成一个匿名内部类，同样实现接口。只不过调用静态的方法
-  * ![](/static/2020-08-17-17-08-33.png)
+  * ![](..../static/2020-08-17-17-08-33.png)
 
 ```java
 /* 因为在main()中使用了lambda，所以带有$main
@@ -270,7 +270,7 @@ private statoc void lambda$main$0(){
 
 #### Supplier: get()
 
-![](/static/2020-08-17-19-25-11.png)
+![](../static/2020-08-17-19-25-11.png)
 
 供给型接口，**数据类型由泛型指定**,**无参有返回**
 
@@ -284,7 +284,7 @@ public interface Supplier<T>{
 
 🍊 使用lambda表达式返回数组元素最大值
 
-![](/static/2020-08-17-19-44-48.png)
+![](../static/2020-08-17-19-44-48.png)
 
 ```java
 /* 匿名内部类方式 */
@@ -309,13 +309,13 @@ s.get();
 
 #### Consumer: accept(T t) & andThen(Consumer<T> after)
 
-![](/static/2020-08-17-19-47-06.png)
+![](../static/2020-08-17-19-47-06.png)
 
 消费型接口，**数据类型由泛型指定**，**无返回值**
 
 🍬 <font color="red">注意Consumer接口中定义的另一个`default`方法</font>
 
-![](/static/2020-08-17-20-19-49.png)
+![](../static/2020-08-17-20-19-49.png)
 
 * 通配符指定范围`T`及其父类
 * 为Consumer传入另外的Consumer
@@ -325,7 +325,7 @@ s.get();
 
 🍊 使用lambda将一个字符串转成大，小写字符串
 
-![](/static/2020-08-17-19-48-17.png)
+![](../static/2020-08-17-19-48-17.png)
 
 ```java
 /* 匿名内部类写法 */
@@ -370,7 +370,7 @@ public void printHello(Consumer<String> c1, Consumer<String> c2){
 
 🍊 使用`andThen`
 
-![](/static/2020-08-17-21-04-08.png)
+![](../static/2020-08-17-21-04-08.png)
 
 ```java
 public void printHello(Consumer<String> c1, Consumer<String> c2){
@@ -382,13 +382,13 @@ public void printHello(Consumer<String> c1, Consumer<String> c2){
 
 🍊 jdk8,map集合支持`forEach(BiConsumer<T,U>)`
 
-![](/static/2020-08-20-00-08-04.png)
+![](../static/2020-08-20-00-08-04.png)
 
 * 无返回值
 
 #### Function<T, R>: apply(T t) & andThen(Function)
 
-![](/static/2020-08-17-21-05-47.png)
+![](../static/2020-08-17-21-05-47.png)
 
 * 接受一个`T`，返回一个`R`
 
@@ -450,7 +450,7 @@ System.out.print(num);
 
 ##### BiFunction<T,U,R>
 
-![](/static/2020-08-18-16-02-32.png)
+![](../static/2020-08-18-16-02-32.png)
 
 * 接收2个参数，返回1个值
 
@@ -471,7 +471,7 @@ String result = f.apply("hello world",3);
 
 🍊 判断测试接口，接收一个`T`，返回一个`boolean`
 
-![](/static/2020-08-17-23-09-59.png)
+![](../static/2020-08-17-23-09-59.png)
 
 ```java
 /**
@@ -578,7 +578,7 @@ jdk8接口增强，新增两个方法（之前只能存在抽象方法，**不�
 
 ### 默认方法
 
-![](/static/2020-08-17-19-01-25.png)
+![](../static/2020-08-17-19-01-25.png)
 
 🍊 定义格式
 
@@ -613,7 +613,7 @@ interface interfaceName{
 
 lambda也可能出现冗余
 
-![](/static/2020-08-18-00-11-53.png)
+![](../static/2020-08-18-00-11-53.png)
 
 🍊 使用方法引用【<font color="red">特定情况下，对lambda表达式的一种缩写</font>】
 
@@ -708,7 +708,7 @@ int[] a = f.apply(10);// 默认值为0
 
 🍊 集合操作数据的弊端?
 
-![](/static/2020-08-18-16-50-49.png)
+![](../static/2020-08-18-16-50-49.png)
 
 * 筛选每个要求，都需要循环一次，新集合来装筛选出来的数据，麻烦
 
@@ -760,7 +760,7 @@ list.stream().filter(p2);
 
 🍊 根据Collection获取流
 
-![](/static/2020-08-18-17-13-25.png)
+![](../static/2020-08-18-17-13-25.png)
 
 * `Collection`接口默认方法
   * `defaul Stream<E> stream()`
@@ -790,8 +790,8 @@ Stream<String> s =list.stream();
 
 * 注意不能使用基本数据类型的数组，因为会将整个数组看为1个元素
 
-![](/static/2020-08-18-19-42-19.png)
-![](/static/2020-08-18-19-37-10.png)
+![](../static/2020-08-18-19-42-19.png)
+![](../static/2020-08-18-19-37-10.png)
 
 ```java
 Stream<String> s = Stream.of("aa","bb","cc");// 可变参，本质是数组
@@ -802,15 +802,15 @@ Stream<String> s2 = Stream.of(str);
 ### 注意事项(*)
 
 * Stream只能操作一次
-  * ![](/static/2020-08-18-19-50-12.png)
+  * ![](../static/2020-08-18-19-50-12.png)
 * Stream方法返回的是新的流
 * Stream不调用终结方法，中间操作不会执行
-  * ![](/static/2020-08-18-19-51-32.png)
+  * ![](../static/2020-08-18-19-51-32.png)
 
 ### 常用方法
 
 🍊 重点关注**返回值类型**
-![](/static/2020-08-18-19-45-46.png)
+![](../static/2020-08-18-19-45-46.png)
 
 * 终结方法
   * 返回值不是`Stream`，不支持链式调用
@@ -823,7 +823,7 @@ Stream<String> s2 = Stream.of(str);
 
 🍊 forEach用于遍历
 
-![](/static/2020-08-18-19-55-48.png)
+![](../static/2020-08-18-19-55-48.png)
 
 * 终结方法
 * 无返回值，接收Consumer，将每个流元素交给该函数进行处理
@@ -840,7 +840,7 @@ list.stream().forEach(System.out::println); // 使用方法引用
 
 🍊 count用于统计元素个数
 
-![](/static/2020-08-18-20-36-42.png)
+![](../static/2020-08-18-20-36-42.png)
 
 * 终结方法
 * 返回`long`
@@ -855,7 +855,7 @@ long count = list.stream().count();
 
 🍊 用于过滤数据，**返回符合过滤条件的数据**
 
-![](/static/2020-08-18-20-45-49.png)
+![](../static/2020-08-18-20-45-49.png)
 
 * 接收`Predicate`函数式接口参数，可用lambda/方法引用/内部类重写
 
@@ -871,7 +871,7 @@ list.stream()
 
 🍊 limit对流进行截取，只取前n个
 
-![](/static/2020-08-18-20-56-50.png)
+![](../static/2020-08-18-20-56-50.png)
 
 * 接收`long`（集合长度大于该参数时，进行操作）
 * 返回`Stream<T>`，非终结方法
@@ -887,7 +887,7 @@ list.stream().limit(3).forEach(System.out::println);// 取前3个元素
 
 🍊 跳过前n个元素，截取之后的新流
 
-![](/static/2020-08-18-21-05-31.png)
+![](../static/2020-08-18-21-05-31.png)
 
 * 非终结方法，返回`Stream`
 * 如流长度大于n，则成功跳过前n个
@@ -904,7 +904,7 @@ list.stream().skip(3).forEach(System.out::println);// 跳过前3个元素
 
 🍊 将流的元素映射到另一个流中
 
-![](/static/2020-08-18-21-12-45.png)
+![](../static/2020-08-18-21-12-45.png)
 
 * 返回`Stream`
 * 非终结方法
@@ -919,7 +919,7 @@ Stream<Integer>n = o.map(str->return Integer.valueOf(str)).forEach(System.out::p
 
 🍊 sorted将数据排序
 
-![](/static/2020-08-19-15-35-34.png)
+![](../static/2020-08-19-15-35-34.png)
 
 * 无参`sorted()`
   * 返回`Stream`，非终结方法
@@ -942,10 +942,12 @@ list.stream().sorted((Integer o1, Integer o2)->{
 }).forEach(System.out::println);
 ```
 
+可以利用 `Comparator.reverseOrder()`返回的 `Comparator`
+
 #### distinct()
 
 🍊 distinct去除重复数据
-![](/static/2020-08-19-15-45-10.png)
+![](../static/2020-08-19-15-45-10.png)
 
 * 非终结方法，返回`Stream`
 
@@ -961,7 +963,7 @@ list.stream().distinct().forEach(System.out::println);
 
 🍊 判断数据是否匹配指定的条件
 
-![](/static/2020-08-19-16-40-31.png)
+![](../static/2020-08-19-16-40-31.png)
 
 * 返回`boolean`，接收`Predicate`，终结方法
 * `allMatch(Predicate<? super T>)` 匹配所有元素，所有元素都不满足条件
@@ -981,7 +983,7 @@ System.out.print(flag);
 
 🍊 找某些元素
 
-![](/static/2020-08-19-16-48-33.png)
+![](../static/2020-08-19-16-48-33.png)
 
 * 返回`Optional<T>`，终结
   * 避免了空指针检测？
@@ -1005,7 +1007,7 @@ A a =bList().stream().filter(b->"test".equals(b.getName())).findAny().orElse(nul
 
 🍊 获取max&min值
 
-![](/static/2020-08-19-17-12-49.png)
+![](../static/2020-08-19-17-12-49.png)
 
 * 返回`Optional<T>`, 传入`Comparator<? super T>`比较器【指定比较规则】
   * 可用lambda重写
@@ -1030,8 +1032,8 @@ Integer min = Stream.of(5,3,6,1).min((o1, o2)-> o1-o2).get();
 
 🍊 将所有数据归纳后得到一个数据（常用）
 
-![](/static/2020-08-19-17-25-10.png)
-![](/static/2020-08-19-17-45-01.png)
+![](../static/2020-08-19-17-25-10.png)
+![](../static/2020-08-19-17-45-01.png)
 
 * `T reduce(T identity, BinaryOperator<T> accumulator)`
 * `T identity`默认值
@@ -1060,9 +1062,9 @@ Integer result = Stream.of(4,5,3,9).reduce(0, (x,y)->x+y);
 
 🍊 map&reduce结合使用
 
-![](/static/2020-08-19-19-52-59.png)
-![](/static/2020-08-19-19-54-55.png)
-![](/static/2020-08-19-19-58-09.png)
+![](../static/2020-08-19-19-52-59.png)
+![](../static/2020-08-19-19-54-55.png)
+![](../static/2020-08-19-19-58-09.png)
 
 #### mapToInt(ToIntFunction)
 
@@ -1082,7 +1084,7 @@ IntStream s = Stream.of(1,2,3,4,5).mapToInt((Integer n)->n.intValue());
 
 🍊 合并两个流
 
-![](/static/2020-08-19-20-32-47.png)
+![](../static/2020-08-19-20-32-47.png)
 
 * 静态方法`Stream.concat(Stream<T> , Stream<T>)`
   * 返回`Stream<T>`
@@ -1098,7 +1100,7 @@ Stream<Integer> c = Stream.concat(a,b);
 ### 收集Stream流中的结果
 
 对流操作完成后，将流的结果存入数组/集合
-![](/static/2020-08-19-21-23-02.png)
+![](../static/2020-08-19-21-23-02.png)
 
 * 流结果->集合
 * 流结果->数组
@@ -1122,7 +1124,7 @@ Set<String> s = stream.collect(Collectors.toSet());
 
 #### 数据收集至数组: toArray()
 
-![](/static/2020-08-19-21-44-27.png)
+![](../static/2020-08-19-21-44-27.png)
 
 * `Object[] toArray()`
   * 操作麻烦
@@ -1139,7 +1141,7 @@ String[] a = list.stream().toArray(String[]::new);
 
 #### 聚合计算收集流数据
 
-![](/static/2020-08-19-22-08-51.png)
+![](../static/2020-08-19-22-08-51.png)
 
 * 如max, min, sum, avg, count等操作进行聚合收集
   * <font color="red">通过Collectors收集器收集,聚合</font>,再通过`stream.collect(R Collector<? super T, A, R>)`提取数据
@@ -1205,9 +1207,9 @@ System.out.println(collect);
   * 传入T作为map集合的value-List< T>，返回K作为map集合的key
 * `map`jdk8支持`forEach(BiConsumer<T,U>)`
 
-![](/static/2020-08-19-23-58-03.png)
-![](/static/2020-08-20-00-08-13.png)
-![](/static/2020-08-20-00-16-40.png)
+![](../static/2020-08-19-23-58-03.png)
+![](../static/2020-08-20-00-08-13.png)
+![](../static/2020-08-20-00-16-40.png)
 
 ##### 多级分组
 
@@ -1218,8 +1220,8 @@ System.out.println(collect);
 
 * 如先按年龄分组，再按成绩分组
 
-![](/static/2020-08-20-01-06-17.png)
-![](/static/2020-08-20-01-32-11.png)
+![](../static/2020-08-20-01-06-17.png)
+![](../static/2020-08-20-01-32-11.png)
 
 #### 流数据分区
 
@@ -1233,7 +1235,7 @@ System.out.println(collect);
 * `Collector<T, ?, Map<Boolean, List<T>>> partitioningBy(Predicate<? super T> predicate)`
 * 多级分区 - `Collector<T, ?, Map<Boolean, D>> partitioningBy(Predicate<? super T> predicate, Collector<? super T, A, D> downstream) `
 
-![](/static/2020-08-20-01-33-21.png)
+![](../static/2020-08-20-01-33-21.png)
 
 #### 流数据拼接
 
@@ -1243,7 +1245,7 @@ System.out.println(collect);
 * `Collector<CharSequence, ?, String> joining(CharSequence delimiter)`根据一个字符串拼接
 * `Collector<CharSequence, ?, String> joining(CharSequence delimiter, CharSequence prefix, CharSequence suffix)`根据三个字符串拼接
 
-![](/static/2020-08-20-02-23-38.png)
+![](../static/2020-08-20-02-23-38.png)
 
 ### range() & rangeClosed()
 
@@ -1259,7 +1261,7 @@ System.out.println(collect);
 
 🍊 效率对比
 
-![](/static/2020-08-20-18-41-31.png)
+![](../static/2020-08-20-18-41-31.png)
 
 * 并行流，分治法，效率最高
 
@@ -1277,7 +1279,7 @@ System.out.println(collect);
 
 如`ArrayList`线程不安全，并行流生成的有序元素并发加入集合，会出现线程安全问题
 
-![](/static/2020-08-20-19-24-01.png)
+![](../static/2020-08-20-19-24-01.png)
 
 🍊 解决线程安全问题
 
@@ -1327,11 +1329,11 @@ List<Integer> l = IntStream.rangeClosed(1,1000).parallel().boxed().collect(Colle
 
 * `parallelStream`线程不安全
 * `parallelStream`适用CPU密集型场景
-* ![](/static/2020-08-20-22-17-26.png)
+* ![](../static/2020-08-20-22-17-26.png)
 
 并行流底层使用`Fork/Join`框架,可以将一个大任务拆分为很多小任务异步执行
 
-![](/static/2020-08-20-21-21-17.png)
+![](../static/2020-08-20-21-21-17.png)
 
 * 线程池 ForkJoinPool
 * 任务对象 ForkJoinTask
@@ -1339,9 +1341,9 @@ List<Integer> l = IntStream.rangeClosed(1,1000).parallel().boxed().collect(Colle
 
 ##### Fork/Join原理: 分治法 & 工作窃取法
 
-![](/static/2020-08-20-21-30-39.png)
-![](/static/2020-08-20-21-31-58.png)
-![](/static/2020-08-20-21-34-09.png)
+![](../static/2020-08-20-21-30-39.png)
+![](../static/2020-08-20-21-31-58.png)
+![](../static/2020-08-20-21-34-09.png)
 
 🍊 主要方法
 
@@ -1415,7 +1417,7 @@ public class DemoForkJoin{
 
 🍊 Optional没有子类的工具类。可以是一个为`null`的容器对象
 
-![](/static/2020-08-20-22-21-42.png)
+![](../static/2020-08-20-22-21-42.png)
 
 * 主要为了避免`null`检查，防止`NullPointerException`
 
@@ -1448,21 +1450,21 @@ public class DemoForkJoin{
 
 🍊 旧版日期时间API存在的问题
 
-![](/static/2020-08-20-22-50-05.png)
+![](../static/2020-08-20-22-50-05.png)
 
 * 设计不合理`Date`有两个类，包不同
   * 初始化year会加上1900，`Date now = new Date(year, month,date)`
 * 时间格式化&解析**线程不安全**
   * 之前使用SimpleDateFormat进行解析&格式化
   * `SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd")`, `Date date = sdf.parse("2019-09-09")`
-  * ![](/static/2020-08-20-22-54-21.png)
+  * ![](../static/2020-08-20-22-54-21.png)
 * 旧版时区处理麻烦
   * 日期类不提供国际化，没有时区支持
 
 🍊 新版时间日期API
 
-![](/static/2020-08-20-22-58-10.png)
-![](/static/2020-08-20-22-59-37.png)
+![](../static/2020-08-20-22-58-10.png)
+![](../static/2020-08-20-22-59-37.png)
 
 ### LocalDate
 
@@ -1487,7 +1489,7 @@ LocalDate date = LocalDate.of(2018,8,8);//指定年月日
 
 * 当前时间 - `static LocalTime now()`
 * 指定时间 - `static LocalTime of(int hour, int minute, int second)`
-* ![](/static/2020-08-20-23-09-51.png)
+* ![](../static/2020-08-20-23-09-51.png)
 
 ```java
 LocalTime t = LocalTime.now();
@@ -1499,18 +1501,18 @@ LocalTime t2 = LocalTime.of(13,26,39);
 表示日期时间，年月日，时分秒
 
 * `static LocalDateTime now()`
-* ![](/static/2020-08-20-23-12-03.png)
-* ![](/static/2020-08-20-23-12-31.png)
+* ![](../static/2020-08-20-23-12-03.png)
+* ![](../static/2020-08-20-23-12-31.png)
 
 ### 共通方法：修改时间
 
 LocalDate，LocalTime，LocalDateTime修改
 
-* 直接修改 - withXXX()![](/static/2020-08-20-23-14-45.png)
+* 直接修改 - withXXX()![](../static/2020-08-20-23-14-45.png)
   * 修改后返回新的对象，不会修改旧的
-* 增加 - plusXXX()![](/static/2020-08-20-23-16-33.png)
-* 减少 - minusXXX()![](/static/2020-08-20-23-17-21.png)
-* 比较时间 - ![](/static/2020-08-20-23-24-19.png)
+* 增加 - plusXXX()![](../static/2020-08-20-23-16-33.png)
+* 减少 - minusXXX()![](../static/2020-08-20-23-17-21.png)
+* 比较时间 - ![](../static/2020-08-20-23-24-19.png)
 
 ```java
 LocalDateTime date = LocalDateTime.now();
@@ -1532,7 +1534,7 @@ date.isEqual(t);
 
 ### DateTimeFormatter: 时间格式化 & 解析
 
-![](/static/2020-08-20-23-25-08.png)
+![](../static/2020-08-20-23-25-08.png)
 
 * 格式化 - `String format(DateTimeFormatter formatter)`
 * 指定时间格式 - `static DateTimeFormatter ofPattern(String pattern)`
@@ -1564,11 +1566,11 @@ for(int i-=;i<50;i++){
 ### Instant: 时间戳
 
 时间戳/时间线，**内部保存**自1970年依以来的**秒&纳秒**
-![](/static/2020-08-20-23-45-57.png)
+![](../static/2020-08-20-23-45-57.png)
 
 * 不提供给用户，一般用于程序统计【操作秒，纳秒方便】
 * 支持加减，`plusXXX`&`minusXXX`
-* 获取，`getXXX`![](/static/2020-08-20-23-49-47.png)
+* 获取，`getXXX`![](../static/2020-08-20-23-49-47.png)
 
 ```java
 Instant now = Instant.now();
@@ -1578,17 +1580,17 @@ Instant instant = Instant.now().plusSeconds(20);
 
 ### Duration/Period: 日期时间差类
 
-![](/static/2020-08-20-23-51-21.png)
+![](../static/2020-08-20-23-51-21.png)
 
 * between让后面的参数减去前面的参数
 * `Duration`
   * 计算时间`LocalTime`，时分秒差距
   * `static Duration between(Temporal startInclusive, Temporal endExclusive)`
-  * 获取相差的字段数值![](/static/2020-08-21-00-01-06.png)
+  * 获取相差的字段数值![](../static/2020-08-21-00-01-06.png)
 * `Period`
   * 计算日期`LocalDate`，年月日差距
   * `static Period between(LocalDate startDateInclusive, LocalDate endDateExclusive)`
-  * 获取相差的字段数值![](/static/2020-08-21-00-06-46.png)
+  * 获取相差的字段数值![](../static/2020-08-21-00-06-46.png)
 
 ```java
 /* 计算时间距离 */
@@ -1642,7 +1644,7 @@ LocalDate with = now.with(toFirstDay);
 
 🍊 使用自带的校正器
 
-![](/static/2020-08-21-00-22-21.png)
+![](../static/2020-08-21-00-22-21.png)
 
 ```java
 LocalDate now = LocalDate.now();
@@ -1654,7 +1656,7 @@ System.out.println(now.with(temporalAdjuster));
 
 🍊 前面LocalDate,LocalTime,LocalDateTime不带时区
 
-![](/static/2020-08-21-00-27-18.png)
+![](../static/2020-08-21-00-27-18.png)
 
 * `ZonedDate`
 * `ZonedTime`
@@ -1687,18 +1689,43 @@ ZonedDateTime zonedDateTime = now2.withZoneSameInstant(ZoneId.of("America/Vancou
 
 ## 重复注解 & 类型注解
 
-![](/static/2020-08-21-00-42-25.png)
-![](/static/2020-08-21-00-43-47.png)
-![](/static/2020-08-21-00-44-33.png)
+![](../static/2020-08-21-00-42-25.png)
+![](../static/2020-08-21-00-43-47.png)
+![](../static/2020-08-21-00-44-33.png)
 
 * 先前注解不能在同一个地方使用相同注解，jdk8进行改进
 
 ---
 
-![](/static/2020-08-21-00-52-47.png)
-![](/static/2020-08-21-00-54-44.png)
-![](/static/2020-08-21-00-55-50.png)
+![](../static/2020-08-21-00-52-47.png)
+![](../static/2020-08-21-00-54-44.png)
+![](../static/2020-08-21-00-55-50.png)
 
 * `@Target`元注解新增了两种类型
   * `TYPE_PARAMETER`表示注解能放在泛型上
   * `TYPE_USE`注解可用于任何地方
+
+
+
+# Stream扩展：boxed()
+
+
+
+将基本类型流转换为对象流
+
+
+
+```java
+int arr[] = {1,2,3,4,5};
+IntStream stream1 = Arrays.stream(arr);//通过Arrays工具类获取int[]的stream
+Set<Integer> set1 = stream1.boxed().sorted(Comparator.reverseOrder()).collect(Collectors.toSet()); // boxed()相当于mapToObject
+
+```
+
+
+
+---
+
+普通流转换成数值流
+
+![image-20201215220435922](C:\Workspace\gitnote\static\jdk8\image-20201215220435922.png)
