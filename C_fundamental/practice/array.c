@@ -12,6 +12,7 @@ Array array_create(int int_size)
     // a = {int_size, malloc(sizeof(int)*a.size)};
     // a = {.size=int_size};
     return a;
+    
 }
 
 /* 
