@@ -356,6 +356,8 @@ smaller ones, such that, when we re-join them, it guarantees that no information
 
 ## 完全函数依赖 & 部分函数依赖
 
+<font color="red">完全&部份依赖：只指非主属性&PK之间的关系 - The full or partial FD relates the dependency of a non-prime attribute to the PK only.</font>
+
 ![](/static/2021-01-29-22-54-47.png)
 
 2NF关注PK冗余
@@ -443,6 +445,8 @@ fully functionally dependent on the primary key of R.
 ![](/static/2021-01-30-00-26-07.png)
 
 ## 选取分解属性【造成传递依赖的非主传递属性】：方法 Methodology
+
+<font color="red">找传递依赖，看非键部分（非主属性部分之间，是否存在完全依赖）</font>
 
 :orange: 3NF定义
 
