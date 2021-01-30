@@ -372,7 +372,7 @@ mini language for calculator
 
 ![](/static/2021-01-25-02-51-40.png)
 
-> 文法定义了PL中如何用子短语(nonterminal symbol)形成短语 --- **短语结构**
+> 文法定义了PL中如何用子短语(nonterminal symbol，最上面的)形成短语（最下面的所有的节点） --- **短语结构**
 > A grammar defines how phrases may be formed from sub-phrases in the language. This is called phrase structure.
 
 :orange: 语言中，每个短语都有**语法树**，明确**表示其短语结构** Every phrase in the language has a syntax tree that explicitly represents its phrase structure.
@@ -406,12 +406,15 @@ mini language for calculator
 
 * 如果`N`是文法`G`的非终止符，则`N`类短语（class of N）即语法树中根为`N`的终止符节点组成的字符串 （注意一个phrase是个完整的str）
   * 终止节点访问顺序：左->右
+  * 比如`N = X Y Z`, X,Y,Z整单独一个是一个短语
+* <font color="deeppink">找个合适节点，下面衍生节点一起看为一个`N`类短语</font>
+  * 比如句符，`S`看为一个非终止符节点，文法`G`的所有其他句子都为该节点`S`类的短语（衍生）
 
 # 句子&语言：Sentences & Languages
 
 ![](/static/2021-01-25-03-13-22.png)
 
-* 如果`S`是文法`G`的句符，则`G`的句子为`S`类短语
+* 如果`S`是文法`G`的句符，则`G`的句子都为`S`类短语
   * ‘set n = 42 \n put x*(22-y) \n’ is a （prog class）sentence of Calc
 
 :orange: 语言 languages
@@ -428,7 +431,7 @@ mini language for calculator
 ![](/static/2021-01-25-03-18-51.png)
 
 * 我们还应关注**语言的【语义】 --- 每个句子的含义**
-* 已知，文法不仅仅用于产生句子集合（构成语言），文法也规定了每个句子的短语结构（nonterminal symbol语法树）
+* 已知，文法不仅仅用于产生句子集合（构成语言），文法也规定了每个句子的短语结构（nonterminal symbol为root的语法树）
 * <font color="deeppink">一旦知道某句子的语法树（短语结构），就可以为该句子赋予特定含义</font> Once we know a sentence’s phrase structure, we can use it to ascribe a meaning to that sentence
 
 ## expression结构例子
@@ -455,7 +458,8 @@ mini language for calculator
 ![](/static/2021-01-25-03-36-33.png)
 
 * 短语模糊
-  * 如果某短语有多于`1`个语法树
+  * 如果某**短语**有多于`1`个语法树
+  * 即，构成某相同特定短语，方式不确定。比如一个句子（句符`S`类短语），有2种方式/语法树可以构成该句子
 * 文法模糊
   * 如果其任意一个短语是模糊的
 
@@ -468,6 +472,8 @@ mini language for calculator
 ![](/static/2021-01-25-03-39-47.png)
 ![](/static/2021-01-25-03-43-02.png)
 
+* `G`文法，相同1个句子（`S`类句符的短语）有两个语法树可以构成该句子 --- 模糊
+
 # 扩展巴科斯范式标记：EBNF Notation
 
 ![](/static/2021-01-25-03-44-41.png)
@@ -477,6 +483,7 @@ mini language for calculator
 * 结合BNF& RE标记
 * **产生式规则**
   * `N=RE`
+  * `N` - 非终结符
   * `RE` - 正则，**由终结&非终结符号表示**（其正则，BNF是用组合的序列表示产生式）
 
 :orange: EBNF标记适用于规定所有语法
@@ -485,3 +492,5 @@ mini language for calculator
 
 ![](/static/2021-01-25-03-48-26.png)
 ![](/static/2021-01-25-03-48-31.png)
+
+* 注意正则，字符单引号

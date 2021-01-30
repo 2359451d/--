@@ -1,6 +1,6 @@
 # Database Fundamentals & Relational Model
 
-数据库原理
+Relational Design - 数据库原理
 
 * [Database Fundamentals & Relational Model](#database-fundamentals--relational-model)
 * [情境数据库：Contexual Database](#情境数据库contexual-database)
@@ -163,6 +163,8 @@
 > 在非正式的情况下，**当任何实体与任何其他实体有共同的属性时**，它们都可能与其他实体关联
 > Informally, any entity might relate with any other entity when they both share common attributes.
 
+relation - 注重一个，互相离不开引用（“关系”）
+
 # 关系型模型：Relational Model
 
 ![](/static/2021-01-17-15-44-39.png)
@@ -287,7 +289,7 @@
 * **Entity Integrity Constraint** 完整性约束
   * 某些KEY不能为`NULL`
   * 某些KEY必须为`Unique`，不允许重复值
-  * 避免某些属性的不一致性&不确定性
+  * 避免某些属性的不一致性&不确定性 inconsistency & uncertainty
 * **Referential Integrity Constraint** 引用完整性约束
   * 反映表之间关系
 

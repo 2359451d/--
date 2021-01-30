@@ -39,6 +39,26 @@ content
   * [公共加密密钥协议：Protocol - Public Algorithm, Secret Key](#公共加密密钥协议protocol---public-algorithm-secret-key)
     * [单秘钥加密攻击：Attacking Single Key Encryption](#单秘钥加密攻击attacking-single-key-encryption)
     * [问题-太多需要加密的文件：Problem: Many Secret Documents](#问题-太多需要加密的文件problem-many-secret-documents)
+* [通信加密传输：Communicating a Secret](#通信加密传输communicating-a-secret)
+  * [安全传输中介协议：Protocol - Secure Transmission Medium](#安全传输中介协议protocol---secure-transmission-medium)
+  * [隐藏信息协议：Protocol - Hiding in Plain Sight](#隐藏信息协议protocol---hiding-in-plain-sight)
+  * [安全区域加密后不安全介质传输协议：Protocol - Secure Preparation](#安全区域加密后不安全介质传输协议protocol---secure-preparation)
+    * [安全区域：Secure Area](#安全区域secure-area)
+    * [加密算法：Using Encryption](#加密算法using-encryption)
+    * [涉及加密算法分配问题：Encryption Distribution Problem](#涉及加密算法分配问题encryption-distribution-problem)
+  * [保密加密算法协议：Protocol- Use a Secret Algorithm](#保密加密算法协议protocol--use-a-secret-algorithm)
+  * [单秘钥/对称加密: Public Algorithm & Secret Key](#单秘钥对称加密-public-algorithm--secret-key)
+    * [原理 - 秘钥使用： Using a Secret Key](#原理---秘钥使用-using-a-secret-key)
+    * [涉及密钥分配问题：Key Distribution Problem](#涉及密钥分配问题key-distribution-problem)
+* [常见单秘钥加密算法：Common Single Key  Encryption Algorithms](#常见单秘钥加密算法common-single-key--encryption-algorithms)
+  * [DES: data encryption standard](#des-data-encryption-standard)
+    * [统计攻击：Statistical Attack](#统计攻击statistical-attack)
+    * [DES破解：Breaking DES](#des破解breaking-des)
+    * [三重DES：Triple DES](#三重destriple-des)
+  * [AES：advanced encryption standard](#aesadvanced-encryption-standard)
+    * [密码段连接模式（CBC） & 电子密码本模式（EBC）：Cipher Block Chaining & Electronic Codebook](#密码段连接模式cbc--电子密码本模式ebccipher-block-chaining--electronic-codebook)
+  * [数据擦除算法：Erase Algorithm](#数据擦除算法erase-algorithm)
+* [【】AES Using JAVA](#aes-using-java)
 
 # 资产 & 资产保护机制：Assets & Protection Mechanism
 
@@ -468,3 +488,364 @@ recycling, to be reused as part of another file later on
   * 其中一个文档可能具有已知的特殊结构 One of the documents may have a known special structure
 
 :orange:  由于人为因素，很难拥有许多不同的密钥 Having many different keys fails for human factor reasons
+
+# 通信加密传输：Communicating a Secret 
+
+![](/static/2021-01-27-01-05-47.png)
+
+:orange: 通信中产生的保密相关问题
+
+* 通常为**保密性问题**，confidentiality problem
+* 也可以为**完整性问题**integrity problem
+  * 通信其中一方过程中改变了信息
+* 还可为**可用性问题** availability problem
+  * 通信中其中一方被动拒收了信息（其他因素导致的）
+
+## 安全传输中介协议：Protocol - Secure Transmission Medium
+
+![](/static/2021-01-27-01-17-53.png)
+
+其中一个协议，
+
+* 双方在安全的地点，房间见面
+  * “**选择一个安全传输介质**” --- 地点
+
+:orange: 不足 --- **电子传输很容易被截取**
+
+* 转发器可以连接到以太网电缆，并对流量进行分析
+* 电子邮件被存储并可在以后进行分析（电子邮件服务器缓存）
+
+:orange: 这个协议，适用场景
+
+* spy场景，alice获取信息后在安全地点将信息告知bob
+* 不适用于购物情景，因为网上购物不会存在线下见面交易
+
+## 隐藏信息协议：Protocol - Hiding in Plain Sight
+
+![](/static/2021-01-27-01-23-16.png)
+
+a way to "hide" the info
+
+* alice send bob an email(不安全) or phone him
+* 大量的数据意味着消息可能被忽略(won't be noticed)
+  * 如果自动工具没有发现它们的可疑之处 --- 对于email纯文本的检测很简单
+  * 而且Alice和Bob都没有被监视（如果被监视了可以通过某种方法对整个通信进行监听）
+
+email vs phone
+
+* plaintext & written down before analysed
+* 这两种方法都不够安全，因为automatic tool还是能提供方法分析
+
+## 安全区域加密后不安全介质传输协议：Protocol - Secure Preparation
+
+![](/static/2021-01-27-01-32-35.png)
+
+* Alice提前将信息在**安全区域**加密 secure area
+* 通过**不安全的介质/中介**进行传输（可假设为email）
+  * 假设Eve可以窃听该数据
+* Bob在安全区域进行解密
+* 加密后解密抵消效果
+
+### 安全区域：Secure Area
+
+![](/static/2021-01-27-01-35-51.png)
+
+* 不要把明文放在分布式文件系统上 Don’t put the plaintext on a distributed files system
+  * 它会通过不安全的以太网电缆传到另一台电脑上 It will travel to another computer via an insecure Ethernet cable
+* 注意击键记录程序和其他间谍软件 Watch out for keystroke logging programs and other spyware
+* 任何连接到互联网的计算机都有可能被感染 Any computer connected to the Internet can potentially be
+compromised
+  * 使用不与任何东西连接的独立计算机 Use a stand-alone computer not connected to anything
+* 加密后的信息必须传输到面向网络的电脑上 The encrypted message will have to be transferred to a network-facing
+computer
+
+### 加密算法：Using Encryption
+
+![](/static/2021-01-27-16-09-28.png)
+
+how protocol works - encrypted secure area & transferred by an insecure medium 在
+
+* left line - alice secure area
+* right line - bob secure area
+* eve - can intecept the communication
+
+:orange:过程
+
+* plaintext is secured by encryption algorithm
+* then is sent to Bob, but since the medium is insecure so **Eve can intecept it(ciphertext)**
+* Bob uses decryption algo to decrypt and get the plaintext
+
+### 涉及加密算法分配问题：Encryption Distribution Problem
+
+![](/static/2021-01-27-16-20-09.png)
+
+:orange: 该协议产生的问题（事先加密，后不安全传输） --- 加密算法分配问题
+
+* Alice和Bob需要**知道如何加密和解密明文**(只有双方知道，如何分配加密算法)
+  * Bob怎么知道是否正确解密？
+* **解决**
+  * 他们必须使用一种**兼容的方法**
+  * 他们必须通过**不同的协议**来交流这些信息
+  * 他们可能会在一个**安全区域**见面
+
+:orange: 该解决方式适用于spy情景，但不适用于互联网购物
+
+* 因为需要在购物之前见面
+
+## 保密加密算法协议：Protocol- Use a Secret Algorithm
+
+![](/static/2021-01-27-16-38-57.png)
+
+:orange: 保密加密算法的实现细节 keep the details of the algorithm secret（use secret algorithm）
+
+* **缺点** bad for
+* **算法设计者**知道这个秘密，可能会有**人身危险** The algorithm designers know the secret and may be physically at risk
+  * 胁迫的威胁 Threat of coercion
+* **公开算法的同行审阅可以减少算法缺陷** Peer review of a public algorithm reduces flaws
+  * 很容易自欺欺人地认为算法比实际情况更安全（如果不进行审阅）It is easy to fool oneself that an algorithm is more secure than it really is （without peer review）
+
+## 单秘钥/对称加密: Public Algorithm & Secret Key
+
+> 加密解密使用相同密钥算法，且加密解密算法细节公开 Details of the encryption and decryption algorithms are public
+
+![](/static/2021-01-27-17-00-58.png)
+
+* 具有一个参数，**key 秘钥**，进行保密
+* 如果只知道公开的加解密算法，不知道秘钥也无法获取明文  Knowledge of the algorithm is useless without the key
+
+:orange: 又称为**单秘钥加密 single key encryption/对称加密 symmetric encryption**
+
+### 原理 - 秘钥使用： Using a Secret Key
+
+![](/static/2021-01-27-17-21-34.png)
+
+:orange: 步骤
+
+* 使用**秘钥secret key， & 加密算法**（E，Encryption algorithm）加密明文，得到密文（C，ciphertext）
+* 密文传送给Bob，ciphertext is sent to Bob
+* 秘钥sent by Alice to Bob
+* Bob使用**秘钥 & 解密算法** 得到明文 plain text
+
+### 涉及密钥分配问题：Key Distribution Problem
+
+思考：单秘钥加密\解密涉及的问题？
+
+* 更好的解决方法 - 非对称加密
+
+![](/static/2021-01-27-17-30-17.png)
+
+* **(加密算法分配->)密钥分配问题 & 秘钥存储问题** key distribution problem & key storage problem
+  * <font color="deeppink">秘钥必须以安全形式存储</font> key must be stored safely
+
+:orange: 先前协议需要考虑，如何安全分配算法 The problem of transferring data between Alice and Bob has been transformed into an easier problem.
+
+* 对称加密只需要考虑如何安全传输秘钥 The problem of transferring a key
+
+:orange: 相同密钥可以用于多个不同通信会话中 The same key can be used for several different communication sessions
+
+* 双方只需要传输共享一次 It just needs to be shared once
+* 传输的秘钥通常比密文更短
+
+:candy: 使用哪种协议进行**秘钥传输**会更简单？which protocol to be used for transferring the key?
+
+* have a meeting
+  * 针对某些场景可能不适用（互联网购物）
+* **hide in plain sight**
+  * 如，用某种安全形式的email进行密钥传输
+
+# 常见单秘钥加密算法：Common Single Key  Encryption Algorithms
+
+:orange: 常见单秘钥加密算法 common single key encryption algorithms
+
+![](/static/2021-01-27-17-55-46.png)
+
+* **DES** - data encryption standard
+* **AES** - advanced encryption standard
+* Also consider an erase algorithm
+
+## DES: data encryption standard
+
+![](/static/2021-01-27-18-26-24.png)
+
+* **块密码/分组加密 block cipher**
+  * **数据被分成若干块，每块长64位(不是对数据的每个字符进行加密)** The data is divided into blocks, each 64 bits long
+  * <font color="deeppink">最后一个数据块可能会很短（小于64位），所以**填充**，将其扩展到64位</font> The last block may often be short (less than 64 bits) and so is **padded** to expand it to 64 bits
+  * 为什么使用块密码？ --- <font color="blue">这使得**统计攻击**变得更加困难，因为它不太可能是两个区块将是相同的</font> This makes a **statistical attack** harder because it is less likely that two blocks will be the same
+  * <font color="deeppink">将明文分成多个等长的块（ block ），然后用相同的一个密钥，对每个块进行加密，得到密文块。</font>
+* 它始于IBM的Lucifer项目
+  * 几个小的变换一个接一个的重复。Several small transformations are repeated one after the other.
+  * 每个小的变换都有一个不同的子密钥(主密钥偏移几位得来)，由一个主密钥生成。Each small translation has a different sub-key, generated from a master key
+  * master密钥长度为128位 It had a master key length of 128 bits
+
+---
+
+![](/static/2021-01-27-18-50-41.png)
+
+NSA（美国国家安全局）对《路西法》稍作修改。并在1977年被采用。
+
+* 他们将密钥长度**减少到56位（原128），使暴力破解变得更容易**。They reduced the key length to 56 bits, making a brute force attack easier
+* 改进优点 -- **它使用了非常简单的操作，所以它的速度很快**，很容易在硅中实施 It uses very simple operations so that it is fast and easy to
+implement in silicon
+* NSA没有公布其安全性分析，鼓励一些人认为他们已经插入了后门 The NSA did not publish an analysis of its security, encouraging some to think that they had inserted a backdoor
+  * 没有发现后门，但NSA后来说，他们已经改变了算法，以防止差分密码学。No back door has been found but NSA later said that they had changed the algorithm to protect against differential cryptography
+  * 竞争对手的算法，如欧洲的IDEAL，后来被发现容易受到差分密码学的影响（详情不在此赘述）Rival algorithms, such as IDEAL in Europe, were later found to be vulnerable to differential cryptography
+
+### 统计攻击：Statistical Attack
+
+为什么使用块密码？ --- <font color="blue">这使得**统计攻击**变得更加困难（块密码避免该攻击），因为它不太可能是两个区块将是相同的</font> This makes a **statistical attack** harder because it is less likely that two blocks will be the same
+
+![](/static/2021-01-27-18-38-58.png)
+
+> 统计攻击试图寻找单字母、双字母（digram）和三字母（trigram）组合频率。A statistical attack tries to look for frequencies of single letter, double letter (digram) and triple letter (trigram) combinations
+
+* **明文中的频率会有很大的不同** The frequency in plain text will vary greatly
+* **这可能会导致密码文本中的频率变化，从而帮助攻击者** This may cause varying frequencies in the cipher text and can help the attacker
+
+:orange: 统计攻击在计算机前的算法中是一个严重的问题，但现代技术在很大程度上防止了这种攻击 Statistical attacks were a serious problem in pre-computer algorithms but modern techniques largely prevent them
+o **在加密前进行压缩**：压缩后的数据看起来更加随机 Compressing before encryption: compressed data looks more random
+o **块密码**的使用 The use of block ciphers
+o **密码块链和初始化向量的使用** Cipher block chaining and the use of an initialisation vector
+
+### DES破解：Breaking DES
+
+目前大多DES都被替换
+
+![](/static/2021-01-27-18-56-08.png)
+
+**56位的短密钥长度（手动设置的56bit）**使得DES**很容易受到暴力破解**，所有密钥都会被尝试。($2^56$)
+
+* 1997年1月29日，RSA组织提供了一个10000美元的奖金给第一个找到密文密钥的人，他们被提供3个明文块(一个已知的明文攻击)并且需要找到秘钥
+  * Rocke Versur在1997年5月25日领取了奖金
+* 在1976年，Hellman和Diffie估计要花费2000万美元才能完成。制造一台特殊用途的机器，在1天内破解了DES
+* 1998年，电气前沿基金会制造了一台DES破解机. 它可以在9天内搜索所有可能的密钥
+* 所以DES存在了20年才变得容易破解
+
+### 三重DES：Triple DES
+
+![](/static/2021-01-27-19-02-26.png)
+
+在DES上已经投入了大量的资金，以努力改进它的使用方式
+
+* **通过使用两次不同的密钥，DES算法的密钥长度可以增加一倍（2*56=112bit）** The key length can be doubled by using the DES algorithm twice with 2 different keys.
+* <font color="deeppink">这很容易受到中途相遇攻击</font> This is vulnerable to a meet-in-the-middle attack 【攻击者先获得几组明文密文。顾名思义，取一组(明文，密文),枚举所有可能的key1，对明文加密得到中间结果，这所有中间结果保存起来；也枚举key2，对密文解密，得到中间结果，和保存起来的中间结果比较，如果有match的，那认为已经找到这2个key了】
+
+:orange: 目前使用的都为 Triple DES
+
+* <font color="deeppink">三密钥三层DES（3*56=168bit）不容易受到攻击，其密钥长度为168位</font> Three key triple DES is not vulnerable and has a key length of 168 bits
+* `C = EK3(DK2(EK1(P)))`，（3DES加密过程）
+  * 其中E是加密，D是解密
+  * K1加密，K2解密，K3加密，3个Key=168bit long
+  * <font color="blue">为什么中间步骤用K2解密？ --- 使用这个顺序是为了使它能**适用于只用一个相同密钥K加密的旧数据(3DES适用于普通DES)**（K=K1=K2=K3）</font> This order is used so that it will work with old data encrypted with just one key K (K = K1 = K2 = K3)
+  * `C = EK(DK(EK(P))) = EK(P)`，而，如果K相同，最后明文相当于只加密了一次，因为前两次加密解密效果相互抵消【好处：三重DES对DES具备向下兼容性】 since one E D pair cancels out
+
+## AES：advanced encryption standard
+
+history
+
+![](/static/2021-01-27-19-20-33.png)
+![](/static/2021-01-27-19-23-10.png)
+
+* 美国国家标准与技术研究院： 一旦DES的缺陷显现出来，就开始寻找其替代品
+* **与DES不同，AES的设计是公开进行的** The design of AES was performed in public, unlike DES
+  * 邀请了世界各地的参赛者。
+  * 算法和分析是公开的。
+  * 邀请任何组织提出意见。
+* 申请者减少到5个，进行最后的评估
+
+---
+
+![](/static/2021-01-27-19-27-02.png)
+
+> 这是一个块大小为128、192或256位(可选择)的【**块算法**】，密钥长度为128、192或256位（可选择）This is a block algorithm with block sizes of 128, 192 or 256 bits and key lengths of 128, 192 or 256 bits.
+
+* 128-128 pair最快
+* 它在回合中重复几个简单的步骤，每一回合都有它自己的子密钥，这些子密钥来自一个主密钥，就像 DES 一样。It repeats a few simple steps several times in rounds and each round has its own sub-key generated from a master key, just like DES
+* **AES加密和解密算法是相互关联的，但又是不同的**
+  * **DES** 解密算法使用了与加密相同的步骤，只是顺序相反
+  * **DES**使用查找表(看起来像随机数字) DES used lookup tables to what seemed like random numbers The DES decryption algorithm used the same steps as for encryption, just in the reverse order.
+  * **AES**
+    * **它使用简单的数学运算** uses simple mathematical operations.
+    * 快 It is fast
+    * 它可以被分析（因为使用了数学运算） It can be analysed.
+
+### 密码段连接模式（CBC） & 电子密码本模式（EBC）：Cipher Block Chaining & Electronic Codebook
+
+:orange: **一个数据文件有许多块，所有的块都必须加密**。 A data file will have many blocks, all of which must be encrypted.
+
+![](/static/2021-01-27-19-32-52.png)
+
+:orange:**电子密码本模式**(ECB)
+
+![](/static/2021-01-27-20-07-06.png)
+
+* **这样做的一个【简单方法（AES一代）】是对所有块进行单独加密（一个明文分组加密成一个密文分组）**。A simple way of doing this is to encrypt all the blocks individually
+  * 这被称为使用**电子密码本模式** Electronic Code Book
+  * *将明文按分组密码的分组规模分成若干个分组，并将明文分组按照一定的顺序编号，每一个明文分组直接作为分组密码算法的输入，在同一个密钥的控制下加密得到相应的密文分组，各密文分组按照与明文分组相同的顺序链接得到密文*
+  * 加密：用相同的key将分好组的明文进行加密函数加密
+  * 解密：使用相同的key将明文通过解密函数解密
+* <font color="deeppink">如果消息太长，它很容易受到统计攻击</font> It is vulnerable to a statistical attack if the message is long
+* 如果纯文本具有内部结构，这可能会反映在密文中 If the plain text has an internal structure, this might be reflected in the cipher text
+* **具有相同初始块并使用相同密钥加密的两个文件将生成相同的密码文本（缺点是无法隐蔽数据模式，相同的明文分组被加密成相同的密文分组）**。许多文字处理程序使用相同的样板代码启动每个文件 Two files with the same initial blocks and encrypted with the same key will produce the same cipher text. Many word processors start each file with the same boilerplate code
+
+---
+
+> 密码段连接（CBC）是一种操作分段密码的方式（在一段bit序列加密成一个单独的单元或分成一个密钥提供给整个部分）。密码段连接使用一定长度初始化向量（IV）。他的一个主要特点是他完全依靠前面的密码文段来译码后面的内容。因此，整个过程的正确性决定于前面的部分
+> CBC模式中，每个明文块（加密前）都与先前的密文块进行异或 In cipher block chaining, each block of plaintext is xored (exclusive or) with the previous block of cipher text before encrypting
+
+* 明文中的常规模式不会出现在密文中 Regular patterns in the plain text do not appear in the cipher text
+* 加密：`Ci = EK(Ci-1⊕Pi)` （该密文输出可做下一块明文用于异或的密文）
+  * 明文与前一个密文快进行异或
+  * 为什么使用异或？--- xor has the useful properties: `a ⊕ a = 0, a ⊕ 0 = a, x ⊕ y = y ⊕ x`
+* 解密（中间式，通过解密加密方程得到）：`DK(Ci) = DK(EK(Ci-1 ⊕ Pi)) = Ci-1 ⊕ Pi`
+  * 密文块先解密，之后与先前的密文块进行异或 `Ci-1 ⊕ DK(Ci) = Ci-1 ⊕ Ci-1 ⊕ Pi = 0 ⊕ Pi = P` = 原明文块（即，解密过程）
+
+---
+
+:orange: 初始向量 Initialisation Vector
+
+![](/static/2021-01-27-20-32-33.png)
+
+* 假设前一个密文`C-1`不存在，无法与`P0`进行异或后加密
+  * <font color="deeppink">因此需要**随机**块，用于充当IV初始向量，作为`C-1`</font> use the random bit block called the initialisation vector and use it as C-1
+* 必须作为明文和加密文件/块一起传输，以便文件能被解密 It must be transmitted as plain text with the file so that the file can be decrypted
+
+:orange: 【为什么需要IV，好处】 --- 如果我们有许多文档都以相同的块开始，加密后的密文将是不同的，因为它们**有不同的初始化向量（随机）**
+
+## 数据擦除算法：Erase Algorithm
+
+Methods of erasing
+
+![](/static/2021-01-27-21-00-20.png)
+
+> 删除文件中的数据最简单的方法是在删除文件之前用随机值覆盖它，之后再进行删除 The easiest way to erase the data in a file is to overwrite it with random values before deleting the file.(and then deleting the files)
+
+* 块现在被重新安排回收，但不包含原始数据 The blocks are now rescheduled for recycling, but do not contain the original data.
+  * 这在Java中很容易做到
+* 可以检查物理文件存储设备和几个不同层次的数据  It is possible to examine the physical file storage device and several different levels of data
+  * 擦掉的数据可以恢复，比如从磁性材料中恢复 Erased data can be recovered, say from the magnetic material 【最简单的擦除方式，但可以恢复】
+* 竞争技术是用不同的随机数据覆盖7次  The technique to beat this is to overwrite with different random data 7 times 【BSI/VSITR，DOD】
+
+# 【】AES Using JAVA
+
+![](/static/2021-01-27-21-17-13.png)
+
+* 实例程序，加密解密文本
+* 该库方法支持`bytes`
+  * `String`<->`byte[]`
+* 包括以16进制格式化输出`byte[]`
+  * 秘钥
+  * 密文
+
+---
+
+![](/static/2021-01-27-21-19-03.png)
+
+---
+
+![](/static/2021-01-27-21-19-14.png)
+
+---
+
+数据擦除算法
+
+![](/static/2021-01-27-21-19-21.png)
