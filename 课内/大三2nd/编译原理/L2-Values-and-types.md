@@ -133,7 +133,7 @@
 
 :orange: disjoint unions 不相交并集 
 
-* (algebraic types, variant records, objects)
+* (algebraic types, variant records, objects, C structs)
 * 在不相交并集类型中，值从1个或多个不同类型中选取
 
 :orange: 数学层面
@@ -176,11 +176,11 @@
 ![](/static/2021-01-31-22-03-11.png)
 ![](/static/2021-01-31-22-03-18.png)
 
-* 不相交并集可用于表示对象，`OBJECT = Point VOID + Circle INT + BOX（INTxINT）`
+* 不相交并集可用于表示(程序中会有的所有)对象，`OBJECT = Point VOID + Circle INT + BOX（INTxINT）`
   * `TAG`用来标识每个对象的类型 each object's tag identifies its class
   * `VOID，INT，INTxINT`都是variant
-* 其本身也是一个不相交并集（单个元素？），对象
-  * `POINT VOid`
+* 其对象本身也是一个不相交并集（单个元素？）
+  * `POINT VOid` 无参构造（无成员）`POINT`类对象
 
 ---
 
@@ -287,6 +287,16 @@ index value
 ![](/static/2021-02-01-00-18-12.png)
 
 * binary function
+
+#### 数组 vs 函数：Arrays & Functions Differs
+
+from Lab solution2
+
+> Arrays and functions are fundamentally different in that the mapping represented by an array is stored in its entirety (and therefore must be a finite mapping), whereas a function is applied to its arguments on demand (and therefore may be an infinite mapping).
+
+数组和函数有本质上的不同，数组所代表的映射是完整存储的（因此必须是有限映射），而函数则是按需应用于它的参数（因此可能是无限映射）。
+
+* 也许还可以提一手数组index range必须为有限numerical类型（或值为numerical的表达式），而函数映射输入没有限制于numerical
 
 ### 递归类型：Recursive Types
 
