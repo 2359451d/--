@@ -321,7 +321,8 @@ WHERE p.Plocation = 'Stafford';
 * `UNION`
 * `EXCEPT`
 * `INTERSECT`
-* `IN/Exist/ALL`
+* `IN/EXIST/ALL`多行子查询
+* 单行子查询 `> < = >= <=`
 
 :orange: `DISTINCT`
 
@@ -364,6 +365,7 @@ SQL支持3类逻辑
 * 1 - TRUE
 * 0 - FALSE
 * 其他或`NULL`，`UNKNOWN`
+* 附：`<=>` 安全等与，既能判断null又能判断普通数值，但是可读性差
 
 :orange: 任何与`NULL`进行逻辑比较的值都计算为`UNKNOWN`
 
