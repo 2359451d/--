@@ -496,7 +496,12 @@ fully functionally dependent on the primary key of R.
 
 * 任何属性应只函数依赖于PK
 * A relation is in BCNF iff whenever there exists a FD: X → A then X
-is a PK, i.e., the left-hand side should be a PK 【BCNF形式的relation，如存在函数依赖`FD：X->A`,则`X`应该为PK(SK)】---以移除所有inherent dependencies,只 保留functional dependencies
+is a PK, i.e., the left-hand side should be a PK 【BCNF形式的relation，如存在函数依赖`FD：X->A`,则`X`应该为PK(prime attribute, 主属性)】---以移除所有inherent dependencies,只 保留functional dependencies
+
+:candy: 注意区分FD和CK
+
+* CK能唯一标识整一个tuple，可以选取作为PK
+* <font color="deeppink">而存在FD只能说某属性能唯一标识别的属性，不一定是CK/主属性</font>
 
 ---
 
