@@ -477,6 +477,14 @@ SQL支持3类逻辑
   * return `FALSE/TRUE`
   * `S={}/ S ≠{}`
 
+`NOT EXISTS`操作符
+
+* 相反，用于监测set是否为空
+* 为空时，返回`TRUE`
+  * `S={}`
+* 存在元素时，返回`FALSE`
+  * `S ≠{}`
+
 ---
 
 :orange:例子
@@ -509,7 +517,7 @@ SQL支持3类逻辑
 ```sql
 -- nested correlted query
 -- 每个学生执行一次内查询，如果不为'A'分的集合元素为空，则筛选出来该学生，NOT EXISTS
-
+-- 即，NOT EXISTS返回的[集合为空时返回True]，满足WHERE筛选条件
 SELECT s.Name
 FROM Student as s
 WHERE NOT EXISTS(SELECT * FROM Grades as g WHERE s.StudentID = g.StudentID AND Grade <> 'A');
