@@ -323,7 +323,7 @@ Shamir, Adleman.
 
 * A&B想创建一个会话密钥，共享信息
   * <font color="deeppink">E可以监听通信，但不知道密钥详情</font>
-* **RSA实际用来共享会话密钥（传输会话密钥）**，RSA is you is normally used to actually share a session key
+* **RSA实际用来共享会话密钥（传输会话密钥，用互相的公钥来加密，交换后各自用私钥解密获取会话密钥，再用会话密钥解密密文）**，RSA is you is normally used to actually share a session key
   * 他会直接通过**创建会话密钥，然后会话密钥被用作加密** So it'd be held held approach does that directly by creating the session key and then the session key is used as encryption.
 * 所以一个人，生成一个公号，密号，So, this person generates a public and secret number
   * 交换公号，**用自己的密号和对方的工号生成会话密钥**they exchanged the public numbers, and then they generate the keys with their secret number and the other person's public number.
