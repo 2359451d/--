@@ -569,3 +569,140 @@ TCP给你一个有序的、可靠的、字节流。TCP gives you an ordered, rel
 :orange: 而且你可以把每个流当作是**并行运行多个TCP连接**，所以它给你提供了相同的服务模型，有多个数据流，And you can treat each stream as  if it were running multiple TCP connections  in parallel, so it gives you the  same service model with several streams of  data,
 
 :orange: 或者你也许可以把**每个流当作一个要发送的消息序列，用流表示消息边界**。 or you could perhaps treat each  stream as a  sequence of messages to be sent,  with the streams indicating message boundaries.
+
+## QUIC包&序列号：QUIC Packet and Sequence Number
+
+![](/static/2021-03-02-12-04-43.png)
+
+每个QUIC包都有一个包序号，一个包号，包号分为两个包号空间。 Each QUIC packet has a packet sequence  number, a packet number,  and the packet numbers  are split into two packet number spaces.
+
+* **在初始QUIC握手过程中发送的数据包以数据包序列号0开始，在握手过程中每发送一个数据包，该数据包序列号就增加一个**。The packets sent during the initial QUIC  handshake start with packet sequence number zero,  and that packet sequence number increases by  one for each packet sent during the  handshake.
+* **然后，当握手完成后，它切换到发送数据，它将数据包序列号重置为0，然后重新开始**。Then, when the handshake’s complete, and it  switches to sending data, it resets the  packet sequence number to zero and starts  again.
+* **在每一个包号空间、握手空间和数据空间内，包号序列从0开始，每发送一个包就增加一个**。Within each of these packet number spaces,  the handshake space, and the data space,  the packet number sequence starts at zero,  and goes up by one for every  packet sent.
+* **也就是QUIC中的序列号，QUIC中的数据包号，统计的是发送数据包的数量**。That is, the sequence numbers in QUIC,  the packet numbers in QUIC, count the  number of packets of data being sent.
+  * 这与TCP不同。**在TCP中，头中的序列号计算的是字节流内的偏移量，它计算的是发送了多少字节的数据。而在QUIC中，数据包号计算的是数据包的数量**。  That's different to TCP. In TCP,  the sequence number in the header counts  the offset within the byte stream,  it counts how many bytes of data  have been sent. Whereas in QUIC,  the packet numbers count the number of  packets.
+
+:orange: **QUIC数据包内是一帧序列，其中有些帧可能是流帧，流帧携带数据**。 Inside a QUIC packet is a sequence  of frames. Some of those frames may  be stream frames, and stream frames carry  data.
+
+* **每个流帧都有一个流ID，所以它知道它为众多子流中的哪个子流携带数据，它也有=被携带的数据量，以及这些数据从流开始的偏移量**。Each stream frame has a stream ID,  so it knows which of the many  sub-streams it’s carrying data for, and it  also has the = amount of data  being carried, and the offset of that  data from the start of the stream.
+* **所以，本质上流包含的序列号与TCP序列号的作用是一样的，它们统计该流中发送的数据字节数**。 **而QUIC数据包的序列号则是计算发送数据包的数量**。So, essentially the stream contains sequence numbers  which play the same role as TCP  sequence numbers, in that they count bytes  of data being sent in that stream.  And the packets have sequence numbers that  count the number of packets being sent.
+
+:orange: 我们可以在右边的图中看到，我们可以看到**QUIC数据包的数量在上升，0，1，2，3，4**。而**流号，零号数据包承载着第一流的数据，从零到1000的字节**。And we can see this in the  diagram on the right, where we see  the packet numbers going up, zero,  one, two, three, four. And the stream  numbers, packet zero carries data from the  first stream, bytes zero through 1000.
+
+* 数据包1携带第一流的数据，字节1001至2000。Packet one carries data from the first  stream, bytes 1001 to 2000.
+* 而数据包2则从第一流携带字节2001到2500，从第二流携带0到500，以此类推。And packet  two carries bytes 2001 to 2500  from the first stream, and zero to  500 from the second stream, and so  on.
+
+:candy: 而且我们看到，**我们可以在一个QUIC数据包中发送多个流的数据**。And we see that we can send  data on multiple streams in a single  packet.
+
+### QUIC不保留流的消息边界
+
+![](/static/2021-03-02-12-18-06.png)
+
+**QUIC不保留流内的消息边界**。 QUIC doesn't preserve message boundaries within the  streams.
+
+* 同理，在一个**TCP流内**，如果你向流中写入数据，而你写入的数据量太大，无法放入一个数据包中，那么数据包之间可能会被任意分割 In the same way that,  within a TCP stream, if you write  data to the stream and  the amount you write is too big  to fit into a packet, it may  be arbitrarily split between packets.
+  * 或者如果你在TCP流中发送的数据太小，没有填满整个数据包，可能会延迟等待更多的数据，能够填满数据包再发送。 Or if the data you send in  a TCP Stream is too small,  and doesn't fill a whole packet,  it may be delayed waiting for more  data, to be able to fill up  the packet before it’s sent.
+* 同样的事情也发生在QUIC上。 **如果您写入流的数据量太大，无法放入 QUIC 数据包，那么它将被分割成多个数据包**。 The same thing happens with QUIC.  If the amount of data you write  to a stream is too big to  fit into a QUIC packet, then it  will be split across multiple packets.
+  * 同样，如果你写入流的数据量非常小，QUIC可能会把它缓冲起来，延迟，等待更多的数据，这样它就可以发送，填满一个完整的数据包。Similarly, if the amount of data you  write to a stream is very small,  QUIC may buffer it up, delay it,  wait for more data, so it can  send it and fill a complete packet.
+
+:orange:此外，如果有空间的话，**QUIC可以从多个流中获取数据，并以单个数据包的形式发送**。 In addition, QUIC can take data from  more than one stream, and send it  in a single packet, if there’s space  to do so.
+
+* 而**如果有多个流的数据可供发送，那么quic发送方可以任意决定，如何优先处理这些数据，以及如何从每个流中发送帧**。And if there's more than one stream  with data that's available to send,  then the QUIC sender can make an  arbitrary decision, how it prioritises that data,  and how it delivers frames from each stream.
+* 通常，它会拆分流中数据，所以每个数据包有一半的数据来自一个流，一半来自另一个流。但是，如果它愿意，它可以交替使用它们，发送一个数据包，**数据来自流1，一个来自流2**，以此类推。 And usually it will split those the data from the streams, so each packet has  half the data from one stream,  and half from another stream. But it  may alternate them if it wants,  sending one packet with data from stream  1, one from stream 2, one from  stream 1, one from stream 2,  and so on.
+
+## QUIC ACK：QUIC Acknowledgment
+
+![](/static/2021-03-02-12-23-22.png)
+
+在接收端，**QUIC收方对收到的数据包发送确认**。 On the receiving side,  the QUIC receiver sends acknowledgments for the  packets it receives.
+
+* 所以，**与TCP确认下一个预期的序列号不同，QUIC接收器只是发送一个确认**，说 "我收到了这个数据包"。 So, unlike TCP which acknowledges the next  expected sequence number, a QUIC receiver just  sends an acknowledgement to say “I got  this packet”.
+  * 所以，**当零号数据包到达时，它会发送一个确认，说 "我收到了零号数据包"。 而当数据包1到达时，它会发送一个确认，说 "我收到了数据包1"**，以此类推。So when packet zero arrives, it sends  an acknowledgement saying “I got packet zero”.  And when packet one arrives, it sends  an acknowledgement saying “I got packet one”,  and so on.
+* **发送方需要记住它在每个数据包中放了什么数据**，The sender needs to remember what data  it puts in each packet,
+  * 所以当它收到第二个数据包的确认时，它知道在这种情况下，**它包含了流1的2001到2500字节，以及流2的0到500字节。 这些信息不在确认中**。 确认中的内容只是数据包的编号，所以发送方需要跟踪它是如何把数据从流放到数据包中的。  so it  knows when it gets an acknowledgement for  packet two that,  in this case, it contained bytes 2001  to 2500 from stream one, and bytes  zero through 500 from stream two.  That information isn't in the acknowledgments.  What's in the acknowledgments it's just the  packet numbers, so the sender needs to  keep track of how it puts the  data from the streams into the packets.
+
+### QUIC ACK帧格式
+
+QUIC中的确认也比TCP中的复杂一些，**它不只是在头中有一个确认号字段**。The acknowledgments in QUIC are also a  bit more sophisticated than they are in  TCP, in that it doesn't just have  an acknowledgement number field in the header.
+
+* 而是在回来的数据包中以帧的形式发送确认信息。Rather, it sends the acknowledgments as frames  in the packets coming back.
+* 这就提供了更多的灵活性，**因为它可以有一个相当复杂的帧格式，如果需要的话，它可以改变帧格式，包括不同的，支持不同的发送头的方式**。 And this gives a lot more flexibility,  because  it can have a fairly sophisticated frame  format, and it can change the frame  format to include different, to support different  ways of sending a header, if it  needs to.
+
+:orange: 在QUIC的初始版本中，在帧格式中，在从接收方传回发送方的ACK帧中，**有一个字段表示最大的确认**，这与TCP确认基本相同--它告诉你**收到的最高序列号是什么**。 In the initial version of QUIC,  what's in the frame format, in the  ACK frames coming back from the receiver  to the sender,  is a field indicating the largest acknowledgement,  which is essentially the same as the  TCP acknowledgment – it tells you what's  what's the highest sequence number received.
+
+:orange: 有一个**ACK延迟字段，它告诉你在收到该数据包之间，接收方在发送确认之前等待了多长时间**。There's an ACK delay field, that tells  you how long between receiving that packet  the receiver waited before sending the acknowledgement.
+
+* 所以这就是接收方的延迟。而**通过测量确认回来所需的时间，并去掉这个ACK延迟字段，就可以估算出不包括收方中处理延迟的网络往返时间RTT**。 So this is the delay in the  receiver. And by measuring the time it  takes for the acknowledgment come back,  and removing this ACK delay field,  you can estimate the network round trip  time excluding the processing delays in the  receiver.
+
+:orange:有一个ACK范围的列表。 There’s a list of ACK ranges.
+
+* 而ACK范围是**接收方说 "我收到了一个范围的数据包 "的一种方式**。 And the ACK ranges are a way  of the receiver saying “I got a  range of packets”.
+* 所以你可以发送一个确认，说：我一次就收到了5到7的数据包。你**可以把这个拆开，使用多个ACK范围**。 因此，你可以有一个确认，说 "我得到了5个数据包；我得到了7到9个数据包；我得到了11到15个数据包"，你可以在**一个单一的确认块中，在一个ACK帧中**，在反向路径流中发送所有的ACK范围确认。 So you can send an acknowledgement that  says, I got packets from five through  seven  in a single go. And you can  split this up, with multiple ACK ranges.  So you could have an acknowledgement that  says “I got packet five; I got  packets  seven through nine; and I got packets  11 through 15” and you can send  that all within a single acknowledgement block,  in an ACK frame, within the reverse  path stream.
+* 而这就给了它更多的灵活性，所以它**不只是要确认最近收到的数据包，提供发送者更多的信息来进行重发**。And this gives it more flexibility,  so it doesn't just have to acknowledge  the most recently received packet, which gives  the sender more information to make retransmissions.
+  * 类似TCP选择性确认ACK扩展。 This is a bit like the TCP  selective acknowledgement extension.
+
+## QUIC重传&丢包恢复：QUIC Retransmissions and Loss Recovery
+
+![](/static/2021-03-02-12-41-47.png)
+
+和TCP一样，QUIC会重传丢失的数据。Like TCP, QUIC will retransmit lost data.
+
+* 不同的是，**TCP重传**的数据包，和原来发送的数据包一模一样，**所以重传的数据包看起来和原来的数据包一样**。 The difference is that TCP retransmits packets,  exactly as they would be originally sent,  so the retransmission looks just the same  as the original packet.
+* **QUIC从不重传数据包**。QUIC中的每个数据包都有一个唯一的数据包序列号，**每个数据包只传输一次**。 QUIC never retransmits packets. Each packet in  QUIC has a unique packet sequence number,  and each packet is only ever transmitted  once.
+  * QUIC宁可做的，**是将这些数据包中的数据重新传输到一个新的数据包中**。 What QUIC rather does, is it retransmits  the data which was in those packets  in a new packet.
+
+:orange: 因此，在这个例子中，我们看到的数据包，在幻灯片上，我们看到，**数据包号2得到了丢失，它包含的数据字节2001至2500从流1，和字节0到500从流2**。 So in this example, we see that  packet, on the slide, we see that  packet number two got lost, and it  contain the data bytes 2001 to 2500  from stream one, and bytes zero through  500 from stream two.
+
+* 而且，当它收到表示数据包丢失的确认ACK时，它会重新发送数据。 And, when it gets the the acknowledgments  indicating that packet was lost, it resends  that data.
+* 而在这种情况下，**它在发送第六个数据包，它在重新发送流的第一个数据字节，它在发送流一的2001到2500字节，它最终会在以后的某个时刻，重新发送流二的数据**。 And in this case it's sending in  packet six, it’s resending the first bytes  of data from stream, it’s sending the  bytes 2001 to 2500 from stream one,  and it will eventually, at some point  later, retransmit the data from stream two.
+
+正如我们所说，**每个数据包都有唯一的数据包序列号**。由于每个数据包在到达时都会被确认，而且它不是以TCP的方式确认最高的，不是以TCP的方式确认下一个预期的序列号，**所以你不能以同样的方式进行三重重复的ACK**，As we say, each packet has a  unique packet sequence number. Since each packet is acknowledged as it  arrives, and it's not acknowledging the highest,  not acknowledging the next sequence number expected  in the same way TCP does,  you can’t do the triple duplicate ACK  in the same way,
+
+* 因为你不会得到重复的ACK。**每个ACK都会确认下一个新的QUIC数据包** because you don't  get duplicate ACKs. Each ACK acknowledges the  next new packet.
+* **而是QUIC在收到三个数据包的ACKS时，就宣布一个数据包丢失**，而这三个数据包的数据包号比它发送的那个数据包高。 这时，它就可以重传该数据包中的数据。 Rather QUIC declares a packet to be  lost when it's got ACKS for three  packets with higher packet numbers than the  one which it sent.  At that point, it can retransmit the  data that was in that packet.
+* **而这就是QUIC相当于三倍重复的ACK，它是三个跟随的序列号而不是三个重复的序列号**。 And that’s QUIC’s equivalent to the triple  duplicate ACK; it's three following sequence numbers  rather than three duplicate sequence numbers.
+
+:orange: 还有，就像TCP一样，**如果出现超时，它停止接收ACK，它就宣布数据包丢失**。 And also, just like TCP, if there's  a timeout, and it stops getting ACKs,  then it declares the packets to be  lost.
+
+## QUIC队首阻塞：Head-ofLine Blocking in QUIC
+
+![](/static/2021-03-02-12-50-08.png)
+
+QUIC **在一个连接中传送多个数据流。在每个数据流中，数据都能按照发送的顺序可靠地传送**。 QUIC delivers multiple streams within a single  connection. And within each stream, the data  is delivered reliably, and in the order  it was sent.
+
+* 如果一个数据包的丢失，那么显然会导致该**数据包中包含的数据流、流的数据丢失**。 If a packet’s lost, then that clearly  causes data for the stream, streams,  where the data was included in that  packet to be lost.
+
+:orange: **数据包丢失是否会影响一个或多个流**，其实取决于**发送者如何选择将不同流的数据放入数据包中**。Whether a packet loss effects one,  or more, streams really depends on how  the sender chooses to put the data  from different streams into the packets.
+
+* **一个QUIC数据包有可能包含来自多个流的数据**。我们在例子中看到，数据包同时包含来自流一和流二的数据。It’s possible that a QUIC packet can  contain data from several streams. We saw  in the examples, how the packets contain  data from both stream one and stream  two simultaneously.
+* **在这种情况下，如果一个数据包丢失，会影响到两个流，如果数据包中有两个以上流的数据，则会影响到所有的流**。 In that case, if a packet is  lost, it will affect both of the  streams, all of the streams if there’s  data from more than two streams in  the packet.
+
+:orange: 同样，一个QUIC发送者可以选择其他方式，**发送一个数据流1的数据包，然后再发送一个数据流2的数据包，并且在每个数据包中只放一个数据流的数据**。 Equally, a QUIC sender can choose to  alternate, and send one packet with data  from stream one, and then another packet  with data from stream two, and only  ever put data from a single stream  in each packet.
+
+:orange: 规范没有对发送者如何做提出要求，不同的发送者可以根据他们是想同时在每个流上取得进展，还是想他们想交替进行，选择不同的做法，并确保数据包丢失只影响到单个流。The specification puts no requirements on how  the sender does this, and different senders  can choose to do it differently depending  whether they're trying to make progress on  each stream simultaneously, or whether they want  to  they want to alternate, and make sure  that packet loss only ever affects a  single stream.
+
+* 根据它们的方式，**流的行首阻塞单独进行**。Depending on how they do this,  the streams can suffer from head of  line blocking independently.
+  * **如果数据在一个特定的流上丢失了，那么在丢失的数据没有被传输之前，这个流就不能向应用程序传送以后的数据**。但是**其他的流，如果它们已经得到了所有的数据，就可以继续向应用程序传送**。  If data is lost on a particular  stream, then that stream can't deliver later  data to the application, until that  lost data has been transmitted. But the  other streams, if they've got all the  data, can keep delivering to the application.
+* **所以每个流单独遭受队首阻塞，但流之间没有队首阻塞**。So streams suffer from head of line  blocking individually, but there's no head of  line blocking between streams.
+  * 这意味着数据在一个流上能可靠地、有序地传输，但流与流之间的顺序并没有得到保留 This means that the data is delivered  reliably, and in order, on a stream,  but order’s not preserved between streams.
+* 很有可能一个流被阻断，等待数据包中的部分数据重传，而其他流在继续传送数据，还没有看到该流有任何丢包。 It’s quite possible that one stream can  be blocked, waiting for a retransmission of  some of the data in the packets,  while the other streams are continuing to  deliver data and haven't seen any loss  on that stream.
+
+:orange:**每个流都是独立发送和接收的。 而这意味着，如果你小心翼翼地将数据分割到不同的流中，如果实现时小心翼翼地将流中的数据放到不同的数据包中，就可以限制队首阻塞的持续时间，并使流在队首阻塞和数据传输方面独立**。 Each stream is sent and received independently.  And this means if you're careful with  how you split data  across streams, and if the implementation is  careful with how it puts data from  streams into different packets, it can limit  the duration of the head of line  blocking, and make the streams independent in  terms of head of line blocking and  data delivery.
+
+## 总结-QUIC可靠传输：Reliable Data Transfer with QUIC
+
+![](/static/2021-03-02-13-02-55.png)
+
+QUIC delivers, as we've seen, several ordered,  reliable, byte streams of data in a  single connection.正如我们所看到的，QUIC在一个连接中提供了几个有序的、可靠的、字节流的数据。
+
+* 如何对待这些不同的字节流，我想，还是一个解释的问题。 How you treat these different bytes streams,  is, I think, still a matter of  interpretation.
+* **可以把一个QUIC连接当作是几个并行的TCP连接**。 It's possible to treat a QUIC connection  as though it was several parallel TCP  connections.
+  * 所以，**你不是打开多个TCP连接到服务器，而是打开一个QUIC连接，并在其中发送和接收多个数据流**。 So, rather than opening multiple TCP connections  to a server, you open one QUIC  connection, and you send and receive several  streams of data within that.
+  * 然后你把**每一个数据流当作是一个TCP流**，你把数据的解析和处理当作是一个TCP流。 而且你可能会在**每个数据流上发送多个请求，并得到多个响应**。 And then you treat each stream of  data as-if it were a TCP stream,  and you parse and process the data  as if it were a TCP stream.  And you possibly send multiple requests,  and get multiple responses, over each stream.
+* 或者，你可以把流更多地当作一个帧设备。你可以选择把每个流，解释为发送一个单一的对象。然后，当你从流中发送数据时，**在该流上，一旦你发送完这个对象，你就关闭该流，继续使用下一个流**。 Or, you can treat the streams more  as a framing device.   you can choose to interpret each stream,  as sending a single object. And then,  when you send data from the stream,  on that stream, once you finish sending  that object, you close the stream and  move on to use the next one.
+  * 而在接收端，你只**需要读取所有的数据，直到你看到流的终点标记，然后你处理它，知道你已经得到了一个完整的对象**。 And, on the receiving side, you just  read all the data until you see  the end of stream marker, and then  you process it knowing you’ve got a  complete object.
+
+:orange: **最佳做法，即对QUIC连接的思考方式，以及连接中的流，仍在不断发展**。 目前还不清楚这两种方法中哪一种一定是正确的方式。the best practices,  the way of thinking about a QUIC  connection, and the streams within a connection,  is still evolving.And it's not clear which of these  two approaches is the necessarily the right  way to do it.
+
+* 这可能取决于应用，什么才是最合理的。 it probably depends on the application what  makes the most sense.
+
