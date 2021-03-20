@@ -12,19 +12,25 @@
 * Fun syntactic analyser
 
 * [L5 - Syntactic analysis](#l5---syntactic-analysis)
-* [Aspects of syntactic analysis](#aspects-of-syntactic-analysis)
+* [语法分析：Aspects of syntactic analysis](#语法分析aspects-of-syntactic-analysis)
 * [令牌：Tokens](#令牌tokens)
   * [例子-Case study: Calc tokens](#例子-case-study-calc-tokens)
 * [Separators](#separators)
 * [词法分析器：Lexer](#词法分析器lexer)
 * [语法分析器：Parser](#语法分析器parser)
   * [递归下降解析：Recursive descent parsing](#递归下降解析recursive-descent-parsing)
+  * [mathch(t)方法](#mathcht方法)
+  * [N() 方法](#n-方法)
   * [例子：Calc Parser](#例子calc-parser)
-  * [递归下降解析的一般规则: General rules for recursive-descent parsing](#递归下降解析的一般规则-general-rules-for-recursive-descent-parsing)
+    * [Calc - Command文法 分析过程](#calc---command文法-分析过程)
+    * [Calc - Prog文法 分析过程](#calc---prog文法-分析过程)
+  * [递归下降解析的一般文法匹配规则: General rules for recursive-descent parsing](#递归下降解析的一般文法匹配规则-general-rules-for-recursive-descent-parsing)
+    * [匹配终结 & 非终结符](#匹配终结--非终结符)
+    * [匹配其他RE](#匹配其他re)
 * [Applications of syntactic analysis](#applications-of-syntactic-analysis)
 * [编译器自动生成工具：Compiler Generation Tools](#编译器自动生成工具compiler-generation-tools)
-  * [ANTLR - Compiler Generation Tool](#antlr---compiler-generation-tool)
-    * [ANTLR Calc语法：Case Study - Calc Grammar in ANTLER](#antlr-calc语法case-study---calc-grammar-in-antler)
+  * [ANTLR编译组件自动生成工具 - Compiler Generation Tool](#antlr编译组件自动生成工具---compiler-generation-tool)
+    * [ANTLR符号 - 编写Calc语法：Case Study - Calc Grammar in ANTLER](#antlr符号---编写calc语法case-study---calc-grammar-in-antler)
   * [例子：Calc Driver](#例子calc-driver)
   * [遍历解释语法树-执行程序：Interpretation by syntax tree traversal](#遍历解释语法树-执行程序interpretation-by-syntax-tree-traversal)
   * [用访问者模式遍历语法树：Syntax Tree Traversal Using a Visitor](#用访问者模式遍历语法树syntax-tree-traversal-using-a-visitor)
@@ -32,7 +38,7 @@
   * [引入ExecVisitor后驱动的更新](#引入execvisitor后驱动的更新)
 * [Fun grammar in ANTLR](#fun-grammar-in-antlr)
 
-# Aspects of syntactic analysis
+# 语法分析：Aspects of syntactic analysis
 
 ![](/static/2021-03-06-15-00-28.png)
 
@@ -53,13 +59,13 @@
 前略，语法分析阶段的语法分析器输入源程序，输出AST The syntactic analyser inputs a source program and outputs an AST
 
 * zoom in
-  * 词法分析器输入源程序，如果没有词法错误，输出令牌流给语法分析器 the lexer channels a stream of tokens to the parser
+  * **词法分析器输入源程序，如果没有词法错误，输出令牌流给语法分析器** the lexer channels a stream of tokens to the parser
 
 # 令牌：Tokens
 
 ![](/static/2021-03-06-15-25-43.png)
 
-令牌是影响源程序短语结构的文本符号 Tokens are textual symbols that influence the source program’s phrase structure
+令牌Tokens是影响源程序短语结构的文本符号 Tokens are textual symbols that influence the source program’s phrase structure
 
 * literals 字面值
 * identifiers 标识符
@@ -67,7 +73,7 @@
 * keyword 关键字
 * punctuation 标点符号（parentheses, commas, colons, etc 括号逗号分号）
 
-:orange: 每个token都有tag & text 
+:orange: **每个token都有tag & text**
 
 - the addition operator might have tag PLUS and text ‘+’
 – a numeral might have tag NUM, and text such as ‘1’ or ‘37’
@@ -84,10 +90,10 @@ how it translated into tokens
 
 ![](/static/2021-03-06-15-31-34.png)
 
-分隔符是不影响短语结构的文本片段 Separators are pieces of text that do not influence the phrase structure
+**分隔符是不影响短语结构的文本片段** Separators are pieces of text that do not influence the phrase structure
 
-* 空格 spaces
-* 注释 comments
+* **空格** spaces
+* **注释** comments
 
 EOL
 
@@ -98,11 +104,11 @@ EOL
 
 ![](/static/2021-03-06-15-46-14.png)
 
-词法分析器将源码转为令牌流 lexer converts source code into a token stream
+**词法分析器 lexer 将源码转为令牌流** lexer converts source code into a token stream
 
-在每个步骤中，lexer 检查源代码的下一个字符并采取相应的行动 At each step, the lexer inspects the next character of the source code and acts accordingly
+**在每个步骤中，lexer 检查源代码的下一个字符并采取相应的行动** At each step, the lexer inspects the next character of the source code and acts accordingly
 
-当没有源代码时，lexer 输出一个 EOF 标记。 When no source code remains, the lexer outputs an EOF token.
+**当没有源代码时，lexer 输出一个 EOF 标记**。 When no source code remains, the lexer outputs an EOF token.
 
 ---
 
@@ -110,82 +116,131 @@ EOL
 
 ![](/static/2021-03-06-15-48-43.png)
 
+* 源码下一字符为
+  * 空格
+    * 忽略
+  * 注释起始
+    * 扫描剩余注释，忽略
+  * 标点
+    * **输出token**(tag & text)
+  * 字母
+    * 扫描剩余字母，**输出token**（tag & text-identifier）
+
 # 语法分析器：Parser
 
 ![](/static/2021-03-06-15-49-58.png)
 
-语法分析器将token流转为AST The parser converts a token stream into an AST
+**语法分析器将token流转为AST** The parser converts a token stream into an AST
 
 * 分析分为两种，对应解析树如何生成
   * TOP-DOWN （Recursive descent parsing, backtracking）
   * Bottom-UP
 * **递归下降解析是常见的，而且特别简单: 它使用递归过程来处理令牌流** Recursive-descent parsing is common and particularly simple: it uses recursive procedures to process the stream of tokens
   * **给定一种适合源语言的语法，我们可以系统地为它编写一个 RD 解析器(语法分析器)** Given a suitable grammar for the source language, we can systematically write a RD parser for it
+  * 给定一种适合源语言的语法，我们可以系统地为它编写一个 RD 解析器(语法分析器)， 比如给定FUn语法，可以通过自动工具生成一个Fun的语法分析器（用来从源码中抽象出一个AST）
+    * 仅编译过程第一阶段
 
 ## 递归下降解析：Recursive descent parsing
 
 ![](/static/2021-03-06-15-53-15.png)
 
-递归下降语法分析器包括 recursive-descent parser consists of
+递归下降**语法分析器**包括 recursive-descent parser consists of
 
-* **一组解析方法 N () ，对应源语言文法中的每个非终结符号N** a family of parsing methods N(), one for each nonterminal symbol N of the source language’s grammar
-* 辅助方法`match()` an auxiliary method match() 
+* **一组解析方法 `N ()` ，对应源语言文法中的每个非终结符号N** a family of parsing methods N(), one for each nonterminal symbol N of the source language’s grammar
+* **辅助方法`match()`** an auxiliary method match() 
 * 这些方法从左到右“使用”令牌流
+  * **即lexer产生的Tokens（Tag & text）作为输入**
 
 ---
 
 ![](/static/2021-03-06-15-56-45.png)
 
-mathc(t)检测下一个token是否包含tag t Method `match(t)` checks whether the next token has tag `t`
+## mathch(t)方法
 
-* yes - consumes the token
-* no - report a syntactic error
+**用于终止符？**
+
+**mathch(t)检测下一个token, 是否包含tag `t`** Method `match(t)` checks whether the next token has tag `t`
+
+* **token包含tag `t`**, 使用该token yes - consumes the token
+* **token不包含tag `t`**，出现语法错误（syntactic analysis - parser）  no - report a syntactic error
+
+## N() 方法
 
 **每个非终止符N对应的N(),检查后几个tokens是否组成N类词语** For each nonterminal symbol N, method N() checks whether the next few tokens constitute a phrase of class N
 
-* yes, consumes tokens, returns an AST representing the parsed phrase
-* no, reports a syntactic error
+* **token包含tag `t`**, **使用该token， 返回解析后短语的AST** yes, consumes tokens, returns an AST representing the parsed phrase
+* **token不包含tag `t`**，出现语法错误 no, reports a syntactic error
 
 ## 例子：Calc Parser
 
 ![](/static/2021-03-06-16-00-42.png)
 
+* AST中每个非终结符对应的方法 `N()`
+  * 检查后几个tokens能否组成该非终结符节点
+    * 即该节点子节点Token能否构成
+
 ![](/static/2021-03-06-16-01-22.png)
 
 * N(), how the parsing methods work?
 
+### Calc - Command文法 分析过程
+
 ![](/static/2021-03-06-16-10-26.png)
 
-EBNF production rule for commands & parsing method for commands
+EBNF production rule for commands & parsing method for commands **Calc命令的产生式（EBNF表示**）
 
-![](/static/2021-03-06-16-10-55.png)
-![](/static/2021-03-06-18-35-55.png)
-
+* Command AST如何生成？
 * terminal symbol - match()
 * non-terminal symbol - N()
+
+![](/static/2021-03-06-16-10-55.png)
+
+* match 先检测下一token是否为PUT
+* expr() 检测后几个token是否构成expr
+* match 检测下一token是否为 EOL
+
+![](/static/2021-03-06-18-35-55.png)
+
+* 下一token是否为SET
+* 后几个token是否构成var
+* 下一token是否为ASSN
+* 后几个token是否构成expr
+* match 检测下一token是否为 EOL
+
+### Calc - Prog文法 分析过程
 
 EBNF production rule for programs
 ![](/static/2021-03-06-19-19-01.png)
 
-## 递归下降解析的一般规则: General rules for recursive-descent parsing
+* while 下一token为 SET/PUT
+* 后几个token是否构成com()
+* 最后token是否为 EOF
+
+## 递归下降解析的一般文法匹配规则: General rules for recursive-descent parsing
 
 ![](/static/2021-03-06-19-21-51.png)
 
 ---
 
+### 匹配终结 & 非终结符
+
 ![](/static/2021-03-06-19-22-27.png)
 
-* terminal symbol - match()
+* 终结符terminal symbol - match()
+  * **文法中终结符节点，检测下一token是否含有 tag（即该终结符tag）** `t`
 * nonterminal symbol - N()
+  * **文法中非终结符节点，检测后几个token是否构成该短语**（节点）
+
+### 匹配其他RE
 
 ![](/static/2021-03-06-19-22-58.png)
 
-* RE1 RE2 （concate）
-  * match RE1
-  * match RE2
+* RE1 RE2 （concate）拼接
+  * 下一token是否匹配 RE1 match RE1
+  * 下一token是否匹配 RE2 match RE2
 * RE*
-  * if next token can start RE
-  * then matchRE
+  * 下一token是否为可以匹配RE的token条件 if next token can start RE
+  * 下一token是否为RE then matchRE
 
 ![](/static/2021-03-06-19-24-02.png)
 
@@ -198,6 +253,7 @@ EBNF production rule for programs
 
 语法分析有多种应用。
 - 在编译器中 compilers
+  - **属于第一个阶段，生成抽象语法树AST**
 - 在XML应用中（解析XML文档和
 将其转换为树形）。) xml applications
 - 在网络浏览器中（解析和渲染HTML）。
@@ -209,10 +265,11 @@ EBNF production rule for programs
 
 ![](/static/2021-03-06-19-28-11.png)
 
-编译器生成工具可以自动构建编译器组件的过程。 A compiler generation tool automates the process of building compiler components
+**编译器生成工具可以自动构建编译器组件的过程**。 A compiler generation tool automates the process of building compiler components
 
 * 编译器生成工具的输入是对编译器组件应该做什么的说明 The input to a compiler generation tool is a specification of what the compiler component is supposed to do
-  * 语法生成器的输入是一个语法。 The input to a parser generator is a grammar.
+  * **语法生成器的输入是一个语法/文法**。 The input to a parser generator is a grammar.
+  * **通过输入语言文法，生成一个编译器所需要的组件（如lexer，parser等？**）
 
 例子
 
@@ -220,13 +277,15 @@ EBNF production rule for programs
 * javacc
 * antlr
 
-## ANTLR - Compiler Generation Tool
+## ANTLR编译组件自动生成工具 - Compiler Generation Tool
 
 ![](/static/2021-03-06-19-31-58.png)
 
 **ANTLR从(.g4)语法开始，自动生成一个词法分析器(lexer)和一个递归递减解析器(parser)，并允许建立和遍历一个解析树**。 ANTLR automatically generates a lexer and a recursive-descent parser, starting from a grammar (.g4), and it allows to build and walk a parse tree
 
+* **即编写一套文法/语法，`.g4`文件，可以通过ANTLR自动生成编译器组件（语法分析阶段的lexer，parser**）
 * 我们首先用ANTLR符号（类似于EBNF）来表达源语言的语法。 we start by expressing the source language’s grammar in ANTLR notation (which resembles EBNF)
+  * 需要学习 ANTLR符号（`.g4`文件）来编写表示语法
 
 ---
 
@@ -235,20 +294,28 @@ EBNF production rule for programs
 ANTLR由两个部分组成
 
 * tool
-  * 生成词法分析器&语法分析器 generate the lexer & parser
-  * java program
-  * **运行antlr tool时可以指定目标语言，默认java，生成特定语法分析器**
+  * **java编写的工具，用于生成词法分析器&语法分析器** generate the lexer & parser
+    * java program
+  * **运行antlr tool时可以指定目标组件的语言，默认java，生成java特定语法分析器**
 * runtime
   * run them
 
 :orange: ANTLR可以默认生成监听器 & 访问者， 是实现上下文分析器 & 代码生成器的基础 ANTLR can generate listeners (by default) and visitors, which are the basis for implementing a contextual analyser and a code generator
 
-### ANTLR Calc语法：Case Study - Calc Grammar in ANTLER
+* lexer&parser基于 listener & visitor 模式
+
+### ANTLR符号 - 编写Calc语法：Case Study - Calc Grammar in ANTLER
 
 ![](/static/2021-03-06-20-07-34.png)
 
+ANTLR符号规则
+
 * **lexer rules（at the end of the file） - uppercase**
+  * 用于生成tokens？TAG & Text
+  * 全部大写，放在文件末尾
 * **parser rules - lowercase**
+  * 用于抽象出AST
+  * 全部小写
 * **syntax of a antlr production rule**
   * name
   * colon

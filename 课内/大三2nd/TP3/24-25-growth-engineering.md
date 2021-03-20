@@ -39,6 +39,8 @@ the more users you have, the faster you grow (desired achievements)
 * 右，吸引多个用户使用软件
 * 左，被邀请的用户最后又变成新的使用用户，并吸引**邀请**其他用户
 
+what is compuonding growth loops - rate of user growth is proportional to the number of users that are currently using the product, 用户增长速度与当前使用产品的用户数量成正比。
+
 ## loop例子
 
 ![](/static/2021-03-09-20-58-10.png)
@@ -114,3 +116,74 @@ Growth Engineering models and optimizes the entire user journey
 growth engineering is systematic
 
 * start from having the growth model as the basis
+
+# User Journey
+
+![](/static/2021-03-16-21-36-14.png)
+
+* **retain in a habitual state**
+  * form a habit around the product
+  * or can we in that state(only) to monetize the users (shows the ads, charging them subscriptions when users are using the products)
+
+* referring other users to the product
+  * as the fuel of compouding growth loops, important state (**but retetion is more important**)
+
+![](/static/2021-03-16-21-45-49.png)
+![](/static/2021-03-16-21-45-39.png)
+
+* each year of the users retention forms the baseline of next year, without it won't have a big growth
+* retention is the fundation of compounding growth
+* also retention is the foundation of monetization
+
+# Zero Churn
+
+![](/static/2021-03-16-21-54-30.png)
+
+* active users grows, and stops and certain points(size limitation of the market)
+  * market saturates
+* but if have zero churn, won't loose any users
+  * week 9 ~ 10
+  * so can continue monetize users
+
+# 1% Churn
+
+![](/static/2021-03-16-22-06-47.png)
+
+* every point 1% decrease of inactive users
+* **slowly** lose users overtime
+  * since at certain point, cannot find more users to sign up
+  * but since **it's slow**, there are many approches to improve it, add more users cases , features, or open other markets to keep growth going
+
+# 33% churns
+
+![](/static/2021-03-16-22-10-35.png)
+
+* every time 1/3 usres are lossed from previous time
+* jump shark phenomenon
+
+so if no user retention(or no attention to it, no use right with retention), gonna run out of users to sign up and eventually all the users go away i.e. jumping the shark is back
+
+# cohort of users
+
+cohort means users who sign up at given time period
+
+* e.g. the cohort of users in time period 5, would be the users who sign up at time period 5
+
+# retention-cohort graph
+
+![](/static/2021-03-16-22-19-28.png)
+![](/static/2021-03-16-22-24-53.png)
+
+* green line
+  * lose users before they formed the habit
+* yellow line
+  * can take some approches to line up or just attain in this level
+  * earlier warning
+
+# Retention is a trend, not a number
+
+follow the trend pattern, if direction is not right, make changes
+
+# How start-up teams use the Growth Model
+
+![](/static/2021-03-16-22-37-59.png)

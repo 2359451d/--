@@ -30,7 +30,8 @@
             },
             "compilerPath": "C:\\MinGW\\bin\\gcc.exe",
             "cStandard": "c99",
-            "cppStandard": "c++11"
+            "cppStandard": "c++11",
+            "compileCommands": "${workspaceFolder}/课内/大三2nd/NetworkSys/lab/lab02/build/compile_commands.json"
         }
     ],
     "version": 4
