@@ -36,7 +36,7 @@
   * [用访问者模式遍历语法树：Syntax Tree Traversal Using a Visitor](#用访问者模式遍历语法树syntax-tree-traversal-using-a-visitor)
     * [Case study: a visitor for Calc](#case-study-a-visitor-for-calc)
   * [引入ExecVisitor后驱动的更新](#引入execvisitor后驱动的更新)
-* [Fun grammar in ANTLR](#fun-grammar-in-antlr)
+* [Fun文法：Fun grammar in ANTLR](#fun文法fun-grammar-in-antlr)
 
 # 语法分析：Aspects of syntactic analysis
 
@@ -147,7 +147,7 @@ EOL
 递归下降**语法分析器**包括 recursive-descent parser consists of
 
 * **一组解析方法 `N ()` ，对应源语言文法中的每个非终结符号N** a family of parsing methods N(), one for each nonterminal symbol N of the source language’s grammar
-* **辅助方法`match()`** an auxiliary method match() 
+* **辅助方法`match()`** an auxiliary method match()
 * 这些方法从左到右“使用”令牌流
   * **即lexer产生的Tokens（Tag & text）作为输入**
 
@@ -335,9 +335,15 @@ com
   ;
 ```
 
+:orange: Calc文法 - ANTLR符号表示
+
 ![](/static/2021-03-06-21-22-24.png)
 
+* parser rule?
+
 ![](/static/2021-03-06-22-24-10.png)
+
+* Token & 分隔符 - 大写 （lexer rule）
 
 ## 例子：Calc Driver
 
@@ -347,13 +353,20 @@ com
 
 * ANTLR TOOL 生成 lexer & parser
 * Class `CalcLexer`
-  * 包含转换源码流为令牌流的方法 contains methods that convert an input stream (source code) to a token stream.
+  * **包含转换源码流为令牌流的方法** contains methods that convert an input stream (source code) to a token stream.
 * Class `CalcParser`
-  * 包含使用令牌流的解析方法（token->AST） contains parsing methods prog(), com(), …, that consume the token stream.
+  * **包含使用令牌流的解析方法**（token->AST） contains parsing methods prog(), com(), …, that consume the token stream.
+    * `match()`
+    * `N()`
 
 ---
 
-写一个driver program 驱动程序 `CalcRun`，调用 `CalcParser`类的 `prog()`方法
+写一个driver program 驱动程序 class `CalcRun`，调用 `CalcParser`类的 `prog()`方法
+
+* 即调用 解析方法处理 之前生成的Calc令牌
+  * match token
+    * yes - AST
+    * no - report error
 
 ![](/static/2021-03-06-22-53-24.png)
 
@@ -368,16 +381,17 @@ com
 
 ![](/static/2021-03-06-22-58-51.png)
 
-程序的执行可以通过遍历（走过）语法树，从左到右，深度优先，解释命令。 The program can be executed by traversing (walking over) the syntax tree, left to right, depth first, and interpreting the commands.
+程序的执行可以通过遍历（走过）语法树，从左到右，深度优先，解释命令 The program can be executed by traversing (walking over) the syntax tree, left to right, depth first, and interpreting the commands.
 
 ## 用访问者模式遍历语法树：Syntax Tree Traversal Using a Visitor
 
 ![](/static/2021-03-07-04-23-41.png)
 
-通过ANTLR TOOL 自动生成语法树，但是需要遍历树&分析其结构来生成解析器 & 编译器 We get a syntax tree automatically, but to implement an interpreter or compiler we need to walk over the tree and analyse its structure
+通过ANTLR TOOL 自动生成语法树，但是需要遍历树&分析其结构来**生成解析器(interpreter) & 编译器(compiler-lexer, parser,...)** We get a syntax tree automatically, but to implement an interpreter or compiler we need to walk over the tree and analyse its structure
 
 * 我们**使用抽象语法树（AST）进行解释**，但在ANTLR4中，**我们使用的是完整的语法树，包含所有的令牌** We use abstract syntax trees (ASTs) for explanation, but in ANTLR4 we work with full syntax trees, containing all the tokens
-  * ANTLR通过访问者模式定义树节点访问器 ANTLR uses the Visitor pattern to define tree walkers
+  * **ANTLR通过访问者模式定义树节点访问器** ANTLR uses the Visitor pattern to define tree walkers
+    * 访问分析所有结构节点后 - 生成 interpreter & compiler
   * （It is possible to use the Listener pattern instead
 
 ### Case study: a visitor for Calc
@@ -385,12 +399,12 @@ com
 ![](/static/2021-03-07-04-41-49.png)
 
 * `CalcVisitor` 接口
-  * 为每个语法树节点定义`visit()`方法，用于访问
+  * **为每个语法树节点定义`visit()`方法，用于访问**
     * `visitProg(CalcParser.ProgContext ctx)`
 
 ![](/static/2021-03-07-04-42-58.png)
 
-* `CalcBaseVisitor`实现类（实现`CalcVisitor`接口，继承`AbstractParseTreeVisitor`抽象类），遍历整个语法树，无其他特殊行为）
+* `CalcBaseVisitor`实现类（实现`CalcVisitor`接口，继承`AbstractParseTreeVisitor`抽象类），**遍历整个语法树，无其他特殊行为**）
   * 实现 `visitProg(CalcParser.ProgContext ctx) { return visitChildren(ctx)}`
     * `visitChildren(...)` 定义在 `AbstractParseTreeVisitor`返回 `null`
 
@@ -398,15 +412,16 @@ com
 
 ![](/static/2021-03-07-05-01-43.png)
 
-* 假设`CalcRun`进行实际计算 perform actual calculations
-  * `put expr`计算表达式 `expr`，打印结果
-  * `set var=expr`计算表达式 `expr`， 存储结果至变量 `var`
+* 假设`CalcRun`进行实际计算（其本身是不执行程序的） perform actual calculations
+  * `put expr`文法 - 计算表达式 `expr`，打印结果
+  * `set var=expr`文法 - 计算表达式 `expr`， 存储结果至变量 `var`
 
 :orange: `ExecVisitor`继承`CalcBaseVisitor`访问者基类，
 
 ![](/static/2021-03-07-05-37-45.png)
 
-* 覆写了`visit()`方法， 因此遍历节点时会执行特定行为， 即。遍历语法树时解释程序 they interpret the program while walking over the syntax tree
+* **覆写了`visit()`方法， 因此遍历节点时会执行特定行为， 即。遍历语法树时解释程序** they interpret the program while walking over the syntax tree
+  * 原visit()只是访问节点
 
 `visitPut(CalcParser.PutContext ctx)`
 
@@ -416,6 +431,7 @@ com
 
 ![](/static/2021-03-07-17-04-14.png)
 
+* `set var=expr`
 * 存储表达式计算结果（先获取地址）
 
 `visitOp(CalcParser.OpContext ctx)`
@@ -436,21 +452,22 @@ com
 
 ![](/static/2021-03-07-17-10-16.png)
 
-驱动需要扩展，创建调用 `ExecVisitor`
+驱动需要扩展，创建调用 `ExecVisitor`（访问AST节点时会执行计算）
 
 ---
 
-新的 `CalcRun`驱动类，可以进行语法分析 & 程序解释
+新的 `CalcRun`驱动类class，**可以进行语法分析 （抽象AST）& 程序解释（执行计算）**
 
 * `java CalcRun test.calc`
 
-# Fun grammar in ANTLR
+# Fun文法：Fun grammar in ANTLR
 
 * **syntax of a antlr production rule**
   * name
   * colon
   * definition of the production rule
   * terminating semicolon
+* lexer rules大写，parser rules小写
 
 ![](/static/2021-03-07-17-14-09.png)
 ![](/static/2021-03-07-17-14-15.png)
@@ -461,3 +478,11 @@ com
 自动化工具生成lexer & parser
 
 ![](/static/2021-03-07-17-15-37.png)
+
+* Fun文法（ANTLR符号表示），放于文件`Fun.g4`
+* 启用ANTLR Tool生成lexer & parser
+  * `java org.antlr.v4.Tool Fun.g4`
+* 会自动生成以下类
+  * `FunLexer` 将源码(输入流)转换为token流
+  * `FunParser` 包含解析方法 `prog()`, `var_decl()`, `com()`,...将token流抽象生成AST短语
+* `prog()`(CalcBaseVisitor) - 抽象全AST树
