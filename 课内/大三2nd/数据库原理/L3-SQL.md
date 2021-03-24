@@ -29,6 +29,7 @@ Part A.2: SQL & Advanced SQL
   * [是否省略WHERE：IF WHERE IS MISSING](#是否省略whereif-where-is-missing)
 * [*使用：USE OF THE ASTERISK](#使用use-of-the-asterisk)
 * [重复值&唯一值集合：Set/Multi-sets](#重复值唯一值集合setmulti-sets)
+  * [In 与 = 区别](#in-与--区别)
 * [UNION使用例子](#union使用例子)
 * [TF & UNKNOWN(NULL值处理):Three-Valued Logic](#tf--unknownnull值处理three-valued-logic)
   * [NULL值处理例子](#null值处理例子)
@@ -322,13 +323,19 @@ WHERE p.Plocation = 'Stafford';
 * `EXCEPT`
 * `INTERSECT`
 * `IN/EXIST/ALL`多行子查询
+  * 查询结果多行，单列 （当，集合值>1时）
 * 单行子查询 `> < = >= <=`
+  * 查询结果单行，单字段
 
 :orange: `DISTINCT`
 
 * 生成set，建立索引index structure
 
 :candy: <font color="deeppink">注意，如果生成Multiset，需要转换成set后进行操作</font>
+
+## In 与 = 区别
+
+![](/static/2021-03-24-15-40-40.png)
 
 # UNION使用例子
 
@@ -365,11 +372,11 @@ SQL支持3类逻辑
 * 1 - TRUE
 * 0 - FALSE
 * 其他或`NULL`，`UNKNOWN`
-* 附：`<=>` 安全等与，既能判断null又能判断普通数值，但是可读性差
+* 附：`<=>` **安全等与，既能判断null又能判断普通数值，但是可读性差**
 
 :orange: 任何与`NULL`进行逻辑比较的值都计算为`UNKNOWN`
 
-* 因此当某字段可能有`NULL`值时，`WHERE`中使用`IS NULL`或`IS NOT NULL`进行处理
+* 因此当某字段可能有`NULL`值时，`WHERE`中需要使用`IS NULL`或`IS NOT NULL`进行处理
   * `WHERE`只匹配`TRUE`的tuples，不然会输出为`UNKNOWN`而跳过检索
 
 ---
@@ -403,30 +410,32 @@ SQL支持3类逻辑
 
 * `WHERE` (outer) query
   * 嵌套查询 - `SELECT-FROM-WHERE` block (**inner)** query
-* <font color="deeppink">嵌套查询结果又作为 outer WHERE的输入</font>，可应用操作
+* <font color="deeppink">嵌套查询结果又作为 outer WHERE的输入</font>，(嵌套内查询结果，查询集set)可应用操作
   * `IN`
   * `ALL`
-  * `EXISTS`
+  * `(NOT)EXISTS`
 * 聚合操作中常见。。
 
 :orange:嵌套查询分类
 
 * **Nested Uncorrelated Query 嵌套非相关子查询**
-  * 先执行嵌套查询，再执行外部查询（where）first execute the nested query, and then execute the outer query using inner’s output
+  * **先执行嵌套查询，再执行外部查询**（where）first execute the nested query, and then execute the outer query using inner’s output
   * 其中，嵌套查询的结果会被缓存 storing in cache memory the results
+    * 即，内嵌套查询只执行一次
 * **Correlated Query 相关子查询**
-  * 每个外查询都执行嵌套查询，for each tuple of the outer query, we execute the nested query.
+  * **每个外查询都执行嵌套查询**，for each tuple of the outer query, we execute the nested query.
   * 即，根据外查询的数量来多次执行内部嵌套查询 there is a correlation between outer query and inner query, such that the inner query is executed as many times as the number of the tuples in the outer query
 
 ## 非相关子查询-IN例子：Nested Uncorrelated Query
 
 ![](/static/2021-02-04-17-44-47.png)
 
-嵌套非相关子查询 - `IN`操作符连接 inner query结果 作为 outer query的输入
+嵌套**非相关子查询** - `IN`操作符连接 inner query结果 作为 outer query的输入
 
-* set operator
+* set operator - `IN`
 * 用于检查某元素是否属于 set/multiset check whether an element belongs to a set or multiset
-* 内查询只执行一次
+  * 等价于 `PNO=1 or PNO=2 or PNO=3`
+* **内查询只执行一次**
 
 :orange:例子
 
@@ -438,13 +447,15 @@ SQL支持3类逻辑
 
 ![](/static/2021-02-04-18-34-36.png)
 
+* 非相关，内查询执行一次，结果集作为外部 where筛选条件
+
 ## 非相关子查询-ALL例子：Nested Uncorrelated Query
 
 ![](/static/2021-02-04-18-40-46.png)
 
 * 两个uncorrelated Query
   * 1.找到所有在部门5工作的员工工资（multiset）
-  * 每次拿一个employee tuple比较，是否大于1.中multiset的所有tuples
+  * 每次拿一个employee tuple比较，是否大于1.中multiset的所有员工工资记录tuples
 * inner query只执行一次
   * 之后结果缓存，用于跟outer query中所有tuples进行比较
 
@@ -465,7 +476,7 @@ SQL支持3类逻辑
 ![](/static/2021-02-04-18-57-24.png)
 
 * <font color="deeppink">因为有时候嵌套相关子查询使用`IN`过于复杂，可以移除相关子查询中的关系，并将子查询转换为单个查询块</font> sometimes would be complex to use IN in nested correlated query we can remove the correlation & collapse this nested query in the single block
-* <font color="red">所以一般何时使用嵌套相关子查询？ - EXISTS</font>
+* <font color="red">所以一般何时使用嵌套相关子查询？ - （NOT）EXISTS相关查询</font>
 
 ## 相关子查询-EXISTS使用：Nested Correlated Query
 
@@ -479,7 +490,7 @@ SQL支持3类逻辑
 
 `NOT EXISTS`操作符
 
-* 相反，用于监测set是否为空
+* 相反，用于检测set是否为空
 * 为空时，返回`TRUE`
   * `S={}`
 * 存在元素时，返回`FALSE`
@@ -493,6 +504,7 @@ SQL支持3类逻辑
 
 * correlation - employee & department
   * 不关心具体哪个department，只关心只要存在一个department匹配（存在1个元素），则EXISTS-TRUE
+* **只要每个外查询tuple对应的内查询，查询结果集中有值存在，，就输出该外查询tuple**
 
 ---
 
@@ -523,3 +535,4 @@ FROM Student as s
 WHERE NOT EXISTS(SELECT * FROM Grades as g WHERE s.StudentID = g.StudentID AND Grade <> 'A');
 ```
 
+* 注意 <>不包含null检测，，如果存在null可能会忽略为unknown
