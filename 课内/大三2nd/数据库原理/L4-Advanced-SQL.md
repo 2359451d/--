@@ -67,18 +67,18 @@ Part A.2: SQL & Advanced SQL
 * 因此，有时候需要引入外连来解决FK为`NULL`的情况
 * <font color="red">INNER JOIN只适用于FK不为NULL的情况</font>inner join operator is focusing only on the fact that the foreign key is not `NULL`
   * A tuple is retrieved if and only if there exists a matching tuple
-  * FK为`NULL`的tuple会直接被忽略
+  * FK为`NULL`的tuple,使用内连`INNER JOIN`会直接被忽略, 因为只匹配不为`NULL`的tuple
 
 ![](/static/2021-02-14-22-33-08.png)
 
 * 外连允许FK属性可以有`NULL`值，outer join operator is dealing with the fact that we can have certain `NULL` values in the foreign key attribute
 * 分类
   * **左(外)连** LEFT OUTER JOIN （LR[left relation] LEFT OUTER JOIN RR[right relation]）
-    * 左关系`LR`中的每个元组都必须出现在结果中。Every tuple in the left relation LR must appear in result
-    * 如果没有匹配的元组存在，只需为右关系`RR`的属性添加`NULL`值。If no matching tuple exists, just add NULL values for attributes of right relation RR
+    * **左关系`LR`中的每个元组都必须出现在结果中**。Every tuple in the left relation LR must appear in result
+    * **如果没有匹配的元组存在，只需为右关系`RR`的属性添加`NULL`值（而不是直接忽略这整个元组）**。If no matching tuple exists, just add NULL values for attributes of right relation RR
   * **右(外)连** RIGHT OUTER JOIN （LR[left relation] RIGHT OUTER JOIN RR[right relation]）
-    * 右关系`RR`中的每个元组都必须出现在结果中。Every tuple in the right relation LR must appear in result
-    * 如果没有匹配的元组存在，只需为左关系`LR`的属性添加`NULL`值。If no matching tuple exists, just add NULL values for attributes of left relation LR
+    * **右关系`RR`中的每个元组都必须出现在结果中**。Every tuple in the right relation LR must appear in result
+    * **如果没有匹配的元组存在，只需为左关系`LR`的属性添加`NULL`值（而不是直接忽略这整个元组）**。If no matching tuple exists, just add NULL values for attributes of left relation LR
 
 ## 左连例子：LEFT OUTER JOIN
 
@@ -87,7 +87,8 @@ Part A.2: SQL & Advanced SQL
 * 因为`Borg`这行，`Supervisor.SSN=NULL`可以推断出`Borg`是supervisor，其他两个人为supervisees
   * <font color="purple">也就是通过left join 提取匹配&不匹配元组的信息</font>exploit the left outer join in order to extract knowledge about the matching tuples and also the tuples that cannot be matched
 * <font color="deeppink">注意下面的SQL92写法，不会处理`NULL`值，WHERE声明中筛选含有`NULL`值直接被处理为`UNKNOWN`，tuple被忽略</font>
-  * 所以只适用于，FK不为NULL的情况
+  * **因此只会输出 2条记录**
+  * 所以只适用于，**FK不为NULL的情况**
 
 ---
 
@@ -124,7 +125,7 @@ Part A.2: SQL & Advanced SQL
 
 ![](/static/2021-02-14-23-02-29.png)
 
-:orange: 根据分组属性将关系分割成组，即在分组属性中具有相同值的聚类元组。Partition a relation into groups based on grouping attribute, i.e., clustering tuples having the same value in the grouping attribute.
+:orange: **根据分组属性将关系分割成组，即在分组属性中具有相同值的聚类元组**。Partition a relation into groups based on grouping attribute, i.e., clustering tuples having the same value in the grouping attribute.
 
 * `GROUP BY {grouping attribute}`
 
@@ -146,7 +147,7 @@ Part A.2: SQL & Advanced SQL
 
 :orange: 根据分组属性&应用完聚合函数后
 
-* 可以用select列出聚合后数据，聚合函数，&分组属性
+* **可以用select列出聚合后数据，聚合函数，&分组属性**
   * 其他数据不能包含于select声明中
   * <font color="deeppink">最好包括分组属性，不然难以分辨每组的具体统计信息</font> cannot identify where these two statistical values are corresponding in which group; that's why w# need to take into consideration the fact that the grouping attribute should also appear in the SELECT clause because this is information per group.
 
@@ -175,7 +176,7 @@ Part A.2: SQL & Advanced SQL
 
 ![](/static/2021-02-15-00-43-57.png)
 
-可以通过GROUP BY操作符，生成直方图，模拟某属性的概率分布
+可以通过GROUP BY操作符，**生成直方图，模拟某属性的概率分布**
 
 * Use this analytics to approximate the histogram of AGE, i.e., how the AGE is distributed over the tuples…
 
@@ -237,6 +238,8 @@ having筛选
 
 * where子句
   * nested **uncorrelated** aggregation query
+  * 内查询返回查询集 - 人数>100的部门号码DNO
+  * 外查询 - 返回所有为manager，且在内查询结果集中部门的manager姓
 * IN是set操作符
 
 # Tricky Analytics Query 例子
@@ -247,7 +250,7 @@ having筛选
 
 ![](/static/2021-02-15-17-46-07.png)
 
-如果先筛选where，可能先把本来部门有5个以上的人的部门给忽略了，然后把查询变成了，找出有5个人以上收入超过4w的部门
+如果先筛选where，可能**先把本来部门有5个以上的人的部门给忽略了**，然后把查询变成了，找出有5个人以上收入超过4w的部门
 
 ![](/static/2021-02-15-20-57-27.png)
 
@@ -261,12 +264,14 @@ having筛选
 ![](/static/2021-02-15-21-00-23.png)
 
 * nested uncorrelated query
+* 内查询先查出 人数>5的部门的号码 DNO
+* 外查询筛 员工工资>40k 且 DNO 属于 内查询查询集的记录
 
 # Having子句例子
 
 ![](/static/2021-02-15-21-03-22.png)
 
-* 显示雇员人数最多的部门。
+* **显示雇员人数最多的部门**。
   * 可能存在多个部门人数最多（一样多）的情况
 
 ![](/static/2021-02-15-21-16-06.png)
