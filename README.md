@@ -7,7 +7,7 @@ JAVASE
 - [X] ~~*JVM_basics*~~ [2020-08-30]
 - [X] ~~*JUC & Muilti-threads Optimization fundamentals*~~ [2020-09-01]
 - [ ] NIO
-- [ ] XML & JSON PARSING
+- [ ] Netty
 
 jdk new features
 
@@ -18,21 +18,28 @@ jdk new features
 - [ ] jdk12
 - [ ] jdk13
 - [ ] jdk14
+- [ ] jdk15
 
-J2EE
+J2EE & Distributive Techniques
 
 * [X] ~~*Nginx*~~ [2020-11-21]
 * [ ] Docker
-
-Distributive Techniques
+* [ ] Dubbo
+* [ ] SSM
+* [ ] Cloud
+* [ ] JPA
+* [ ] mybatisplus
 
 DBMS .etc
 
 - [X] ~~*MySQL*~~ [2020-09-18]
 - [ ] Oracle
+- [ ] MongoDB
+- [ ] Redis
 - [X] ~~*JDBC*~~ [2020-09-27]
 
 other
 
 * [X] ~~*Linux & Shell*~~ [2020-09-26]
 * [X] ~~*c*~~ [2020-10-11]
+* [ ] Vue.js
