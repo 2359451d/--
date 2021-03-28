@@ -657,6 +657,8 @@ hash file
 
 :orange: **即，预期成本基于哈希字段的分布值，无法预测，不同分布成本不同** expected cost is underlying distribution of the hash field
 
+* 因此图例针对age的分布，如果选取hash file，很不理想，因为不服从均匀分布
+
 # 例子：选取sort file or hash file - Decision Making: Hash or Sort
 
 选取哈希文件或有序文件
