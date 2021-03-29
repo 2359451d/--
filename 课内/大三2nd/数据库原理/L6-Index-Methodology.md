@@ -24,6 +24,14 @@ index（任意） - 访问记录的一种方法
     * [Clustering Analysis](#clustering-analysis)
     * [是否建立聚簇索引 & 无穷大唯一值时线性搜索成本：Decision Making](#是否建立聚簇索引--无穷大唯一值时线性搜索成本decision-making)
     * [聚簇索引开销&效率图：Tradeoff overhead vs speed](#聚簇索引开销效率图tradeoff-overhead-vs-speed)
+  * [Secondary Index](#secondary-index)
+    * [例子 - dense(non ordering key field)](#例子---densenon-ordering-key-field)
+    * [Sparse - non ordering non key field](#sparse---non-ordering-non-key-field)
+    * [例子 - sparse non ordering non key field](#例子---sparse-non-ordering-non-key-field)
+* [MultiLevel Index](#multilevel-index)
+  * [例子](#例子)
+  * [t值 & m(fan-out, bfr)](#t值--mfan-out-bfr)
+  * [例子](#例子-1)
 
 # 索引设计目的：Objectives
 
@@ -181,3 +189,87 @@ ordering , non key field (sparse index)
 
 * speed up to about 82% by increasing a little bit overhead(1 block) in storage
 
+## Secondary Index
+
+二级/副级索引
+
+![](/static/2021-03-29-21-48-55.png)
+![](/static/2021-03-29-21-49-59.png)
+
+* 只针对不关于indexing field的任意文件（文件组织类型不限，只是有序乱序全部无关索引字段） - index a file on a non-ordering field
+* 两种index types
+  * dense
+    * non-ordering key field
+    * 因为文件乱序（对于index field来说），无法利用anchor records，**必须给每个记录分配一个索引**
+      * 索引项指针指向记录所在的块
+  * sparse
+    * non-ordering non key field
+
+### 例子 - dense(non ordering key field)
+
+计算检索成本（对比使用二级索引 & 线性搜索(exit feature)）
+
+![](/static/2021-03-29-22-01-38.png)
+![](/static/2021-03-29-22-02-33.png)
+
+TRADE OFF: OVERHEAD VS SPEED
+![](/static/2021-03-29-22-02-38.png)
+
+### Sparse - non ordering non key field
+
+![](/static/2021-03-29-22-03-44.png)
+
+* 将具有相同索引字段值的记录分组
+* 为每组/聚簇分配一个索引项
+  * 索引项块指针指向 该聚簇本身
+* 每个聚簇中存储 **记录指针**
+  * 记录指针指向物理块中对应的各个记录
+  * **注意每个聚簇存储的记录指针如果满了，那么就链式连接下一个聚簇**
+
+### 例子 - sparse non ordering non key field
+
+![](/static/2021-03-29-22-23-10.png)
+
+# MultiLevel Index
+
+![](/static/2021-03-29-22-23-43.png)
+
+所有索引文件的相同点
+
+* **有序**
+* 值唯一
+* 固定长度
+
+---
+
+![](/static/2021-03-29-22-31-52.png)
+
+索引之上建立索引 - multilevel index
+
+* 原始索引文件 - base/ level-1 index
+  * (有时候将primary access path称为level1 index)
+* 额外索引 - level-2 index
+
+:candy: 找到level `t` 具体值，何时有最优效率，并权衡效率&开销（维护多级索引）
+
+## 例子
+
+primary of primary
+![](/static/2021-03-29-22-46-15.png)
+![](/static/2021-03-29-22-50-22.png)
+
+## t值 & m(fan-out, bfr)
+
+![](/static/2021-03-29-23-01-30.png)
+
+* `m` 足够大，
+* 给定level-1 index， 其块因子 `m`（fan out）
+  * 最大多级索引层数(即，块访问成本) - `t=logm b`
+
+## 例子
+
+![](/static/2021-03-29-23-04-03.png)
+![](/static/2021-03-29-23-20-06.png)
+
+TRADE OFF: OVERHEAD VS SPEED
+![](/static/2021-03-29-23-20-41.png)
