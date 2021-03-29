@@ -21,7 +21,9 @@ index（任意） - 访问记录的一种方法
     * [example](#example)
     * [有序文件主索引效率：例子](#有序文件主索引效率例子)
   * [CLUSTERING INDEX](#clustering-index)
-  * [Clustering Analysis](#clustering-analysis)
+    * [Clustering Analysis](#clustering-analysis)
+    * [是否建立聚簇索引 & 无穷大唯一值时线性搜索成本：Decision Making](#是否建立聚簇索引--无穷大唯一值时线性搜索成本decision-making)
+    * [聚簇索引开销&效率图：Tradeoff overhead vs speed](#聚簇索引开销效率图tradeoff-overhead-vs-speed)
 
 # 索引设计目的：Objectives
 
@@ -136,18 +138,46 @@ Secondary Index: index field is:
 
 ### 有序文件主索引效率：例子
 
-![](/static/2021-03-25-04-41-09.png)
+![](/static/2021-03-28-16-39-32.png)
+
+* baseline
+  * worst -> unordered file
+  * binary search -> ordered file
 
 ![](/static/2021-03-25-04-47-50.png)
 
-![](/static/2021-03-25-04-52-58.png)
+* 注意根据索引获得块指针定位块后（二分查找成本），还需要一次块访问取记录
+
+![](/static/2021-03-28-16-45-26.png)
 
 ## CLUSTERING INDEX
 
-。。。
+ordering , non key field (sparse index)
+
+![](/static/2021-03-28-17-22-36.png)
+![](/static/2021-03-28-17-41-14.png)
+
+* 为有序文件的非键字段（允许重复值）建立索引 - 考虑聚簇索引
+* 聚簇索引项 （每个索引字段的唯一值分配一个索引项）
+  * 值 - 索引字段唯一值 One index-entry per distinct clustering value
+  * 块指针 - 指向第一个含有索引字段值的记录的聚簇（块）【后面的连续块，链式连接】Block pointer points at the first block of the cluster. The other blocks of the same cluster are contiguous and accessed via chain pointers.
+
+### Clustering Analysis
 
 ![](/static/2021-03-25-05-29-13.png)
+![](/static/2021-03-28-19-35-50.png)
 
-## Clustering Analysis
+* 注意规定了是与线性搜索（exiting feature）比较
 
+![](/static/2021-03-28-19-47-56.png)
+
+### 是否建立聚簇索引 & 无穷大唯一值时线性搜索成本：Decision Making
+
+![](/static/2021-03-29-01-25-02.png)
+
+### 聚簇索引开销&效率图：Tradeoff overhead vs speed
+
+![](/static/2021-03-29-01-27-12.png)
+
+* speed up to about 82% by increasing a little bit overhead(1 block) in storage
 
