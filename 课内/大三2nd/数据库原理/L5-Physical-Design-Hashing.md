@@ -476,7 +476,7 @@ pseudocode
   * 应用hash function, h(SSN) = M-2 （桶索引）
 * 使用哈希表获取 M-2桶的物理块地址
 * 定位硬盘中该块
-* 对该块进行线性搜索，满足 h(SSN)=M-2，最终找到该记录
+* 对该块进行线性搜索，直到找到记录满足 h(SSN)=M-2，
 
 :orange: 复杂度 complexity - O(1) block access
 

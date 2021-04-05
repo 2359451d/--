@@ -273,3 +273,4 @@ primary of primary
 
 TRADE OFF: OVERHEAD VS SPEED
 ![](/static/2021-03-29-23-20-41.png)
+
