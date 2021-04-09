@@ -32,6 +32,7 @@ index（任意） - 访问记录的一种方法
   * [例子](#例子)
   * [t值 & m(fan-out, bfr)](#t值--mfan-out-bfr)
   * [例子](#例子-1)
+  * [Multi-level index over primary index例子](#multi-level-index-over-primary-index例子)
 
 # 索引设计目的：Objectives
 
@@ -274,3 +275,6 @@ primary of primary
 TRADE OFF: OVERHEAD VS SPEED
 ![](/static/2021-03-29-23-20-41.png)
 
+## Multi-level index over primary index例子
+
+![](/static/2021-04-05-22-18-34.png)
