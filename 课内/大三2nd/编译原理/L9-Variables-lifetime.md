@@ -21,6 +21,14 @@
   * [例子：C global and local variables](#例子c-global-and-local-variables)
   * [例子： C heap variables](#例子-c-heap-variables)
 * [Allocators and deallocators](#allocators-and-deallocators)
+* [Reachability](#reachability)
+* [Pointers](#pointers)
+* [野指针（悬挂指针）：Dangling Pointers](#野指针悬挂指针dangling-pointers)
+  * [Example: C dangling pointers](#example-c-dangling-pointers)
+* [Commands](#commands)
+  * [Example: Java commands](#example-java-commands)
+* [Expressions with side effects](#expressions-with-side-effects)
+  * [Example: side effects](#example-side-effects)
 
 # 变量定义：What are variables?
 
@@ -135,4 +143,145 @@ special case: recursion
 * c allocator - library function `malloc()`
 * java allocator expression - `new`
 
-显式销毁指定堆变量的操作 A **deallocator** is an operation that explicitly destroys a designated heap variable
+显式**销毁指定堆变量**的操作 A **deallocator** is an operation that explicitly destroys a designated heap variable
+
+* c deallocator - library function `free()`
+* java - 有gcc回收机制
+
+# Reachability
+
+![](/static/2021-04-12-10-15-12.png)
+
+堆变量可达: 只要可以通过指针访问到（全局/局部变量）A heap variable remains reachable as long as it can be accessed by following pointers from a global or local variable
+
+一个**堆变量**的寿命从它被创建开始一直到 A heap variable’s lifetime extends from its creation until:
+
+* it is destroyed by a deallocator,or
+* <font color="deeppink">it becomes unreachable, or</font>
+* the program terminates
+
+# Pointers
+
+![](/static/2021-04-12-10-17-51.png)
+
+指针是对一个特定变量的引用。事实上，指针有时也被称为引用）。 A pointer is a reference to a particular variable. (In fact, pointers are sometimes called references.)
+
+指针的引用是指它所指向的变量 A pointer’s referent is the variable to which it refers.
+
+* referent is something which refer with the pointer
+
+空指针是一个特殊的指针值，它没有引用。A null pointer is a special pointer value that has no referent
+
+指针本质上是它在存储中的引用地址 A pointer is essentially the address of its referent in the store
+
+* 然而，每个指针也有一个类型，一个指针的类型允许我们推断出它的引用的类型。 However, each pointer also has a type, and the type of a pointer allows us to infer the type of its referent
+
+---
+
+![](/static/2021-04-12-10-24-13.png)
+
+指针和堆变量可以用来表示**递归值**，如列表和树 Pointers and heap variables can be used to represent **recursive values** such as lists and trees.
+
+但指针本身是一个低级的概念。对指针的操作是出了名的容易出错和难以理解。 But the pointer itself is a low-level concept. Manipulation of pointers is notoriously error-prone and hard to understand.
+
+* eg. `p->succ=q;` to manipulate a list but which list
+  * does it delete nodes from the list
+    * 前例 `node 5` 是 创建了unreachable var
+  * does it stitch together parts of 2 different lists?
+  * does it introduce a cycle?
+
+# 野指针（悬挂指针）：Dangling Pointers
+
+![](/static/2021-04-12-10-29-20.png)
+
+指向非法内存地址的指针（指向已摧毁变量的指针）A dangling pointer is a pointer to a variable that has been destroyed
+
+何时出现？
+
+* 堆变量摧毁后仍指向改变量的指针 a pointer to a heap variable still exists after the heap variable is destroyed by a deallocator
+* 在退出声明局部变量的代码块时，指向局部变量的指针仍然存在。 a pointer to a local variable still exists at exit from the block in which the local variable was declared
+
+deallocator会立即销毁一个堆变量；所有指向该堆变量的现有指针都会变成野指针。 A deallocator immediately destroys a heap variable; all existing pointers to that heap variable then become dangling pointers
+
+* 因此deallocators本质上是不安全的。 Thus deallocators are inherently unsafe
+  * 如，需要用户自己检查现有的变量是否被正确操作
+
+---
+
+![](/static/2021-04-12-10-36-40.png)
+
+* c
+  * 在一个堆变量被销毁后，指向它的指针可能仍然存在。 After a heap variable is destroyed, pointers to it might still exist.
+  * 在退出块时，指向局部变量的指针可能仍然存在（例如，如果存储在全局变量中，那么退出时这个全局变量的值可能还未改变） At exit from a block, pointers to its local variables might still exist (e.g., if stored in global variables)
+* java
+  * It has no deallocator.
+  * Pointers to local variables cannot be obtained
+
+## Example: C dangling pointers
+
+![](/static/2021-04-12-10-42-39.png)
+
+# Commands
+
+![](/static/2021-04-12-10-42-52.png)
+
+**命令**（~~通常称为语句~~,,不要混淆，，，statement有的地方指->expression一般可以有计算值的，，command没有，，）是一个程序结构，它将被**执行以更新变量** A command (often called a statement) is a program construct that will be executed to update variables
+
+命令是命令式和OO式PL的特征（但不是函数式PL）。 Commands are characteristic of imperative and OO PLs (but not functional PLs).
+
+:orange: simple commands
+
+* **skip command**
+  * does nothing
+* **assignment command**
+  * uses a value to update a var
+* **procedure call**
+  * calls a proper procedure with arguments. Its net effect is to update some var
+
+:orange: compound commands
+
+![](/static/2021-04-12-10-52-22.png)
+
+* **sequential command**
+  * executes its sub-commands in sequence
+* **conditional command** (if)
+  * chooses one of its sub-commands to execute
+* **iterative command** (while, for)
+  * executes its sub-command repeatedly
+  * definite iteration (where the number of repetitions is known in advance)
+  * indefinite iteration (where the number of repetitions is not known in advance).
+* **block command**
+  * contains declarations of local variables, etc
+
+## Example: Java commands
+
+assignment commands
+
+![](/static/2021-04-12-11-59-48.png)
+
+conditional commands
+
+![](/static/2021-04-12-12-00-19.png)
+
+iterative commands
+
+![](/static/2021-04-12-12-00-35.png)
+![](/static/2021-04-12-12-00-43.png)
+
+block command
+
+![](/static/2021-04-12-12-01-07.png)
+
+# Expressions with side effects
+
+计算表达式得到输出结果值 The primary purpose of evaluating an expression is to yield a value.
+
+大多命令式 & OO PL中计算表达式可以更新变量 --- 【side effects】In most imperative and OO PLs, evaluating an expression can also update variables – these are side effects
+
+在C和Java中，函数的主体是一条命令。如果该命令更新了全局变量或堆变量，调用该函数就会产生影响（更新变量）。 In C and Java, the body of a function is a command. If that command updates global or heap variables, calling the function has side effects.
+
+* In C and Java, assignments （commands）are in fact expressions with side effects: “V = E” stores the value of E in V as well as yielding that value.
+
+## Example: side effects
+
+![](/static/2021-04-12-12-13-00.png)
