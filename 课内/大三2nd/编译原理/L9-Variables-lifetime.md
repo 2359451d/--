@@ -27,7 +27,7 @@
   * [Example: C dangling pointers](#example-c-dangling-pointers)
 * [Commands](#commands)
   * [Example: Java commands](#example-java-commands)
-* [Expressions with side effects](#expressions-with-side-effects)
+* [表达式副作用：Expressions with side effects](#表达式副作用expressions-with-side-effects)
   * [Example: side effects](#example-side-effects)
 
 # 变量定义：What are variables?
@@ -272,7 +272,9 @@ block command
 
 ![](/static/2021-04-12-12-01-07.png)
 
-# Expressions with side effects
+# 表达式副作用：Expressions with side effects
+
+> 如果一个函数修改了自己范围之外的资源，那就叫做有副作用，反之，就是没有副作用。
 
 计算表达式得到输出结果值 The primary purpose of evaluating an expression is to yield a value.
 

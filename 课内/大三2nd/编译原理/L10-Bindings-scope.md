@@ -46,6 +46,8 @@
 
 ![](/static/2021-04-12-13-20-26.png)
 
+* 表示其environment例子 （这里关注的是program全局的环境，不是特定点，所以编译时期所有声明应可见）
+
 # 作用域：Scope
 
 声明（或绑定）的作用域是指程序中它具有影响（可以产生影响）的部分 The scope of a declaration (or of a binding) is the portion of the program text over which it has effect.
