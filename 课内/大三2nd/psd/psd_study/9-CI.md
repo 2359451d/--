@@ -1,7 +1,8 @@
 # Lecture Note 6: CI
 
 * [Lecture Note 6: CI](#lecture-note-6-ci)
-  * [CI实践：continuous integration practices](#ci实践continuous-integration-practices)
+* [Integration Hell](#integration-hell)
+* [CI实践：continuous integration practices](#ci实践continuous-integration-practices)
   * [变更管理：Change Management](#变更管理change-management)
     * [集成频率：Integration Frequence](#集成频率integration-frequence)
   * [CI中的新特性分支选项:Feature branching options in CI](#ci中的新特性分支选项feature-branching-options-in-ci)
@@ -16,9 +17,25 @@
   * [Advanced topics](#advanced-topics)
   * [Summary](#summary)
 
-## CI实践：continuous integration practices
+# Integration Hell
+
+该术语指的是这样一种情况：**软件开发人员花在将改变的源代码重新整合到软件系统中的时间比他们首先创建新功能的时间还要多**。<font color="red">这种情况会随着软件的发展而发生，尽管使用了源代码管理系统，因为其他开发者可能同时做出了一些改变</font>。The term  refers to a situation where a software developer spends more time trying to re-integrate altered source code into a software system than they did creating the new feature in the first place. This situation can occur as software evolves, despite the use of source code management systems, because other developers may have concurrently made changes that:
+
+* 阻止软件系统被编译，或导致其无法通过某些测试 prevent the software system from being compiled, or cause it to fail some of its tests;
+* 与当前软件开发者所建立的新功能相冲突 conflicts with the new features that the current software developer has built.
+
+:orange: 这些问题往往会在开发者试图进行以下工作时加剧 These problems tend to be exacerbated when a developer attempts to:
+
+* 一次性集成一个非常大的代码库变更；或integrate a very large change to a code base in one go; or
+* 当新功能不经常被集成时 when new features are integrated infrequently.
+
+:orange: 当然，这些因素是相互关联的。**对软件系统进行的非常大的改动**往往涉及相当大的工作量，**这意味着将软件重新整合到主代码库的时间更长**。Of course, these factors are linked. Very large changes to a software system often involve a considerably greater amount of work, meaning longer periods between reintegration of the software into the main code base.
+
+# CI实践：continuous integration practices
 
 ![](/static/2020-11-17-22-04-41.png)
+
+连续集成是一种被提出来的技术，它是**缓解整合连续和并发的软件开发工作问题的手段**。Fowler（2006）将持续集成的实践总结为：Continuous integration</em> is a technique proposed as a means of mitigating the problem of integrating continuous and concurrent software development efforts. Fowler (2006) summarises the practices in continuous integration as (I have grouped related practices):
 
 * **change management 变更管理实践**
   * 维护一个原repo
