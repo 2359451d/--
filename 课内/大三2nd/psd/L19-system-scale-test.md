@@ -197,6 +197,7 @@ Properties/Metric
   * 系统在给定时间内可以处理的事务量 the amount of transactions that the system can process in a given time
 * **需求** demand
   * 系统可以处理的最大事务速率 the maximum rate of transactions that the system can process
+  * demand testing - 测试一个系统可以处理的最大并发交易数 a test of the maximum number of concurrent transactions a system can handle
 * **响应时间** response
   * 响应事务请求所需的平均或最长时间 response time, the average or maximum length of time taken to respond to a transaction request.
 
@@ -335,7 +336,7 @@ Properties/Metric
 
 ![](/static/2021-01-26-23-34-25.png)
 
-由于**运行验收测试的困难**，许多开发团队已经<font color="red">通过从【用户那里收集信息】的机制来增强其应用程序</font>。这些机制可以是**自动提交崩溃报告**，包括堆栈跟踪和堆状态等信息，也可以是在**应用程序中手动提交缺陷报告的设施**。 Due to the difficulty of running acceptance tests many development teams have augmented their applications with mechanisms for gathering information from their users. These can either be automated submissions of crash reports, including information like stack traces and heap state, or facilities for manually submitting defect reports from within an application
+由于**运行验收测试的困难**，许多开发团队已经<font color="red">通过从【用户那里收集信息】的机制来增强其应用程序</font>。这些机制可以是**自动提交崩溃报告【Automated crash reporting**】，包括堆栈跟踪和堆状态等信息，也可以是在**应用程序中手动提交缺陷报告的设施**。 Due to the difficulty of running acceptance tests many development teams have augmented their applications with mechanisms for gathering information from their users. These can either be automated submissions of crash reports, including information like stack traces and heap state, or facilities for manually submitting defect reports from within an application
 
 * 该方法有效地将系统的<font color="red">用户群转化为其测试人员，利用扩展效应来缓解大规模系统测试的问题</font> The approach effectively turns the user base for a system into its testers, leveraging the scaling effect to mitigate the problems of large scale system testing
 * 是请注意，<font color="blue">这并不是万能的</font>。该方法取决于**是否有愿意作为（通常是无偿的）测试人员合作的用户受众**。已经在庞大的用户群中获得认可的**成熟系统将在功能的测试覆盖方面获得最大利益**。相反，**较新的系统，可能会从用户测试中受益，但缺乏受众**。此外，发布一个**不成熟的、容易出现缺陷的产品也有风险，这将阻止用户的使用**。 Note however that this is not a panacea. The approach is dependent on having an audience of users who are willing to cooperate as (often unpaid) testers. Mature systems that have already gained acceptance amongst a large user base will recieve the greatest benefit in terms of test coverage of features. Conversely, newer systems, that might benefit from user testing lack the audience. Also, there is a risk that releasing a product that is immature and prone to defects will deter user take up.

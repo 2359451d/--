@@ -22,6 +22,7 @@
 * [场景大纲&例表-减少规范冗余：Scenarios Outlines & Example Tables](#场景大纲例表-减少规范冗余scenarios-outlines--example-tables)
 * [步骤函数实现位置：Where to implement the step functions?](#步骤函数实现位置where-to-implement-the-step-functions)
 * [BDD良好实践：Good Practice](#bdd良好实践good-practice)
+* [BDD相对优势](#bdd相对优势)
 * [BDD局限-可维护性：Maintainability](#bdd局限-可维护性maintainability)
 * [Summary](#summary)
 
@@ -142,6 +143,8 @@ Note that these definitions are frequently ‘abused’.
 
 * **只是在实现之前开发了测试**。这应该引起警觉 only with tests developed before implementation. This should set alarms bells ringing.
 * **将功能开发与实现同时进行要可行得多**。当任何提议的设计的实际可行性和依赖性所带来的约束都是未知的时候，这可以避免太多的自上而下的设计 it is much more feasible to develop the features concurrently with the implementation. This avoids too much top down design when the actual feasibility of any proposed design and constraints imposed by dependencies are so unknown.</p>
+* 在行为驱动开发（BDD）中，所需软件的行为是以与系统相互作用的例子集合的形式给出的，使用围绕 "Given-When-Then "结构组织的自然语言感性表达
+  * 核心 - Triple A
 
 # 场景-步骤类型：Step Types in Scenarios
 
@@ -165,20 +168,23 @@ BDD生命周期3 - 为所有场景添加其步骤
 
 # 利用AAA - 生成可执行规范（验收测试案例/规范）：Making Specifications Executable
 
+:orange: <font color="deeppink">根据BDD规范（AAA规范）描述系统行为形成的例子，既是一套验收测试，又是一套规范（AAA规范，描述用户故事），，可以看为，验证当前实现是否符合规范</font>
+
 ![](/static/2021-01-16-18-21-48.png)
 
 * <font color="red">根据AAA模式（Triple A pattern），功能对应的每个场景都可以在测试框架（如python的unittest框架）中被**映射为测试用例**</font> Following this AAA pattern, each scenario in a feature can be mapped into a test case within a test framework, such as the unittest framework in Python, as shown here
 * 创建BankAccount - Given
   * 通过创建对象，配置套件，实现GIVEN。The first statement arranges the fixture, by creating a bank account object, realising the Given step
+  * **描述如何在测试用例执行前设置测试用例套件** Describe how to set up the test case fixture before the test case is executed
 * 执行操作deposit(100) - When
   * 实现行为，实现When步骤 The second statement deposits 100 GBP into the bank account, performing an action and realising the When step.
+  * 描述如何在测试用例执行前设置测试用例夹具
 * 判断balance属性 - Then
   * 断言了应用行为后的值，实现Then步骤 Finally the third statement asserts the value of the balance following the action, realising the Then step.
 
 ![](/static/2021-01-16-18-22-27.png)
 
 * 实现行为，，这里的代码显示了实现如何确保测试用例将通过 The code here shows how the implementation ensures that the test case will pass
-  * :sweat_smile: 到底是BDD还是TDD
 
 # 步骤函数消除冗余：Frameworks for BDD
 
@@ -200,7 +206,7 @@ BDD生命周期3 - 为所有场景添加其步骤
 ![](/static/2021-01-16-23-10-07.png)
 
 * **BDD框架**（如[LIST]上）通过提供一种机制，**将单个Gherkin步骤与应用程序编程语言中的函数或方法**（称为**步骤定义函数** step definition function）联系起来，消除了这种冗余. BDD frameworks, such as [LIST] eliminate this redundancy by providing a mechanism for linking individual Gherkin steps to functions or method, called <em>step definition functions</em>, in the application programming language.
-* 因此，开发人员【无需维护一个测试用例来对应每个单独的场景】，而只需确保 Gherkin 功能步骤中的<font color="deeppink">每个唯一步骤都有一个步骤定义函数</font> So, instead of maintaining a test case to correspond with each individual scenario, developers just have to ensure that there is one step definition function for each unique step in the Gherkin feature step. The BDD framework then takes care of executing the scenarios by selecting the correct step functions to execute in sequence.
+* 因此，开发人员【**无需维护一个测试用例来对应每个单独的场景**】，而只需确保 Gherkin 功能步骤中的<font color="deeppink">每个唯一步骤都有一个步骤定义函数</font> So, instead of maintaining a test case to correspond with each individual scenario, developers just have to ensure that there is one step definition function for each unique step in the Gherkin feature step. The BDD framework then takes care of executing the scenarios by selecting the correct step functions to execute in sequence.
   * 然后，BDD 框架将通过*选择正确的步骤函数依次执行*来处理场景的执行 The BDD framework then takes care of executing the scenarios by selecting the correct step functions to execute in sequence
 
 ## 步骤函数例子
@@ -247,6 +253,7 @@ BDD生命周期3 - 为所有场景添加其步骤
 
 * 背景 - 用于分组特性中每个场景中出现的步骤 backgrounds can be used to group steps that occur in every scenario in a feature
 * 背景将在每个场景中的第一步（测试）之前执行 background will execute before the first step in each scenario
+  * 将应该在每个场景开始时执行的小黄瓜步骤组合在一起 Group together Gherkin steps that should be executed at the start of every scenario
 
 # 参数化步骤-减少规范冗余：Parameterised Steps
 
@@ -293,9 +300,9 @@ BDD生命周期3 - 为所有场景添加其步骤
 
 # 步骤函数实现位置：Where to implement the step functions?
 
-:orange: <font color="red">实现位置应基于当前测试的目标是什么</font>
+:orange: <font color="red">实现位置应基于当前测试的目标是什么</font> （对以下什么编写测试）
 
-* **API实现步骤函数（包含步骤函数序列的模块，采用外观模式，，steps为外观？）** On the API (code steps are a facade)
+* （为API功能接口编写测试）**API实现步骤函数（包含步骤函数序列的模块，采用外观模式，，steps为外观？）** On the API (code steps are a facade)
 * **系统接口（用户 or REST）** At the ‘system’ interface, e.g. user interface or REST API
 
 ---
@@ -324,7 +331,24 @@ BDD生命周期3 - 为所有场景添加其步骤
 * Develop features and implementation * gradually **逐步开发&实现新特性**
 * Work with the customer to validate * features **与用户协调，确认特性符合期望规范**
 
+# BDD相对优势
+
+创新被认为比其前身更好的程度"（[4], p.2）。这可以反映在敏捷方法能够提供的好处，如提高生产力和质量，降低成本和时间，产生可维护和可进化的代码，提高士气，合作和客户满意度[5]  “the degree to which the innovation is perceived to be better than its precursor” ([4], p.2). This can be reflected in the ability of an agile method to offer benefits like improved productivity and quality, reduced cost and time, producing maintainable and evolvable code, improved morale, collaboration and customer satisfaction [5].
+
+使用特定领域术语、改善利益相关者之间的沟通、BDD规范的可执行性以及促进对代码意图的理解被认为是BDD的主要好处 The use of domain specific terms, improving communication among stakeholders, the executable nature of BDD specifications, and facilitating comprehension of code intention are revealed as the main benefits of BDD
+
 # BDD局限-可维护性：Maintainability
+
+![](/static/2021-04-25-14-49-25.png)
+
+- 规范可能难以理解。
+- 很难找到故障源，尤其是在大型BDD套件中。
+- 为了纠正故障、适应新的需求或适应新的环境而改变规范可能很困难。
+- 使缓慢的套件运行得更快。
+- 除了单元测试，还需要维护BDD测试。
+- 应对BDD工具可能带来的复杂性。
+- BDD规范中的重复检测。
+- BDD规范中的重复管理。
 
 ![](/static/2021-01-17-00-16-12.png)
 
@@ -336,9 +360,24 @@ BDD生命周期3 - 为所有场景添加其步骤
 * **在给定的步骤定义中对依赖关系进行硬编码** Hard coding of dependencies in given step definitions
 * **在Gherkin中只可能有一个层次的抽象，所以你会得到很多重复的步骤序列（过多冗余）** Only one level of abstraction possible in Gherkin, so you get lots of duplicate sequences of steps
 * Gherkin步骤是潜在有序的，因此需要表达所有的顺序组合（**保证维护顺序**） Gherkin steps are implicitly sequential, so all combinations of orders need to be expressed
+* BDD冗余
+  * 重复会使规范难以理解
+  * BDD规范中存在的重复会导致它们难以扩展和改变（可能导致功能冻结
+  * BDD规范中存在的重复会导致BDD套件的执行时间超过必要时间
 
 # Summary
 
 > BDD provides a means, through executable specifications, of ensuring traceability between user facing requirements and implementations.
 > 通过可执行的规范，BDD提供了一种手段，以确保面向用户的需求和实现之间的可追溯性
 
+**虽然行为驱动开发是测试驱动开发的进化**，但关注的核心是设计。行为驱动开发中，定义系统的行为是主要工作，而对系统行为的描述则变成了测试标准。（AAA标准，步骤函数描述验收标准）
+
+自动运行测试套件，提供快速反馈，进行测试套件。满足**持续集成**要求 （这里可以延申CI优点，，要点是针对CI的变更管理选择，自动化构建&测试，自动化部署）
+
+BDD 已经包含了敏捷分析（需求管理L5延申，用户故事模板，用户故事质量评估INVEST标准）和自动化验收测试的更广泛的范围。
+
+* 一个故事的行为仅仅是它的验收标准——如果系统满足所有的验收标准，那么它的行为就是正确的; 如果它不满足，那么它就不是。因此，我们创建了一个**模板来捕获故事的验收标准**
+  * BDD优化需求管理（具体化用户故事模板，以方便映射故事每个场景为测试用例（利用AAA规范）或是**场景中每个步骤映射成步骤函数<减少冗余>**,形成可执行验收标准）
+  * Triple A - Given,When,then模板 来编写**用户故事卡**
+
+:orange: <font color="deeppink">根据BDD规范（AAA规范）描述系统行为形成的例子，既是一套验收测试，又是一套规范（AAA规范，描述用户故事），，可以看为，验证当前实现是否符合规范</font>

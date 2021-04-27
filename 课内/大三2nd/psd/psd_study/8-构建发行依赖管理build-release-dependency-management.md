@@ -11,7 +11,7 @@
   * [例子：CbyC Maven Project Layout](#例子cbyc-maven-project-layout)
 * [依赖-发行库管理：Dependency & Release Management](#依赖-发行库管理dependency--release-management)
   * [WHY](#why)
-  * [](#)
+  * [依赖 & 接口类型](#依赖--接口类型)
 * [发行库/依赖版本：Release/Dependency versioning](#发行库依赖版本releasedependency-versioning)
 * [指明依赖项：Specify dependencies](#指明依赖项specify-dependencies)
   * [良好实践](#良好实践)
@@ -187,7 +187,7 @@ Ruby on Rails 对这个短语的使用主要集中在默认的项目文件和目
 * 这里的图表显示了Maven项目的一些依赖关系图 The diagram here shows some of the dependency graph for the Maven project.
 * 依赖和发布管理有助于部分地自动调解这些图 Dependency and release management help to partially automate the mediation of these graphs.
 
-## 
+## 依赖 & 接口类型
 
 ![](/static/2020-11-10-22-04-40.png)
 
@@ -293,11 +293,14 @@ Ruby on Rails 对这个短语的使用主要集中在默认的项目文件和目
 
 * 前沿，**快照** bleeding edge/snapshot
   * release of each commit of this project
+  * 这些是用于生产和分析的软件的稳定快照。它们是在第8节中描述的高度统计学验证之后部署的。我们会根据我们是否需要修复在生产过程中发现的问题，或者我们需要测试新的功能和/或新的外部软件变化来发布错误修复或开发编号的版本
 * **增量发布** incremental
 * **每晚构建版** Nightly builds
   * server to run integration tests as
   * too slow to run at every commit
   * 很多大型软件需要做一些每日构建的过程，用来分析是否能正常工作以便及时反馈。由于其耗费时间较长，如果在白天进行构建占大量的计算资源很不值，所以放在晚上。于是就有了daily builds变为nightly builds
+  * 许多组织根据定时的时间表进行定期构建，比如每天晚上。这与持续构建不同，对于持续集成来说也是不够的。持续集成的全部意义在于尽快发现问题。夜间构建意味着在被人发现之前，bug 会潜伏一整天而未被发现。一旦它们在系统中的时间达到这么长，就需要很长时间才能找到并删除它们。
+  * 这些是软件的日常构建，在被覆盖之前保留几天（通常是一个星期）。它们与后面描述的几个验证框架和涉及特定领域专家的软件包审批机制结合在一起，以尽量减少软件构建和测试过程中的不稳定性。这些每晚发布的版本是成为完全稳定版本的主要候选者，在此基础上制作的安装包可以分发用于生产
 * **测试版本** Beta test releases
   * package release which could be provided to trusted third party to undertake user tests(prior to publish to generic public or wide variety of customers)
 * **发行版候选** release candidates
@@ -358,6 +361,7 @@ Ruby on Rails 对这个短语的使用主要集中在默认的项目文件和目
 
 :orange: **破坏是指对已发布的API的更改** Breaking means alteration to the published API.
 
+![](/static/2021-04-25-14-56-21.png)
 ![](/static/2020-11-10-22-36-47.png)
 
 * **标签** Tag

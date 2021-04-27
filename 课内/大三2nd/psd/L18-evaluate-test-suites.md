@@ -10,6 +10,7 @@
 * [测试代码覆盖率-衡量有效性&效率：Test Code Coverage](#测试代码覆盖率-衡量有效性效率test-code-coverage)
   * [可忽略的代码行：If using LoC can ignore](#可忽略的代码行if-using-loc-can-ignore)
 * [测试代码覆盖率局限性：Limits of test code coverage](#测试代码覆盖率局限性limits-of-test-code-coverage)
+* [人工审查测试的局限性](#人工审查测试的局限性)
 * [变异测试：Mutation testing](#变异测试mutation-testing)
   * [变异操作-概念&特性：Mutation operations](#变异操作-概念特性mutation-operations)
     * [例子](#例子)
@@ -159,11 +160,19 @@
 
 :orange: 一个更常见的问题是，在**强调测试代码覆盖而不是缺陷覆盖**的情况下，<font color="deeppink">开发人员可能会倾向于实现增加覆盖率的测试，但是缺少断言，从而有效地忽略了度量</font> A more common problem is that where test code coverage is emphasised over defect coverage, developers may be tempted to implement tests that increase coverage, but lack assertions, effectively gaming the metric
 
+* 现有的覆盖标准不足以识别上述测试问题。潜在的，这些结果意味着测试工程师过于关注满足覆盖率的目标，而不太关注生产设计良好的测试案例。满足覆盖率标准对认证是很重要的，但它并不能推断出测试用例集是足够的
+
 ![](/static/2021-01-19-23-01-40.png)
 
 * 在所示的例子中，这两个测试用例实现了**非常高的测试覆盖率，确保所有的语句都被执行，每个表达式都被评估**。然而，条件是不正确的，**因为如果金额0被作为一个参数提供，它将显示值"-£0.00"**（未正确覆盖的路径，，套件本身的缺陷）。这里的另一个问题是，条件可以修正为小于<而不破坏测试，这表明测试是不明确的 In the example shown, the two test cases achieve very high test coverage, ensuring all statements are executed and that every expression is evaluated. However, the conditional is incorrect, because it will display the value “-£0.00” if the amount 0 is supplied as an argument. A further problem here is that the conditional can be corrected to less than ‘&lt;’ without breaking the test, indicating the test is underspecified.
 
+# 人工审查测试的局限性
+
+测试用例经常通过人工分析来审查是否充分。人工分析的问题是，审查的质量很难衡量
+
 # 变异测试：Mutation testing
+
+:orange: 一组测试用例可能达到所需的覆盖率标准，但却无法检测到某些类型的编码错误（例如，语句删除）。因此，结构**覆盖率分析和突变测试的作用可以被视为是互补的** a set of test cases might achieve the required coverage criterion yet can fail to detect certain types of coding errors (e.g., statement deletion). As such, the role of both structural coverage analysis and mutation testing can be seen to be complementary.
 
 > 突变测试通常对程序的源代码或者目标代码做小的改动，并把截然不同的错误行为（或者怪异行为）作为预期。**如果测试代码没有觉察到这种小改动带来的错误，就说明这个测试是有问题的**
 >
