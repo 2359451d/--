@@ -7,6 +7,7 @@
 ---
 
 * [Agile Team Organisation](#agile-team-organisation)
+* [Project Stakeholds](#project-stakeholds)
 * [Why Agile? - Empirical process control](#why-agile---empirical-process-control)
   * [传统开发问题](#传统开发问题)
 * [瀑布流开发](#瀑布流开发)
@@ -20,7 +21,7 @@
   * [Scrum阶段](#scrum阶段)
   * [Scrum交付](#scrum交付)
   * [Scrum优点](#scrum优点)
-* [Roles (in Scrum and Beyond)](#roles-in-scrum-and-beyond)
+* [基于Roles (in Scrum and Beyond)](#基于roles-in-scrum-and-beyond)
 * [Managing work in Scrum](#managing-work-in-scrum)
 * [流程：Scrum Workflow](#流程scrum-workflow)
 * [项目启动会议：Project Launch Meeting](#项目启动会议project-launch-meeting)
@@ -33,6 +34,13 @@
 * [Reviewing a Sprint](#reviewing-a-sprint)
 * [迭代回顾会议：Sprint Review Meeting](#迭代回顾会议sprint-review-meeting)
 * [Key point](#key-point)
+* [团队成员数量](#团队成员数量)
+
+# Project Stakeholds
+
+![](/static/2021-04-28-11-00-58.png)
+
+如果每种类型的利益相关者超过一个，**或者两组利益相关者对某一功能有不同意见，那么利益相关者之间有时会有冲突。指定一个客户代表，在客户和工程团队之间进行协商(PO?**，讨论需求和问题等，可能会很有用。你也可以把角色分开，在客户的团队里有一个客户代表，在软件工程团队里有一个产品负责人，他们可以互相联络。 There can sometimes be conflict between stakeholders if there is more than one stakeholder of each type, or if two groups of stakeholders disagree about a feature. It can be useful to appoint a customer representative who negotiates between the customer and the engineering team to discuss requirements and issues etc. You can also separate roles out and have a customer representative in the customer’s team and a product owner in the software engineering team who can liaise with each other.
 
 # Why Agile? - Empirical process control
 
@@ -181,14 +189,27 @@ SCRUM方法论使开发者在整个项目过程中，随着学习的进行和环
 
 面向对象的技术为SCRUM方法提供了基础。对象，或产品特征，提供了一个离散和可管理的环境。程序代码，由于它有许多相互交织的接口，不适合SCRUM方法。SCRUM可以有选择地应用于具有干净界面和强大数据导向的程序性系统。Object Oriented technology provides the basis for the SCRUM methodology. Objects, or product features, offer a discrete and manageable environment. Procedural code,a with its many and intertwined interfaces, is inappropriate for the SCRUM methodology. SCRUM may be selectively applied to procedural systems with clean interfaces and strong data orientation.
 
-# Roles (in Scrum and Beyond)
+# 基于Roles (in Scrum and Beyond)
+
+小组工作是复杂的，需要组织。
+项目的一个部分的变化可能会影响到所有的团队成员，所以需要很好地了解做出决定的过程。
+决策的过程需要被充分理解。
+
+---
+
+在团队组织过程中，你应该考虑每个人的技能、个性和情况。如果需要的话，角色可以在项目期间移动。
+你还应该考虑什么是必须沟通的，多长时间一次，通过什么方式，以及在谁之间沟通。
+
 
 ![](/static/2021-04-22-19-01-53.png)
 
 * Scrum master
   * ScrumMaster不是项目经理，他没有分配任务的权力，没有考核的权力，没有下命令的权力，他指导项目组的成员按照Scrum的原则、方法做事情，领导团队完成Scrum的实践以及体现其价值，排除团队遇到的困难，确保团队胜任其工作，并保持高效的生产率，使得团队紧密合作，使得团队个人具有多方面职能的工作能力，保护团队不受到外来无端影响
-* 产品所有者
+* 产品所有者 PO
   * 定义所有产品功能，决定产品发布的内容以及日期，对产品的投入产出负责，根据市场变化对需要开发的功能排列优先顺序，合理地调整产品功能和迭代顺序，认同或者拒绝迭代的交付。
+  * 主要负责backlog
+* 项目经理
+  * 需求收集，优先级，...
 
 团队经理
 
@@ -319,3 +340,9 @@ SCRUM方法论使开发者在整个项目过程中，随着学习的进行和环
 
 敏捷方法通过频繁的审查和对项目目标和过程的微小调整来管理项目风险。
 Agile methods manage project risk through frequent reviews and small adjustments to project objectives and process.
+
+# 团队成员数量
+
+Adding more team members is not necessarily a way to complete a task faster. If there are a lot of dependencies between tasks, you still need to wait for certain tasks to be completed before starting others. Also, if you need to train members of the team to do a task, then this takes time and adding more people means taking more time to train them. If a task cannot be broken down into smaller tasks, then obviously adding more people will have no effect (assuming one person can work on a task at once) as there will not be many tasks for people to do. Finally, if the project is complex, then adding too many team members will mean that more time is spent communicating with new team members and getting them up to speed with progress than is actually spent on the project itself. > Most software projects can be categorised as complex, and adding more team members above an optimal number will make the project take longer.
+
+添加更多的团队成员不一定能更快地完成任务。如果任务之间有很多依赖关系，你仍然需要等待某些任务完成后再开始其他任务。另外，如果你需要培训团队成员来完成一项任务，那么这就需要时间，增加更多的人意味着要花更多的时间来培训他们。如果一项任务不能被分解成更小的任务，那么显然增加更多的人不会有任何影响（假设一个人可以同时处理一项任务），因为不会有很多任务让人们去做。最后，如果项目很复杂，那么增加太多的团队成员就意味着花在与新的团队成员沟通和让他们加快进度上的时间要比实际花在项目本身上的时间多。> **大多数软件项目都可以被归类为复杂的项目，增加超过最佳人数的团队成员会使项目耗时更长**。

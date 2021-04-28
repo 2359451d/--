@@ -1,5 +1,7 @@
 # Software Refactoring & 维护
 
+重构是对软件系统进行修改的过程，以使其更容易理解和更便宜地修改，而不改变其可观察的行为。 Refactoring is the process of making changes to a software system to make it easier to understand and cheaper to modify without changing its observable behaviour.
+
 * [Software Refactoring & 维护](#software-refactoring--维护)
 * [维护良好的源码/项目维护WHY & 定义：Maintaining source code and system design](#维护良好的源码项目维护why--定义maintaining-source-code-and-system-design)
 * [软件重构：software refactoring](#软件重构software-refactoring)
@@ -417,6 +419,15 @@ public class Book {
 
 # 重构的局限性：Limits of refactoring
 
+**重构会影响系统的非功能属性或API**，所以在进行重构时需要注意不要意外地改变这些，因为你可以改变你认为是系统内部的部分，但实际上它是API的重要部分。改变API的重构的例子包括。 Refactoring can affect the non-functional properties or the API of the system, so you need to be careful that you don’t accidentally change these when performing your refactoring, as you can change what you think is an internal part of the system but it is actually an important part of the API. Examples of refactors that change the API include:
+
+* 移动或重命名一个类成员，或改变其可见性 Moving or renaming a class member, or changing its visibility
+* 改变一个操作的参数列表 Changing the list of parameters to an operation
+* 改变一个操作的返回类型 Changing the return type of an operation
+* 改变可能引发的异常情况 Changing the exceptions that may be raised
+
+---
+
 重构过程是一个强大的机制，可以在软件应用程序发展的过程中管理设计质量。**然而，重构本身也会导致软件的发展，因此可以也确实改变了软件系统的可观察行为**。重构可以导致软件系统在以下方面发生可观察到的变化 To summarise the previous section, the refactoring process is a powerful mechanism for managing design quality as a software application evolves. However, refactorings can themselves cause the software evolve and consequently can and do alter the observable behaviour of software systems. Refactorings can cause observable changes to a software system in either the:
 
 * **非功能属性** non-functional properties; or
@@ -453,6 +464,8 @@ public class Book {
   * 通常，有**依赖关系**的软件系统的开发团队会发布一份**迁移计划**，解释用户如何使自己的系统适应新的 API Typically, the development team for a software system that has dependants issues a <em>migration plan</em> explaining how users can adapt their own systems to the new API.
 
 # Key
+
+重构是对软件系统进行修改的过程，以使其更容易理解和更便宜地修改，而不改变其可观察的行为。 Refactoring is the process of making changes to a software system to make it easier to understand and cheaper to modify without changing its observable behaviour.
 
 重构是一种关键的做法，应该与其他软件活动一起进行。 Refactoring is a key practice that should occur alongside other software activities.
 

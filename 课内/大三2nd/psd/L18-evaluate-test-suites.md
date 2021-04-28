@@ -22,7 +22,7 @@
   * [例子-变异测试效率：Evaluating test suite efficiency using mutation testing](#例子-变异测试效率evaluating-test-suite-efficiency-using-mutation-testing)
   * [变异测试配置影响指标：Configuration space and optimisation mutation testing](#变异测试配置影响指标configuration-space-and-optimisation-mutation-testing)
   * [跨项目比较突变测试指标:Comparing mutation test results across applications](#跨项目比较突变测试指标comparing-mutation-test-results-across-applications)
-  * [Limitations of mutation testing](#limitations-of-mutation-testing)
+  * [局限性：Limitations of mutation testing](#局限性limitations-of-mutation-testing)
 * [Summary](#summary)
 
 # Evaluating Test Suites
@@ -172,6 +172,8 @@
 
 # 变异测试：Mutation testing
 
+**测试套件的目的是为了检测在未来某个时间点引入的错误。突变测试通过突变应用程序来测试，然后检查引入的错误是否被测试套件所发现**。 The purpose of a test suite is to detect bugs introduced at some future point in time. Mutation testing tests this by mutating the application, and then checking to see if the bugs introduced are picked up by the test suite.
+
 :orange: 一组测试用例可能达到所需的覆盖率标准，但却无法检测到某些类型的编码错误（例如，语句删除）。因此，结构**覆盖率分析和突变测试的作用可以被视为是互补的** a set of test cases might achieve the required coverage criterion yet can fail to detect certain types of coding errors (e.g., statement deletion). As such, the role of both structural coverage analysis and mutation testing can be seen to be complementary.
 
 > 突变测试通常对程序的源代码或者目标代码做小的改动，并把截然不同的错误行为（或者怪异行为）作为预期。**如果测试代码没有觉察到这种小改动带来的错误，就说明这个测试是有问题的**
@@ -318,7 +320,9 @@
 
 :orange: 一个简单的例子是比较为交互式使用的系统和为科学计算的批量处理设计的系统 A simple example is comparing a system designed for interactive used with that for volume batch processing of scientific calculations.
 
-## Limitations of mutation testing
+## 局限性：Limitations of mutation testing
+
+**突变测试有几个局限性--其有效性取决于仔细的配置，一些突变操作/突变组合可能不能代表将被引入项目的缺陷类型，除非你仔细选择它们**。 There are a couple of limitations for mutation testing - its effectiveness is dependant on careful configuration, and some mutation operations / combinations of mutations might not be representative of the types of defect that will be introduced into a project unless you select them carefully.
 
 尽管通常比测试覆盖率更有信息量，但也要注意**变异测试的局限性**：Although often more informative than test coverage, it is also important to be aware of the limitations of mutation testing:
 

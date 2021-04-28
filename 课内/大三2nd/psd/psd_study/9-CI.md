@@ -1,5 +1,7 @@
 # Lecture Note 9: CI
 
+持续集成的目的是帮助防止一个被称为 "集成地狱 "的问题，**即你花在将功能集成到现有代码库中的时间比你制作新功能本身的时间要多**。这种情况的发生是**因为不同的功能是由不同的开发人员同时开发的，所以代码库中会出现冲突**。 Continuous integration is designed to help prevent a problem known as “Integration Hell” where you spend more time integrating features into the existing code base than you do making new features themselves. This happens because different features are being developed concurrently by different developers, so conflicts can arise in the codebase.
+
 * [Lecture Note 9: CI](#lecture-note-9-ci)
 * [Integration Hell](#integration-hell)
 * [CI实践：continuous integration practices](#ci实践continuous-integration-practices)
@@ -21,6 +23,7 @@
 * [Advanced topics](#advanced-topics)
   * [Summary](#summary)
 * [CI好处](#ci好处)
+* [持续部署](#持续部署)
 * [CI自动测试](#ci自动测试)
 * [为什么每天提交](#为什么每天提交)
 * [CI vs 夜晚构建](#ci-vs-夜晚构建)
@@ -70,6 +73,10 @@ Keep the build fast
 
 # 变更管理：Change Management
 
+**持续集成提倡频繁地对代码进行小改动，而不是大范围的提交。因为这建议你应该不少于每天一次将分支合并到主干中，所以你需要谨慎地计划功能**。 Continuous integration advocates frequent small changes to the code, rather than big wide ranging commits. Because this advises that you should merge branches into the main trunk no less frequently than daily, you need to be careful how you plan features.
+
+**最好是把功能分解成较小的任务，可以快速完成并合并，而不是把它作为一个大任务，可能需要几天的时间来实现，让主分支有时间偏离并导致以后的冲突问题**。 It is better to break features up into smaller tasks, that can be completed quickly and merged, rather than leaving it as one big task that might take days to implement, leaving the main branch time to deviate and cause conflict problems later.
+
 ## 集成频率：Integration Frequence
 
 许多软件项目对新功能采用了【**后期集成**】的方法。这意味着项目的开发人员在一个迭代过程中，**各自在项目源代码的单独副本上工作，以实现新功能**。当每个开发者完成一个新功能时，他们提交他们对代码的修改，以重新整合到项目主干中。不幸的是，由于其他人也想在**同一时间重新整合变化，所有不同的新功能之间可能会有相当多的冲突，并且团队可能不得不在项目结束时花费大量时间进行整合**。Many software projects adopt a late integration approach to new features. This means that the developers on a project each work on a separate copy of the project’s source code to implement new features over the course of an iteration. As each developer completes a new feature they submit their changes to the code to be reintegrated into the project trunk. Unfortunately, because everybody else also wants to reintegrate changes at the same time, there may be a considerable amount of conflict between all the different new features and the team may have to spend a lot of time on integration at the end of the project.
@@ -91,6 +98,10 @@ Keep the build fast
 * 当每个新的小任务完成后，它将立即被重新集成到主干中。这就限制了主干的指数发散率的影响，造成因后期整合而产生大量的重新整合工作。 As each new small task is completed, it is immediately re-integrated into the trunk. This limits the effect of the exponential rate of divergence of the trunk to create a large amount of reintegration work due to late integration.
 
 ## CI中的特性分支选择:Feature branching options in CI
+
+对于主干开发、特定的客户开发和重要的功能分支，您可能需要不同的CI流程 You might want different CI processes for mainline trunk development, specific customer developments and for significant feature branches.
+
+---
 
 在其原生形式中，**持续集成不允许在项目中进行分支，因为所有的开发人员都应该对主干进行频繁的小改动**。一些项目团队发现这是不现实的，因为<font color="red">特性分支可以成为实验长期提案的有用手段。在这种情况下，允许使用分支可以使分支的变化在 SCM 仓库中得到维护</font> In its pure form, continuous integration doesn’t allow for  branching in the project, as all developers should make small frequent changes to the trunk instead. Some project teams find this impractical, as feature branches can be a useful means of experimenting with longer term proposals. Permitting the use of branches in this situation allows changes to the branch to be maintained in the SCM repository.
 
@@ -121,6 +132,11 @@ Keep the build fast
 
 ## 维护多个 CI流程: Maintaining Multiple CI Processes
 
+**对于主干开发、特定的客户开发和重要的功能分支，您可能需要不同的CI流程** You might want different CI processes for mainline trunk development, specific customer developments and for significant feature branches.
+
+
+---
+
 :orange: **分支的寿命越长，建立一个单独的CI流程就越重要**。<font color=""edr>一些较大的项目可能会为其项目的不同分支维护几个不同的永久性CI流程</font>。比如说 The longer-lived a branch, the more important it can be to set up a separate CI process. Some larger projects may maintain several different permanent CI processes for the different branches of their projects. For example:
 
 * 最重要的**构建需要监控**。这种构建将同时包含新功能和缺陷修复的变更 the most important build to monitor. This will have both new features and defect fix changes applied
@@ -140,7 +156,9 @@ Keep the build fast
 
 什么是CI中成功的构建？What is meant by a successful build in continuous integration?
 
-* 根据项目的需要，对代码进行编译、测试和静态分析的任何组合。Any combination of compilation, testing and static analysis of code as appropriate for the project.
+* 根据项目的需要，对代码进行**编译、测试和静态分析的任何组合**。Any combination of compilation, testing and static analysis of code as appropriate for the project.
+
+**质量保证** --- 每次有人做出提交，都可能导致项目的破坏。为了避免这种情况，每次对系统进行修改时，我们都应该。**从源码编译一个克隆的生产环境 在整个系统上运行回归测试 执行静态分析检查，如代码风格的一致性，并将其与基准进行比较** Every time someone makes a commit, it could result in breaking the project. To avoid this, every time a change is made to the system we should: Compile from source a clone of the production environment Run regression tests on the complete system Perform static analysis checks such as code style conformity, and compare these to benchmarks
 
 ## 维护软件质量流程 - 检测破损构建
 
@@ -207,6 +225,8 @@ Keep the build fast
 * 这是因为整合一个新功能所需的工作量使得频繁执行这项任务的吸引力降低 This is because the amount of effort required to integrate a new feature makes it less attractive to perform this task frequently.
 
 # 暂存环境：Staging Environments
+
+**Staging是指在合并到主分支之前，将对系统的拟议修改部署到一个复制的真实世界环境中，以便对其进行测试。这是用来执行质量保证的** Staging is the act of deploying a proposed change to a system into a replica real-world environment in order to test it, before merging it into a master branch. This is used to perform quality assurance.
 
 在向广大用户群发布软件之前，需要对其进行检查，以<font color="deeppink">确保任何拟议的更改不会引入额外的缺陷</font>。**一个暂存平台，一个配置为复制或模拟软件使用条件的环境，被用来在向用户发布之前测试软件**。<font color="red">暂存平台的配置与软件系统的当前基线的硬件和软件依赖性有关</font>。Changes to software need to be checked before they are released to a wider user base, in order to gain assurance that any proposed change does not introduce additional defects. A staging platform, an environment configured to replicate or simulate the conditions the software will be used in, is used to test the software before it is released to users. The staging platform is configured with the current hardware and software dependencies of the current baseline of the software system.
 
@@ -296,6 +316,10 @@ workflow of a CI environment for a typical job or pipeline（**执行某特定jo
 gitlab CI pipeline
 
 # 快速构建对CI的重要性：Fast build are essential
+
+**快速构建对于确保快速发现问题，以及通过减少每次提交的等待时间来鼓励频繁提交非常重要**。 Fast builds are important to ensure problems are discovered quickly, and to encourage frequent commits by reducing waiting time for each commit.
+
+---
 
 :orange: **快速构建对于成功的CI流程至关重要，因为**：Fast builds are essential to a successful CI process because:
 
@@ -393,6 +417,11 @@ VCS来进行变更管理，分支管理（为CI项目选择特定分支开发模
 **因此，具有持续集成的项目在生产和过程中都倾向于拥有少得多的 bug**。然而，我应该强调，这种好处的程度直接取决于测试套件的好坏。您应该会发现，构建一个能够产生显著差异的测试套件并不太困难。然而，通常团队需要一段时间才能真正达到他们有可能达到的低水平的 bug。到达那里意味着不断地工作和改进你的测试。
 
 如果您有持续的集成，那么它消除了频繁部署的最大障碍之一。**频繁部署是有价值的，因为它允许用户更快地获得新功能，对这些功能提供更快速的反馈，并且通常在开发周期中变得更具协作性。这有助于打破客户和开发之间的障碍——我认为这是阻碍软件开发成功的最大障碍**。
+
+# 持续部署
+
+假设CI通过了，你就可以把建成的项目部署给客户。**这可以确保部署过程被定期使用，不同的功能变体可以被部署到不同的客户，以测试新事物**。Assuming that CI passes, you can then deploy the built project to customers. This ensures the deployment process is regularly used and different feature variants can be deployed to different customers to test new things.a
+
 
 # CI自动测试
 

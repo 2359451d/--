@@ -44,6 +44,9 @@
 
 :orange: 因此，构建、发布和依赖性管理是截然不同但又紧密相连的活动 So, build, release and dependency management are distinct but closely inter-connected activities.
 
+* **管理一个版本release的所有不同组件可能会变得相当复杂，所以现在使用【自动构建管理】来构建和发布是很普遍的。这需要使用脚本来构建不同类型的版本**。有很多工具可以做到这一点，例如Make、Ant和Maven。 Managing all the different components of a release can get pretty complicated, so it is quite common now to use automated build management for builds and releases. This uses scripts to build different types of releases. There are a lot of tools for doing this, for example Make, Ant and Maven.
+* 在部署过程中**管理依赖关系可能是一个挑战**，因为一个软件系统的依赖关系将是其他软件系统，有他们自己的发布时间表和配置。**依赖关系的必要版本可能不可用，或者不兼容的版本可能已经安装和/或被不适当地配置。你可以使用一个依赖性管理系统来管理依赖性，并确保正确的版本被安装和更新**。 Managing dependencies during deployment can be challenging, as a software systems dependencies will be other software systems, with their own release schedules and configurations. A required release of a dependency might not be available, or an incompatible version might already be installed and / or be inappropriately configured. You can use a dependency management system to manage dependencies and ensure the correct versions are installed and up-to-date.
+
 # 构建工具：Tooling
 
 构建工具
@@ -303,9 +306,11 @@ Ruby on Rails 对这个短语的使用主要集中在默认的项目文件和目
   * 这些是软件的日常构建，在被覆盖之前保留几天（通常是一个星期）。它们与后面描述的几个验证框架和涉及特定领域专家的软件包审批机制结合在一起，以尽量减少软件构建和测试过程中的不稳定性。这些每晚发布的版本是成为完全稳定版本的主要候选者，在此基础上制作的安装包可以分发用于生产
 * **测试版本** Beta test releases
   * package release which could be provided to trusted third party to undertake user tests(prior to publish to generic public or wide variety of customers)
+  * releases for a customer to experiment with but with no guarantees about quality
 * **发行版候选** release candidates
   * special kind of beta tests
   * have the potential to be the final version of release
+  * releases that are almost ready for production, but can still accept changes
 * **生产版本** rpoduction releases
   * general release to introduced to customers
 
@@ -327,6 +332,8 @@ Ruby on Rails 对这个短语的使用主要集中在默认的项目文件和目
 * **新的特性继续在master中开发** New features continue to be developed in master
 
 # 接口API类型：Changes to different types of APIs
+
+我们需要考虑的一件事是谁需要知道我们对软件系统所做的修改。对于一个类的内部修改，你其实不需要让很多人知道--只需要在类的修订历史中看到。这些被称为私有变化 对于公共API的变化，软件库的其他开发者或用户需要知道--它们是公共变化. 对于软件系统的广告功能的变化，客户需要知道。这就是公布的变化 One thing we need to consider is who needs to know about changes we make to a software system. For internal changes to a class, you don’t really need to let many people know - it can just be seen in the revision history of the class. These are called private changes For changes to the public API, other developers or users of the software library need to know - they are public changes For changes to the advertised features of a software system, the customers need to know. This is a published change.
 
 ![](/static/2020-11-10-22-34-06.png)
 
@@ -386,6 +393,8 @@ Major changes dominate minor and minor dominates incremental.
 
 # 废弃的功能：Deprecating Features
 
+废弃的变化是指为了兼容而保留的功能，但在未来的版本中会被删除。这些功能的文档应该包括废弃的范围、软件的发布版本、该功能何时被删除、为什么被删除以及如何修复相关代码的描述。 A deprecated change is a feature that has been left in place for compatibility, but will be removed from a future release. The documentation of these features should include the scope of the deprecation, the release version of the software, when the feature will be removed, why it has been removed and a description of how to fix dependant code.
+
 ![](/static/2020-11-10-22-41-40.png)
 ![](/static/2020-11-10-22-42-06.png)
 
@@ -411,6 +420,8 @@ Major changes dominate minor and minor dominates incremental.
 **已知的问题应明确说明何时不应迁移至新版本** Known issues should make clear when migration to a new release should not be undertaken.
 
 ![](/static/2020-11-10-22-48-18.png)
+
+**一个软件系统的迁移计划是一个客户为了继续使用一个软件组件而需要做的事情的清单。它包括** A migration plan for a software system is a list of things that a customer needs to do in order to keep using a software component. It includes:
 
 * 迁移计划
   * **一种估计迁移需要多长时间的方法** A means of estimating how long the migration will take.

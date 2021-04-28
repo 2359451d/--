@@ -9,13 +9,15 @@
 
 * [Introduction to Software Engineering](#introduction-to-software-engineering)
 * [软件项目失败原因：Software projects fail because](#软件项目失败原因software-projects-fail-because)
+* [取消项目的原因](#取消项目的原因)
 * [By the numbers](#by-the-numbers)
 * [Case Study: London Ambulance Disaster (1991)](#case-study-london-ambulance-disaster-1991)
 * [Case Study: Scottish Election System 2007](#case-study-scottish-election-system-2007)
 * [What makes software so hard to get right (Brooks, 1995)?](#what-makes-software-so-hard-to-get-right-brooks-1995)
 * [This means software projects fail because we build…](#this-means-software-projects-fail-because-we-build)
 * [软件工程定义：Defining Software Engineering](#软件工程定义defining-software-engineering)
-* [软件开发即建设:Software development as construction](#软件开发即建设software-development-as-construction)
+* [4类软件开发流程模型:Software development as construction](#4类软件开发流程模型software-development-as-construction)
+  * [其他类型](#其他类型)
 * [Ultra-large scale complexity](#ultra-large-scale-complexity)
 * [Unique](#unique)
 * [Brownfield software development](#brownfield-software-development)
@@ -28,6 +30,21 @@
 …software development is hard.
 
 * 至少，开发高质量、无缺陷的软件，真正解决客户的问题是很难的 (Or at least, the development of high quality, defect free software, which really solves a customer’s problem is hard.)
+
+Building a system for the wrong reason 为错误的理由建立一个系统
+
+Building the wrong system 构建错误的系统
+
+Building the system wrong 构建错误的系统
+
+# 取消项目的原因
+
+取消项目的原因有很多，从需求的改变，到缺乏管理或技术能力，再到超出进度/预算。
+
+缺少管理或技术技能，以及超过计划/超过预算
+
+There are a wide variety of reasons for cancelling a project, from requirements changes, to
+lack of management or technical skills, to being over schedule/over budget.
 
 # By the numbers
 
@@ -89,9 +106,11 @@
 
 请注意系统性和纪律性的方法对减少风险的重要性 Note the importance of systematic and disciplined approaches to reduce risk.
 
-# 软件开发即建设:Software development as construction
+# 4类软件开发流程模型:Software development as construction
 
 ![](/static/2021-04-22-18-18-25.png)
+
+瀑布流 - Linear, waterfall model
 
 不起作用，因为假定 Doesn’t work because assumes that:
 
@@ -103,6 +122,14 @@
 * 将测试留到生命周期的后期 Leaves testing until late in the life-cycle
 
 此外，不强调维护是一个成本领域。Also, de-emphasises maintenance as a cost area.
+
+## 其他类型
+
+Iterative
+
+concurrent
+
+configurable or adaptive
 
 # Ultra-large scale complexity
 

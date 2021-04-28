@@ -3,6 +3,7 @@
 :sweat_smile: 到底讲了毛
 
 * [L19 System Scale Test](#l19-system-scale-test)
+* [验收测试](#验收测试)
 * [非功能需求测试 & 优点：Testing Non-Functional Properties](#非功能需求测试--优点testing-non-functional-properties)
 * [非功能性测试所需信息(需求信息)：Info needed for testing non-functional properties](#非功能性测试所需信息需求信息info-needed-for-testing-non-functional-properties)
 * [安全关键环境（严格安全性环境）：Safety Critical Environment](#安全关键环境严格安全性环境safety-critical-environment)
@@ -24,6 +25,17 @@
 * [用户测试：Getting Feedback from the wild](#用户测试getting-feedback-from-the-wild)
   * [用户测试类别](#用户测试类别)
 * [Summary](#summary)
+
+# 验收测试
+
+验收测试证明系统符合客户的要求。BDD就是用于此。验收测试包括部署一个功能齐全的互动系统。
+
+* 有一个明确的计划。
+* 确保关键的用户故事得到令人满意的证明。
+* 确保任何关键的非功能需求被证明是可以实现的。一些非功能性的系统属性可能无法在规定的时间内证明（平均失败时间），所以可能需要其他的机制来证明。
+* 在最终演示前进行练习，确保关键测试能在分配给测试的时间内完成。
+* 在一个明确定义的系统环境中进行，包括了解如何配置任何依赖关系和使用输入数据
+* 严格遵守商定的需求规格的限制，同时在这些限制内允许客户要求的灵活性
 
 # 非功能需求测试 & 优点：Testing Non-Functional Properties
 

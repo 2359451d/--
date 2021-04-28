@@ -20,7 +20,7 @@
 * [测试组件接口规范/契约：Checking component contracts](#测试组件接口规范契约checking-component-contracts)
 * [组件接口规范重要性 & 成本](#组件接口规范重要性--成本)
 * [组件规范不良导致错误：Software failure caused by incompatible components](#组件规范不良导致错误software-failure-caused-by-incompatible-components)
-* [抽象泄露问题：The problem of leaky abstractions](#抽象泄露问题the-problem-of-leaky-abstractions)
+* [必须知道接口实现-抽象泄露问题：The problem of leaky abstractions](#必须知道接口实现-抽象泄露问题the-problem-of-leaky-abstractions)
 * [架构模式：Architectural Patterns](#架构模式architectural-patterns)
 * [UI设计业务分离：Separating concerns in user interface design](#ui设计业务分离separating-concerns-in-user-interface-design)
 * [MVC模式：Model-View-Control](#mvc模式model-view-control)
@@ -33,9 +33,11 @@
   * [协议，会话，API：Protocols，sessions，APIs](#协议会话apiprotocolssessionsapis)
   * [C-S-邮件应用例子](#c-s-邮件应用例子)
   * [胖瘦客户机：Thin vs Fat Clients](#胖瘦客户机thin-vs-fat-clients)
+  * [C/S模式优点](#cs模式优点)
   * [C/S模式局限性](#cs模式局限性)
 * [P2P分布式模式：Peer-to-peer architecture pattern](#p2p分布式模式peer-to-peer-architecture-pattern)
   * [例子：Tor](#例子tor)
+  * [优点](#优点)
   * [P2P局限性](#p2p局限性)
   * [Peer Discovery](#peer-discovery)
 * [信息处理模式：Information Processing Patterns](#信息处理模式information-processing-patterns)
@@ -61,6 +63,7 @@
   * [WHY](#why)
   * [Pattern](#pattern)
   * [How flexible should a plugin architecture be?](#how-flexible-should-a-plugin-architecture-be)
+  * [注意！！](#注意)
 * [Summary](#summary)
 
 # 软件组件/构件：Software components
@@ -89,6 +92,12 @@
 * **组件是有用的，因为它们让我们能够对整体架构中的大型子系统进行推理，而不必担心单个对象的行为或它们在代码中的实现** Components are useful because they allow us to reason about the large scale sub-systems within an overall architecture, without worrying about the behaviour of individual objects or their implementation in code
 
 # 什么是面向组件的软件系统: component based software system
+
+组件之间需要中间件协调通信，，中间件使用IDL接口定义语言，为每个组件定义接口，所以组件可以用不同编程语言实现，但IDL得一样。
+
+这些接口是组件在中间件框架中通信的唯一方式
+
+Component oriented systems require a middleware framework to mediate interactions between components, which uses a interface definition language to define the interfaces of each component in the system. These interfaces are the only way that components will communicate within a middleware framework.
 
 ## 例子
 
@@ -198,6 +207,8 @@ UML组件图是一种有用的符号，用**于勾画软件系统的高层架构
 
 # 组件系统业务分离：Separation of concerns for component systems
 
+为组件系统实现关注点分离的架构模式，即一个组件对某些功能有明确的责任，该组件不应该受到其他组件实现的变化的影响。
+
 ![](/static/2021-02-09-21-40-50.png)
 
 :orange: 了解了组件的概念，让我们开始看看如何**使用组件来组织软件架构** Now that we’ve looked at the notion of components, lets begin to look at how they can be used to organise a software architecture.
@@ -291,7 +302,11 @@ UML组件图是一种有用的符号，用**于勾画软件系统的高层架构
 
 阿丽亚娜5号灾难通常被作为组件规格不良的后果的例子。惯性参考软件中一个简单的铸造溢出（64位到16位）被报告为飞行控制系统的数据（而不是诊断信息），导致欧洲航天局损失了价值5亿美元的发射系统 The Ariane 5 disaster is commonly referenced as an example of the consequences of poor component specification. **A simple casting overflow (64 bit to 16 bit**) in inertial reference software was reported as data to the flight control system (rather than as diagnostic information) causing the loss of the European Space Agencies $500 million launch system <span class="citation" data-cites="lions96ariane">[@lions96ariane]
 
-# 抽象泄露问题：The problem of leaky abstractions
+# 必须知道接口实现-抽象泄露问题：The problem of leaky abstractions
+
+**理想情况下，当使用一个组件的接口时，你应该能够在不了解其实现的情况下使用它。然而，有时这是不可能的，你需要使用关于该接口是如何实现的信息，以便使用该抽象。这就是所谓的泄漏性抽象**。 Ideally when using a component interface you should be able to use it without any knowledge of its implementation. However, sometimes this isn’t possible, and you need to use information about how the interface was implemented in order to use the abstraction. This is called a leaky abstraction.
+
+这方面的一个例子是SQL标准--理论上，你应该能够写出能够在任何基于SQL的数据库管理系统上运行的SQL，但是不同实现之间的细微差别（例如PostgreSQL与mysql）意味着你需要知道你使用的是哪种实现，以便为该版本编写特定的语法。 An example of this is the SQL standard - in theory you should be able to write SQL that will operate on any SQL-based database management system, however slight differences between implementations (e.g. PostgreSQL vs. mysql) mean that you need to know which implementation you are using to write specific syntax for that version.
 
 ![](/static/2021-02-09-22-14-19.png)
 
@@ -383,6 +398,10 @@ UML组件图是一种有用的符号，用**于勾画软件系统的高层架构
 
 ## 修改MVC模式：Adapting the MVC pattern
 
+**如果我们需要在短时间内重复使用相同的数据，我们可以在视图中保留一些模型信息。这就是所谓的缓存。这很有用，因为有时访问或使用模型会很昂贵，所以如果我们能防止重复刷新这些数据，那么我们就能使我们的应用程序更有效率**。 We can retain some model information in the view, if we need to use the same data repeatedly in a short space of time. This is called caching. This is useful because sometimes accessing or using the model can be expensive, so if we can prevent repeated refreshes of this data then we can make our application more efficient.
+
+**我们还可以改变视图获取数据的机制。视图的更新可以是来自模型的通知，也可以是视图对模型的轮询（如果数据变化非常频繁** We can also vary the mechanism by which the view gets data. The view can be updated as a result of notifications from the model that something has changed, or by the view polling the model (if the data changes very frequently).
+
 ![](/static/2021-02-09-22-45-48.png)
 
 :orange: 除了系统组织之外，MVC模式在如何安排组件的内部实施细节和组件之间的相互作用方面留下了相当大的灵活性。选项包括，例如： Beyond system organisation, the pattern leaves considerable flexibility as to how the internal implementation details of components and interactions between components are arranged. Options include, for example:
@@ -396,6 +415,8 @@ UML组件图是一种有用的符号，用**于勾画软件系统的高层架构
   * **视图和控制在系统边界上与系统的用户直接互动**。这可能是一个人，也可能是另一个软件系统。互动的方式可以是文字、图形、视频等等 The <code>View</code> and <code>Control</code> interact directly with the system’s user at the system boundary. This may be a human, or another software system. The mode of interaction could be textual, graphical, video and so on
 
 # 分布式系统模式：Building Distributed System
+
+当系统所提供的服务必须从许多不同的地方访问时，或者当构建一个能够管理系统需求的单一计算机不可行时，就会使用分布式系统。当系统由许多不同的软件组件组成并由不同的组织管理时，它们也很有用 A distributed system is used when the services provided by the system must be accessible from many different locations, or when it is infeasible to construct a single computer capable of managing the demands on the system. They are also useful for when the system is to be composed of many different software components that are managed by different organisations.
 
 ![](/static/2021-02-09-22-49-20.png)
 
@@ -502,6 +523,16 @@ UML组件图是一种有用的符号，用**于勾画软件系统的高层架构
 
 :orange:n **随着客户端环境的处理能力的提高，胖客户端架构已变得越来越流行**。这使得我们能够开发出更丰富、更互动的客户端用户界面，这些界面通常**需要缓存更多信息**。Fat client architectures have become more popular as processing capabilities of client environments have improved. This has enabled the development of richer and more interactive client user interfaces, which often need to cache more information.
 
+## C/S模式优点
+
+数据的管理和组织可以在一个单一的、一致的结构中被维护和控制。 Management and organisation of data can be maintained and controlled in a single, consistent structure.
+
+确保同一数据项目的多个副本之间的一致性的问题被避免了。The problem of ensuring consistency between multiple copies of the same data item is avoided.
+
+该方法为用户提供了一个单一的、全球知名的访问点。The approach provides a single, globally known, point of access to users.
+
+对服务功能变化的管理可以在服务器中进行，而不是在多个客户端进行。The management of changes to service functionality can be undertaken in the server rather than in multiple clients.
+
 ## C/S模式局限性
 
 ![](/static/2021-02-09-23-20-14.png)
@@ -513,11 +544,15 @@ UML组件图是一种有用的符号，用**于勾画软件系统的高层架构
   * 这个问题表现在网站很容易被拒绝服务攻击所禁用。在最简单的情况下，攻击者引导尽可能多的客户在同一时间从一个网站上请求同一个网页 This problem is exhibited by the ease with which websites can be disabled by denial of service attacks. In the simplest case, an attacker directs as many clients as possible to request the same webpage from a site at the same time.
 * **架构中的单一参考点（服务器）也是一个单点故障** The single point of reference in the architecture (the server) is also a single point of failure.
   * **如果服务器被禁用，那么整个系统就会停止运作**。If the server is disabled, then the entire system ceases to function. 
-  * 这个问题可以通过准备后备服务器来缓解，然而，这又重新引入了确保相同数据项目或服务的多个副本之间的一致性问题 This problem can be mitigated by preparing fall-back servers, however, this then re-introduces the problem of ensuring consistency between multiple copies of the same data items or services.
+  * 可以通过准备备份服务器来缓解，但这重新引入了确保同一数据项/服务的多个副本之间的一致性问题 This problem can be mitigated by preparing fall-back servers, however, this then re-introduces the problem of ensuring consistency between multiple copies of the same data items or services.
 
 因此，人们开发了其他架构模式，以提供更大的可扩展性和冗余
 
 # P2P分布式模式：Peer-to-peer architecture pattern
+
+在一个**分布式**软件系统中。将系统中的所有服务和数据转移到客户本身，因此每个对等体既是客户又是服务器。托管和管理服务的责任由所有客户共享。**适用于负责大量计算处理或托管大量信息的系统，但受到物理硬件能力的限制**。Tor项目使用点对点 Within a distributed software system. Moves all services and data in the system into the clients themselves so that ever peer is both a client and a server. Responsibility for hosting and managing services is shared amongst all clients. Suitable for systems that have responsibility for extensive computational processing or hosting large amounts of information, but is constrained by the physical hardware capabilities. Tor project uses peer-to-peer. 
+
+---
 
 正如我们所看到的，**C/S架构的一个关键问题是，随着客户机数量的增加，服务器的可用资源难以扩展**。 As we have seen, a key problem with the client-server architecture is the difficulty of scaling resources available to the server as the number of clients grows.
 
@@ -541,6 +576,17 @@ UML组件图是一种有用的符号，用**于勾画软件系统的高层架构
 
 几乎所有的加密层都被移除，信息被送到了最终的收件人手中。随着越来越多的信息通过Tor网络，观察者越来越难找出信息的收件人 Eventually all the layers of encryption are removed and the message is delivered to the final recipient. As more messages pass through a Tor network, it becomes increasingly difficult for an observer to work out who the recipient of the message is.
 
+## 优点
+
+随着客户数量的增长，服务器可用资源的扩展没有困难。
+
+良好的安全性（Tor项目）。
+
+No difficulty of scaling resources available to the server as the number of clients grow.
+
+Good security (Tor project).
+
+
 ## P2P局限性
 
 点对点架构的一个关键挑战是**服务分配和发现**：如果服务被分配给任何可用的或参与的节点，你怎么知道在哪里寻找提供相同服务的其他对等体。此外，如果任何人都可以参与点对点系统，你如何确定哪些潜在的对等体值得信任？
@@ -549,16 +595,18 @@ UML组件图是一种有用的符号，用**于勾画软件系统的高层架构
 
 ## Peer Discovery
 
+服务分配和发现的挑战：如果服务被分配给任何可用的或参与的节点，**你怎么知道在哪里寻找其他提供相同服务的对等体？如果任何人都可以参加，我们如何知道哪些对等体值得信任**？解决方案。Challenge of service distribution and discovery: if services are distributed to any available or participating node, how do you know where to look for other peers offering the same service? If anyone can take part, how do we know which peers to trust? Solutions:
+
 ![](/static/2021-02-09-23-22-10.png)
 
 为了解决这些问题，可以对点对点模式进行一些调整，包括： There are several adaptations that can be made to the peer-to-peer pattern to accommodate these problems, including:
 
 * **使用全球已知的注册表来记录系统中对等体的地址** Using a globally known registry to record the addresses of peers in the system.
-  * 在这种方法中，一个对等体首先查询注册表以发现有哪些其他对等体可用。注册表有效地充当了超级对等体的角色，所有其他对等体都首先参考它来发现资源 In this approach, a peer first queries the registry to discover what other peers are available. The registry effectively acts as a super-peer, to which all other peers refer first for resource discovery.
-  * **每个对等体都维护自己的已知其他对等体的注册表，这些对等体以前曾与它联系以请求资源**。当这种情况发生时，提出请求的对等体也会报告它的可用资源。当一个对等体对另一个对等体持有的资源进行搜索时，**它会向它所知道的所有对等体询问该资源**。这些对等体随后将请求传递给它们的已知对等体，直到资源被发现或请求超时为止 Each peer maintains its own registry of known other peers that have previously contacted it to request resources. When this happens the requesting peer also reports the resources it has available. When one peer performs a search for resources held by another peer it asks all the peers it knows for the resource. These peers then pass on the request to their known peers until the resource is discovered or the request times out.
+  * 使用一个全球知名的注册表来记录对等体的地址。一个对等体首先查询注册表，以发现哪些其他对等体是可用的，注册表作为一个超级对等体，所有其他对等体首先参照它来发现资源。 In this approach, a peer first queries the registry to discover what other peers are available. The registry effectively acts as a super-peer, to which all other peers refer first for resource discovery.
 * **在基于对等体的网络中进行搜索** Searches across the peer based network.
-  * 在这种方法中，部署了几个注册表，每个注册表都包含一个可用对等体的列表。每个注册表都试图通过查询其他注册表来维持一个独立的、最新的可用对等体列表 In this approach, several registries are deployed, each of which contains a list of available peers. Each registry attempts to maintain an independent and up-to-date list of available peers by querying the other registries.
+  * **每个对等体都维护自己的已知其他对等体的注册表，这些对等体以前曾与它联系以请求资源**。当这种情况发生时，提出请求的对等体也会报告它的可用资源。当一个对等体对另一个对等体持有的资源进行搜索时，**它会向它所知道的所有对等体询问该资源**。这些对等体随后将请求传递给它们的已知对等体，**直到资源被发现或请求超时为止** Each peer maintains its own registry of known other peers that have previously contacted it to request resources. When this happens the requesting peer also reports the resources it has available. When one peer performs a search for resources held by another peer it asks all the peers it knows for the resource. These peers then pass on the request to their known peers until the resource is discovered or the request times out.
 * **两种模式的混合体** A hybrid of both patterns.
+  * 上述两种解决方案的混合体，**其中部署了几个注册中心，每个注册中心都包含可用对等体的列表。每个注册中心都试图通过查询其他注册中心来维持一个独立的、最新的可用对等体列表** Hybrid of both above solutions in which several registries are deployed, each of which contains a list of available peers. Each registry attempts to maintain an independent and up-to-date list of available peers by querying the other registries.
 
 :orange: 所有这些方式都涉及权衡。All of these styles involve trade-offs. 
 
@@ -568,6 +616,10 @@ UML组件图是一种有用的符号，用**于勾画软件系统的高层架构
 * <font color="red">混合方法缓解了其他两种方法的缺点，但并没有消除这些缺点，同时引入了大量额外的架构复杂性</font> The hybrid approach mitigates but does not eliminate the disadvantages of the other two approaches while introducing significant additional architectural complexity.
 
 # 信息处理模式：Information Processing Patterns
+
+信息处理模式，**处理组件之间如何传递消息，而不是将此留给组件中间件**，此时消息传递并不总是同步和即时的
+
+为组件之间的一般**异步**通信提供基础。**所有的通信都以离散的消息形式发生，通过消息总线。总线根据路由策略将消息路由到适当的客户端**
 
 ![](/static/2021-02-09-23-23-10.png)
 
@@ -584,7 +636,7 @@ UML组件图是一种有用的符号，用**于勾画软件系统的高层架构
 
 到目前为止，我们忽略了**组件之间如何传递消息的问题**，将这一细节**留给了组件的中间件**。So far we have ignored issues of how messages are passed between components, leaving this detail to the component middleware.
 
-我们还**假设消息传递在很大程度上是同步的和即时的**。有时这些假设对于**组件间的通信**来说是**不合适**的，因为  We have also assumed that message passing is largely synchronous and instantaneous. Sometimes these assumptions are inappropriate for inter-component communication because:
+我们还**假设消息传递在很大程度上是同步的和即时的**。有时这些假设对于**组件间的通信**来说是**不合适**的，因为  We have also assumed that message passing is largely synchronous and instantaneous. Sometimes these assumptions are inappropriate for inter-component communication because: （同步通信是指一个组件向另一个组件发送一个消息，然后等待回复。这很有用，因为它**导致了可预测的通信**，但也有一些缺点 Synchronous communication is when a component sends a message to another component and then waits for a reply. This is useful as it leads to predictable communication, but has a number of downsides:）
 
 * **底层的通信通道可能不可靠，或者受到延迟的影响，从而破坏了组件中预期的计算流** Underlying communication channels may be unreliable or subject to delays that disrupt the expected flow of computation in a component.
 * **在处理开始之前，计算的信息提供者**。Information providers for a computation before processing begins.
@@ -730,7 +782,9 @@ MessageBus中队列被忽略
 
 # 管道过滤架构-信息处理模式：pipe and filter architectural pattern
 
-<font color="red">信息处理模式-管道过滤器模式，解决顺序数据处理应用的设计问题</font>
+**WHY**：许多应用需要**连续的数据处理**--数据需要通过一连串的转换来进行转化。例如，视频和音频媒体转码，视频被解码，重新格式化，然后以不同的格式再次编码 Many applications require sequential data processing - data needs transforming through a sequence of transformations. For example, video and audio media transcoding, where video is decoded, reformatted, then encoded again in a different format. 这就造成了设计上的问题，因为根据数据项目的不同，转换中的每一个步骤都会花费不同的时间，而且根据不同的需要，可能需要替换或重新排序。This creates design problems, as each of the steps in a transformation can take a variable amount of time depending on the data item, and steps may need to be replaced or re- ordered depending on different needs.
+
+<font color="red">信息处理模式-管道过滤器模式，解决连序数据处理应用的设计问题</font>
 
 ![](/static/2021-04-26-12-51-00.png)
 
@@ -739,7 +793,7 @@ MessageBus中队列被忽略
 * 每个必须**应用于数据的转换**都被实现为一个叫做`Filter`的单一组件。 Each transformation that must be applied to the data is implemented as a single component called a filter.
 * **`Filter`【提供】并【实现】相同的接口，有时称为`Pipe`**。 Each filter provides and implements the same interface, sometimes called the pipe.
 
-:orange: `Filter`被连接到一个称为管道（**pipeline**）的单个顺序配件中，【**多个Filter组成pipeline**】
+:orange: `Filter`被连接到一个称为管道（**pipeline**）的单个连续配件中，【**多个Filter组成pipeline**】
 
 * <font color="red">每个连续的组件从左边的组件获得数据，并将输出传递给右边的组件</font> The filters are then wired into a single sequential assembly called the pipeline, with each successive component obtaining data from a component on the left and passing output to the component on the right.
 * 管道作为过滤器之间数据流动的通道的软件部件,它的主要功能是<font color="red">连接各个过滤器,充当过滤器之间数据流的通道</font>。管道具有数据缓冲以及提高过滤器之间的并行性操作的作用。管道由数据缓冲区,向数据缓冲区读和写数据,判断管道为空或已满等操作定义组成
@@ -769,7 +823,7 @@ MessageBus中队列被忽略
 ## 管道过滤架构变种
 
 * 推拉驱动数据流 push or pull driven data flows
-* 顺序/并发数据处理过滤 sequential or concurrent data processing filters
+* 连续/并发数据处理过滤 sequential or concurrent data processing filters
 * 可重排或替换的过滤器 re-orderable or inter-changeable filters
 * 分支数据过滤 branching data filters
 
@@ -781,6 +835,7 @@ MessageBus中队列被忽略
 
 :orange: 推送模型 push model
 
+* 在推送驱动的流程中，数据提供者负责驱动应用程序 - 它将数据推送到管道中，这将触发过滤器/水槽被动地对到达的数据采取行动。**当有设定好的数据量要放入管道时，这种方式效果最好** In a push driven flow, the data provider is responsible for driving the application - it pushes data into the pipeline, and this triggers the filters / sink to passively act on that data as it arrives. This works best when there is a set amount of data to put into the pipeline.
 * 数据由一个活跃的`DataProvider`驱动进入系统，它将数据提交给`FilterA`进行处理 In the push model, data is driven into the system by an active <code>DataProvider</code>, which submits the data to <code>FilterA</code> for processing.
 * `DataProvider`将**继续向过滤器提供数据，直到Filter被一个满缓冲区阻塞**  The <code>DataProvider</code> will continue to supply data to the filter, until the Filter is blocked by a full buffer.
 * FilterA将处理这些数据，然后将结果传递给FilterB。FilterA</code> will process the data and then pass the results on to <code>FilterB</code>. 
@@ -792,6 +847,7 @@ MessageBus中队列被忽略
 
 :orange: 拉取模型 pull model
 
+* 在拉动式流程中，**请求者主动**从管道中取出数据。这导致每个过滤器依次从它上面的过滤器请求更多的数据，最终导致第一个过滤器从数据源请求数据。当有一个取之**不尽用之不竭的数据源**时，这种方法很有效，而且**请求者可以请求它所能处理的数据**。 In a pull driven flow, the requester actively takes data out the pipeline. This causes each filter in turn to request more data from the filter above it, eventually causing the first filter to request data from the data source. This works well when there is an inexhaustible source of data, and the requester can request as much as it can handle.
 * `DataRequester`**主动轮询**最后一个过滤器`FilterC`的数据。The <code>DataRequester</code> actively polls the last filter, <code>FilterC</code> for data. 
 * `FilterC`依次轮询`FilterB`，这个过程一直**持续到最后一个Filter轮询DataSource来处理数据**。 FilterC</code> polls <code>FilterB</code> in turn and the process continues until the last filter polls the <code>DataSource</code> for data to process.
 * 然后，结果将沿着**请求管道传递回来** The results are then passed back along the request pipeline.
@@ -843,6 +899,7 @@ MessageBus中队列被忽略
 最灵活的选择是允许过滤器**按照软件架构师的要求重新排序**。The most flexible option is to allow the filters to be re-ordered as desired by the software architect.
 
 * 为了实现这一安排，<font color="blue">每个Filter必须提供并要求相同的接口</font> To enable this arrangement, every single filter <em>must</em> provide and require the same interface.
+* 可互换的过滤器不暴露相同的API，因为它们对不同的数据类型进行操作，所以它们不能被重新排序。然而，我们可以用相同的API在作用于同一数据类型的不同组件之间进行更换--例如，在下面的例子中，**如果有更好的OCR组件发布，我们可以把OCR组件换成另一个OCR组件**。 Interchangeable filters do not expose the same API as they operate on different data types, so they cannot be reordered. However, we can change between different components that act on the same data type with the same API - e.g. in the below example, we could swap out the OCR component for another OCR component if a better one was released.
 
 :orange: 这种灵活性意味着可以**通过重新排序处理活动来优化整体处理管道**。This flexibility means that the overall processing pipeline can be optimised by re-ordering processing activity.
 
@@ -869,6 +926,9 @@ MessageBus中队列被忽略
 
 最后一种变体是允许在管道中使用分支过滤器 A final variant is to allow the use of branching filters in the pipeline, as shown in the diagram.
 
+* 分支管道的拆分，使你可以在几个不同的管道中处理数据，每个管道的终点都是不同的汇。例如，在下图中，数据同时进入了logger和最终Sink。 Branching pipelines split so you can process data in several different pipelines, each ending in a different sink. For example, in the below diagram the data goes both to the logger and the final sink.
+* 同一数据源，来自相同处理单元
+
 ![](/static/2021-04-26-14-29-54.png)
 
 :orange: 分支过滤器可以对传入的数据做以下两件事**之一**：A branching filter can do one of two things with incoming data:
@@ -889,6 +949,8 @@ MessageBus中队列被忽略
 
 # 插件架构：Plugin Architecture Motivation
 
+当你认为**随着需求的变化可能需要添加新的功能**，或者**不同的用户会有不同的需求/想要开发自己的功能**时，就可以使用插件架构 Plugin architectures are used when you think new features might need to be added over time as requirements change, or if different users will have different requirements / want to develop their own functionality.
+
 ## WHY
 
 有时，除了一组核心功能之外，可能很难预测一个应用程序所需的所有功能。这可能是因为 Sometimes it can be difficult to predict all the required functionality for an application, beyond a core set of features. This may be because:
@@ -908,6 +970,8 @@ MessageBus中队列被忽略
 该图说明了插件架构模式中的关键组件。
 
 ![](/static/2021-04-26-14-48-49.png)
+
+这种架构**允许应用程序在运行时动态地加载不同的功能插件**。注册表存储了可用的组件，加载器将注册表指定的插件**构建成一个功能齐全的组件供应用程序使用**。 This architecture allows the application to dynamically load different plugins of functionality at runtime. The registry stores the available components, and the loader builds the plugin specified by the registry into a fully functioning component for the application to use.
 
 架构中的主要组件是`Registry`，**它存储了系统可用的所有插件的规范**。The main component in the in architecture is the <code>Registry</code> that stores the specification of all plugins available to the system
 
@@ -936,6 +1000,10 @@ MessageBus中队列被忽略
 * 在某种程度上这是正确的，除了**程序员不需要知道什么类在运行时将被实例化为一个插件**。 To a certain extent this is correct, except that the programmer does not need to know what class will be instantiated as a plugin at runtime.
 * 此外，通过`newInstance`方法创建一个实例，在计算上要昂贵得多。 In addition, creating an instance via the <code>newInstance</code> method is computationally much more expensive. 
 * **因此，选择哪些类将作为插件来实现是非常重要的，因为它们更适合成为松散耦合的组件，而哪些是主应用程序的核心部分** So, it is important to choose which classes will be implemented as plugins because they are better suited to being loosely coupled components, and which are core parts of the main application
+
+## 注意！！
+
+你需要小心，**不要让你的整个程序只是插件**，因为这可能导致一些你没有意识到的讨厌的相互**依赖关系**。 You need to be careful to not let your entire program just be plugins, as this can lead to some nasty interdependencies that you aren’t aware of.
 
 # Summary
 

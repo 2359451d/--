@@ -1,8 +1,9 @@
 # Behaviour Driven Development
 
-行为驱动开发
+行为驱动开发 - 从用户故事和相关情景的集合中得出测试套件的方法。Methodology for deriving a test suite from a collection of user stories and associated scenarios. 
 
 * [Behaviour Driven Development](#behaviour-driven-development)
+* [普通用户故事 vs BDD用户故事](#普通用户故事-vs-bdd用户故事)
 * [术语：Terminology](#术语terminology)
 * [为什么需要测试：Reasons for testing](#为什么需要测试reasons-for-testing)
 * [测试规模(分类)：Scales of testing](#测试规模分类scales-of-testing)
@@ -25,6 +26,13 @@
 * [BDD相对优势](#bdd相对优势)
 * [BDD局限-可维护性：Maintainability](#bdd局限-可维护性maintainability)
 * [Summary](#summary)
+
+# 普通用户故事 vs BDD用户故事
+
+用户故事是敏捷中指定需求的典型方式。
+直觉：用户故事是以结构化语言编写的，从中可以半自动地推导出测试用例。普通用户故事和BDD用户故事之间的唯一区别是，BDD用户故事有一个带有简短描述的 "叙述 "标签。
+一些场景从用户故事中衍生出来，提供用户故事在特定情况下的行为实例。这些场景表达了用户故事的接受条件。
+如果场景对预期的系统行为进行了全面的描述，并且系统通过了由场景产生的所有测试，那么我们就有信心该系统能够被客户接受。(符合验收测试所需信息)
 
 # 术语：Terminology
 
@@ -349,6 +357,10 @@ BDD生命周期3 - 为所有场景添加其步骤
 - 应对BDD工具可能带来的复杂性。
 - BDD规范中的重复检测。
 - BDD规范中的重复管理。
+
+相同或类似的步骤可能出现在不同的场景中。
+
+不同的步骤可能导致相同的代码步骤被写入不同的测试用例中，导致代码步骤在测试线束的不同测试用例实现中被克隆。
 
 ![](/static/2021-01-17-00-16-12.png)
 

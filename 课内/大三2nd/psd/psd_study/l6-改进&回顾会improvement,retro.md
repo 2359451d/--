@@ -79,6 +79,10 @@
 
 # 回顾会议：Scrum Retrospective
 
+**敏捷中最流行的流程改进方式之一是Scrum回顾。复盘发生在迭代之间**。 One of the most popular ways of process improvement in agile is the scrum retrospective. Retrospectives occur between iterations.
+
+* **团队成员可以提供非常详细的信息，因为他们是团队中从事该项目工作的人，但他们也可能相当主观，所以获得所有团队成员的意见很重要。你也可以使用项目的人工制品作为项目历史表现的信息来源**。 The team members can provide very detailed information, as they were the ones in the team working on the project, but they can also be quite subjective so it is important to get the views of all team members. You can also use project artefacts as a source of information about the project’s historic performance.
+
 发生在**迭代结束时，在与客户的审查会议之后** Occurs at the end of the sprint, after the review meeting with the customer
 
 Scrum团队回顾会议（过程改进的一种方法？）[after the review meeting with the customers]
@@ -163,6 +167,12 @@ improvement process improvement - gather data about process 【general process c
 * 可多，可少，只要能找到根本原因
 
 # 结束回顾会后：Monitoring & Measuring
+
+**在回顾性工作结束时，你需要优先考虑哪些行动要在下一次迭代中解决或进行工作。你可以根据优先级、实施的难易程度、或投资回报的多少来选择这些行动**。 At the end of the retrospective, you need to prioritise which actions are going to be resolved or worked on during the next iteration. You might choose these by priority, by how easy they are to implement, or by how much they will provide a return on any investment required.
+
+重要的是要监控回顾中决定的审查行动，以确保这些行动得到跟进。**这可能很简单，因为要确保有人负责每项行动，或者为下一个里程碑制作票据**。你也可以把以前的决定纳入到未来的回顾性研究中。 It is important to monitor the review actions decided upon in a retrospective, to ensure the actions are followed up on. This might be as simple as ensuring someone is responsible for each action, or making tickets for the next milestone. You can also include previous decisions in future retrospectives.
+
+---
 
 一旦找出了可采取的措施，之后：
 
