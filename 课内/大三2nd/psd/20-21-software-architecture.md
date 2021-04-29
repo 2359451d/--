@@ -1015,3 +1015,12 @@ MessageBus中队列被忽略
   * 重用。重用现有组件以创建一个更复杂的系统的能力
   * 演变。通过创建一个高度组件化的系统，该系统更容易维护。在一个设计良好的系统中，变化将是局部的，对系统的变化可以对其余的组件几乎没有影响
 
+---
+
+Other researchers may want to create different processes for filtering and analysing the repositories on GitHub. For example, rather than searching for repositories based on language, they may want to generate a random sample of repository IDs. The researchers may want to insert or remove filters, filter a single source sample in two or more different ways, or they may want to apply different analyses, focusing perhaps on the unit tests in the repository, or exploring the relationship between issues and pull requests. Additional features such as being able to generate graphs may also be useful, or being able to flexibly record information about repositories as they are filtered or analysed. The goal of the project is to provide a framework that can be configured to automatically perform the different stages of an experiment.
+
+Additional features such as being able to generate graphs may also be useful, or being able to flexibly record information about repositories as they are filtered or analysed
+
+“The researchers may want to insert or remove filters, filter a single source sample in two or more different ways, … or exploring the relationship between issues and pull requests”  as the researchers’ requirement are various where they want to develop their own functionality and the new features might need to be added over time as requirements change, the plugin one is a feasible design. And it provides a flexible mechanism for extending the functionality of a software system.
+
+The product owner reports that a new requirement has been proposed. The research team would like to be able to perform the same sampling technique on the GitLab repository hosting platform concurrently with GitHub. Explain how this could be accommodated within the architecture you have proposed

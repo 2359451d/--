@@ -226,3 +226,5 @@ continuous retrospective
 🍬 关键点
 
 **过程改进是一个重要的质量保证过程** Process improvement is an essential quality assurance process
+
+Consider the following user stories, concerning the development of a smartphone application to allow patients with breathing difficulties to monitor their ‘peak flow’ capacity. The application can have a Bluetooth link to a peak flow meter, which they blow into as hard as they can to create a reading, in litres/minute. Peak flow readings of less than 250 l/min are potential signs of problems, such as an asthma attack.

@@ -278,7 +278,7 @@ SCRUM方法论使开发者在整个项目过程中，随着学习的进行和环
   * **性能或其他方面的提升** Performance or other enhancements
   * **需要纠正的bug** Bugs to be corrected
   * **需要改进的代码** Code to be improved
-* **从问题追踪器上的产品待办事项列表任务中【选择符合本次迭代目标的任务**】。Select tasks from the backlog on your issue tracker that match the goal.
+* **从问题追踪器上的产品待办事项列表任务中【选择符合本次迭代目标的任务**---->生成迭代backlog】。Select tasks from the backlog on your issue tracker that match the goal.
   * 先前由PO或团队编写backlog，然后放在迭代计划会议上进一步协商确认
 * **确保所有选择的问题都足够详细**。Ensure all selected issues are sufficiently detailed.
   * **成本估算** Cost estimates
