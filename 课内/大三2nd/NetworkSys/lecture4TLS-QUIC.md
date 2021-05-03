@@ -25,22 +25,23 @@
   * [QUIC头：QUIC Headers](#quic头quic-headers)
     * [Long Header Packet](#long-header-packet)
     * [Short Header Packet](#short-header-packet)
-  * [QUIC帧： QUIC Frames](#quic帧-quic-frames)
+  * [QUIC帧-充当TCP头选项：QUIC Frames](#quic帧-充当tcp头选项quic-frames)
   * [QUIC连接建立&数据传输：QUIC Connection Establishment and Data Transfer](#quic连接建立数据传输quic-connection-establishment-and-data-transfer)
     * [连接建立过程：QUIC Connection Establishment](#连接建立过程quic-connection-establishment)
-      * [初始包格式：QUIC Initial Packet Format](#初始包格式quic-initial-packet-format)
-      * [握手包：Handshake Packets](#握手包handshake-packets)
-    * [0-RTT](#0-rtt)
-      * [0-RTT TLS vs QUIC](#0-rtt-tls-vs-quic)
-    * [握手结束-短头包: Data Transfer, Streams, Reliability](#握手结束-短头包-data-transfer-streams-reliability)
+    * [初始包格式：QUIC Initial Packet Format](#初始包格式quic-initial-packet-format)
+    * [Retry包](#retry包)
+    * [握手包：Handshake Packets](#握手包handshake-packets)
+  * [0-RTT](#0-rtt)
+  * [0-RTT TLS vs QUIC](#0-rtt-tls-vs-quic)
+  * [握手结束（开始数据传输）-短头包: Data Transfer, Streams, Reliability](#握手结束开始数据传输-短头包-data-transfer-streams-reliability)
     * [ACK帧确认](#ack帧确认)
-    * [STREAM Frame帧](#stream-frame帧)
+    * [STREAM Frame帧 & 行首阻塞问题（QUIC流复用）](#stream-frame帧--行首阻塞问题quic流复用)
 * [QUIC避免协议僵化：：Avoid Protocol Ossification](#quic避免协议僵化avoid-protocol-ossification)
-  * [QUIC over UDP](#quic-over-udp)
+  * [QUIC over UDP 好处](#quic-over-udp-好处)
   * [僵化例子2](#僵化例子2)
   * [协议僵化其他影响： Protocol Ossification Other Influence](#协议僵化其他影响-protocol-ossification-other-influence)
   * [避免QUIC僵化：Avoiding Ossification in QUIC](#避免quic僵化avoiding-ossification-in-quic)
-    * [QUIC不变特性：QUIC Invariants](#quic不变特性quic-invariants)
+    * [方法1-QUIC不变特性：QUIC Invariants](#方法1-quic不变特性quic-invariants)
     * [普遍加密-避免僵化：Avoiding Ossification via Pervasive Encryption](#普遍加密-避免僵化avoiding-ossification-via-pervasive-encryption)
     * [GREASE机制避免僵化：Avoiding Ossification via GREASE](#grease机制避免僵化avoiding-ossification-via-grease)
 * [QUIC优点 & 开销：QUIC Benefits and Costs](#quic优点--开销quic-benefits-and-costs)
@@ -425,13 +426,13 @@ QUIC允许应用程序发送和接收数据流。QUIC allows applications to sen
   * 在连接标识符之后是**数据包类型的特定数据**。Following the connection identifiers is packet type  specific data
   * 有**四种**不同类型的长头数据包 【<font color="deeppink">这些不同类型的QUIC长头包都包含QUIC帧，而且都是在UDP数据报里面发送的</font>】There are four different types  of long header packet.
   * **初始数据包** An Initial packet
-    * 用于启动连接并开始TLS握手，它的作用与TCP SYN包和TLS ClientHello相同。used to initiate  a connection and start the TLS handshake.  It plays the same role as a  TCP SYN packet and a TLS ClientHello.
+    * 用于启动连接并开始TLS握手，它的作用与**TCP SYN包**和TLS ClientHello（Crypto帧里）相同。used to initiate  a connection and start the TLS handshake.  It plays the same role as a  TCP SYN packet and a TLS ClientHello.
   * **0-RTT 数据包**
     * 用于携带0-RTT会话重建时发送的幂等数据used to carry  the idempotent data sent when 0-RTT session  re-establishment is being used.
   * **握手包** handshake packet
     * **用来完成TLS握手的**，used to complete  the TLS handshake.
-    * 根据握手包的内容，握手包相当于`TCP SYN-ACK`和`TLS ServerHello`；Depending on its contents,  a Handshake packet is either the equivalent  of a TCP SYN-ACK with a TLS  ServerHello;
-    * 或者`TCP ACK`和`TLS Finished`消息。or a TCP ACK with a TLS Finished message.
+    * 根据握手包的内容，**握手包相当于`TCP SYN-ACK`和**`TLS ServerHello`；Depending on its contents,  a Handshake packet is either the equivalent  of a TCP SYN-ACK with a TLS  ServerHello;
+    * **或者`TCP ACK`和**`TLS Finished`消息。or a TCP ACK with a TLS Finished message.
   * **Retry** packet
     * 用于强制地址验证，作为连接迁移的一部分，并防止某些类型的拒绝服务攻击。used to  force address validation, as part of connection  migration, and to prevent some types of  denial of service attack.
 
@@ -448,11 +449,11 @@ QUIC允许应用程序发送和接收数据流。QUIC allows applications to sen
 * <font color="deeppink">目前只有一种类型的短头数据包，称为1-RTT数据包</font> There is currently only one type of  short header packet, known as 1-RTT packets
   * 这些数据包用于QUIC握手完成后发送的所有数据包，并在所附的UDP数据包中包含一连串加密和认证的QUIC帧。 These are used for all packets sent  after the QUIC handshake has completed,  and contain a sequence of encrypted and  authenticated QUIC frames in the enclosing UDP packet
 
-## QUIC帧： QUIC Frames
+## QUIC帧-充当TCP头选项：QUIC Frames
 
 ![](/static/2021-02-12-21-56-10.png)
 
-长头和短头数据包都包含加密的QUIC帧序列。Both long and short header packets contain encrypted sequence of QUIC frames
+长头和短头数据包都包含**加密的QUIC帧序列**。Both long and short header packets contain encrypted sequence of QUIC frames
 
 * **帧提供了QUIC的核心功能**。Frames provide the core functionality of QUIC.  
 * 帧有许多不同的类型。There are many different types of frame.
@@ -468,8 +469,8 @@ QUIC允许应用程序发送和接收数据流。QUIC allows applications to sen
 :orange: **在许多情况下，QUIC帧发挥了TCP中头字段的作用** In many cases, QUIC frames play the  role taken in TCP by header fields.
 
 * 例如，TCP 报头包含一个确认字段，该字段指示预期的下一个包。QUIC报头则没有 For example, a TCP header contains an  acknowledgement field that indicates the next packet  expected The QUIC header does not
-* 相反，QUIC报文中包含一个携带该信息的ACK帧。 这使得QUIC更加灵活，可扩展性更强 Rather, QUIC packets include an ACK frame  that carries that information.  This makes QUIC more flexible and more  extensible. 
-* **如果想要发送不同类型的控制信息，QUIC 只需添加新的帧类型，而不需要一个固定的头部**(这样就很难更改) Rather than have a fixed header,  that becomes difficult to change, QUIC can  just add new frame types if it  wants to send different types of control  information.
+* 相反，QUIC报文（QUIC短头数据包）中包含一个携带该信息的**ACK帧。 这使得QUIC更加灵活，可扩展性更强（而且还加密认证了**） Rather, QUIC packets include an ACK frame  that carries that information.  This makes QUIC more flexible and more  extensible. 
+* **如果想要发送不同类型的控制信息，QUIC 只需【添加新的帧类型】，而不需要一个【固定的头】部**(这样就很难更改) Rather than have a fixed header,  that becomes difficult to change, QUIC can  just add new frame types if it  wants to send different types of control  information.
 
 ## QUIC连接建立&数据传输：QUIC Connection Establishment and Data Transfer
 
@@ -484,11 +485,11 @@ QUIC允许应用程序发送和接收数据流。QUIC allows applications to sen
 
 ![](/static/2021-02-12-22-09-14.png)
 
-QUIC通过将连接**建立握手和TLS握手合并为一次往返，提高了TCP和TLS的性能**。QUIC improves on the performance of TCP  and TLS by combining the connection establishment  handshake and the TLS handshake into one  round-trip.
+QUIC通过将连接**TCP建立握手和TLS握手合并为一次往返，提高了TCP和TLS的性能**。QUIC improves on the performance of TCP  and TLS by combining the connection establishment  handshake and the TLS handshake into one  round-trip.
 
-* **QUIC连接开始于客户端向服务器发送一个包含QUIC初始包的UDP数据报**。A QUIC connection starts with the client  sending a UDP datagram containing a QUIC  Initial packet to the server.
-  * 这个初始数据包的作用相当于`TCP SYN`数据包，表示客户端希望建立一个连接This Initial  packet plays the equivalent role to a  TCP SYN packet and indicates that the  client wishes to establish a connection.
-  * 初始数据包还包含一个QUIC **CRYPTO帧**。在这个CRYPTO帧里面是一个`TLS ClientHello`消息，就像TLS在TCP上使用一样，The Initial packet also contains a QUIC  CRYPTO frame. Inside that CRYPTO frame is  a TLS ClientHello message, the same as  if TLS was being used over TCP
+* **QUIC连接开始于客户端向服务器发送一个包含QUIC【初始包】的UDP数据报**。A QUIC connection starts with the client  sending a UDP datagram containing a QUIC  Initial packet to the server.
+  * 这个初始数据包的作用**相当于`TCP SYN`数据包（长头包-初始数据包**），表示客户端希望建立一个连接This Initial  packet plays the equivalent role to a  TCP SYN packet and indicates that the  client wishes to establish a connection.
+  * 初始数据包还包含一个QUIC **CRYPTO帧**。在这个CRYPTO帧里面是**一个`TLS ClientHello`消息**，就像TLS在TCP上使用一样，The Initial packet also contains a QUIC  CRYPTO frame. Inside that CRYPTO frame is  a TLS ClientHello message, the same as  if TLS was being used over TCP
   * <font color="deeppink">ClientHello消息开始了加密密钥和其他安全参数的协商。因此，QUIC初始包同时开始建立连接和TLS握手。</font> ClientHello message starts the negotiation of  the encryption keys and other security parameters. The QUIC Initial packet therefore simultaneously starts  both the connection establishment and the TLS  handshake.
 * 作为回应，**服务器向客户端发送一个QUIC初始包和一个QUIC握手包**。 这两个包都包含在一个UDP数据报中。In response to this, the server sends  a QUIC Initial packet and a QUIC  Handshake packet back to the client.  These are both included in a single  UDP datagram.
   * **从服务器发回客户端的Initial数据包起到了`TCP SYN-ACK`数据包的作用，向客户端表明服务器愿意建立连接** The Initial packet sent from the server  back to the client plays the role  of the TCP SYN-ACK packet, and indicates  to the client that the server is  willing to establish the connection.
@@ -501,92 +502,97 @@ QUIC通过将连接**建立握手和TLS握手合并为一次往返，提高了TC
   * **QUIC握手包包含一个CRYPTO帧**，该帧又包含完成安全握手所需的`TLS Finished`消息。The QUIC Handshake packet contains a CRYPTO  frame, that in turn contains the TLS  Finished message needed to complete the security  handshake.
   * 而**QUIC 1-RTT包中包含一个STREAM帧，初始数据由客户端发送到服务器**。And the QUIC 1-RTT packet contains a  STREAM frame, with the initial data sent  from the client to the server.
 
-#### 初始包格式：QUIC Initial Packet Format
+### 初始包格式：QUIC Initial Packet Format
 
 ![](/static/2021-02-13-00-31-07.png)
 
 QUIC初始数据包的格式如图。The format of a QUIC Initial packet  is shown on the slide.
 
-* 它是一个长头包，在QUIC连接建立握手时使用。It’s a  long header packet, used during the QUIC  connection establishment handshake.
+* 它是一个长头包，**在QUIC连接建立握手时使用**。It’s a  long header packet, used during the QUIC  connection establishment handshake.
 
 :orange: 两个作用 QUIC Initial packets play two roles.
 
 * **首先，它们是用来同步客户端和服务器的状态的**。在这方面，它的作用与TCP的`SYN`和`SYN-ACK`包相同。Firstly, they’re used to synchronise the client  and server state. In this respect,  the play the same role as TCP’s  SYN and SYN-ACK packets.
-  * **它们还携带一个CRYPTO帧，其中包含一个`TLS ClientHello`或`TLS Finished`消息，作为加密设置的一部分。而且它们还可以包含ACK帧**。They also carry a CRYPTO frame,  containing either a TLS ClientHello or a  TLS Finished message, as part of the  encryption setup. And they can also contain ACK frames.
+  * **它们还携带一个【CRYPTO帧】，其中包含一个`TLS ClientHello`或`TLS Finished`消息，作为加密设置的一部分。而且它们还可以包含【ACK帧**】。They also carry a CRYPTO frame,  containing either a TLS ClientHello or a  TLS Finished message, as part of the  encryption setup. And they can also contain ACK frames.
   * 初始数据包将**连接设置和安全协商**合并在一个QUIC数据包中 The Initial packets combine connection setup and  security negotiation into one packet.
+
+### Retry包
+
 * **QUIC初始数据包也可以携带一个可选的Token**。 QUIC Initial packets can also carry an  optional Token.
-  * <font color="blue">QUIC服务器可以拒绝连接尝试，并向客户端发送一个包含Token的重试包。如果发生这种情况，客户端必须重试连接，在初始数据包中提供Token。</font>A QUIC server can refuse a connection  attempt, and send a Retry packet to  the client containing a Token. If this  happens, the client must retry the connection,  providing the Token in its Initial packet. 
+  * <font color="blue">QUIC服务器可以拒绝连接尝试，并向客户端发送一个包含Token的【重试包 Retry】。如果发生这种情况，客户端必须重试连接，在初始数据包中提供Token。</font>A QUIC server can refuse a connection  attempt, and send a Retry packet to  the client containing a Token. If this  happens, the client must retry the connection,  providing the Token in its Initial packet.
   * <font color="blue">如果令牌匹配，连接建立就会正常进行</font>。If the Token matches, the connection establishment  then proceeds as normal.
   * <font color="red">这是用来防止连接欺骗的。并验证在改变IP地址后重新建立的连接是否有效</font> This is used to prevent connection spoofing. And to validate that a connection that’s  being re-established after an IP address change  is valid.
   
-#### 握手包：Handshake Packets
+### 握手包：Handshake Packets
 
 ![](/static/2021-02-13-02-03-38.png)
 
 QUIC握手数据包完成了TLS 1.3的交换，QUIC Handshake packets complete the TLS 1.3  exchange.
 
-* **它们包含`TLS ServerHello`消息或`TLS Finished`消息，包含在CRYPTO帧中** They contain either a TLS ServerHello  message or a TLS Finished message,  contained within a CRYPTO frame.  
+* **它们包含`TLS ServerHello`消息或`TLS Finished`消息，（消息包含在CRYPTO帧中** They contain either a TLS ServerHello  message or a TLS Finished message,  contained within a CRYPTO frame.  
   * 在Initial数据包中发送的`TLS ClientHello`消息和在Handshake数据包中发送的`TLS ServerHello`和`Finished`消息的组合，完成了TLS安全握手。The combination of the TLS ClientHello,  sent in the Initial packet, and the  TLS ServerHello and Finished messages, sent in  the Handshake packets, completes the TLS security  handshake.
-    * 它的工作原理和TCP上的TLS一样，只是消息是在QUIC包内发送的。It works just the same as  TLS over TCP, except that the messages  are sent inside QUIC packets.
+    * 它的工作原理和TCP上的TLS一样，**只是消息是在QUIC包内发送的（作为帧的一部分**）。It works just the same as  TLS over TCP, except that the messages  are sent inside QUIC packets.
 
 :orange: 握手包使用长头 Handshake packets use a long header,
 
 ![](/static/2021-02-13-02-40-27.png)
 
 * 在**大多数情况**下，为了减少开销，**握手数据包与初始数据包在同一个UDP数据报中发送**。In most cases, a Handshake packet is  sent in the same UDP datagram as  an Initial packet, to reduce overheads.
-* 如果合并后的数据包太大，无法容纳在一个UDP数据报中，Initial和Handshake数据包也可以用两个单独的数据报发送 If the combined packet is too big  to fit in a single UDP datagram,  though, the Initial and Handshake packets may  be sent in two separate datagrams.
+* <font color="red">如果合并后的数据包太大，无法容纳在一个UDP数据报中，Initial和Handshake数据包也可以用两个单独的数据报发送</font> If the combined packet is too big  to fit in a single UDP datagram,  though, the Initial and Handshake packets may  be sent in two separate datagrams.
 
-### 0-RTT
+## 0-RTT
 
 正常的QUIC连接建立需要一个来回，之后客户机和服务器都同意通信，并掌握了他们需要的信息，得出对称加密密钥【会话密钥】。The normal QUIC connection establishment takes one  round trip, after which both client and  server have agreed to communicate and have  the information they need to derive the  symmetric encryption key【session key】.
 
 ![](/static/2021-02-13-02-42-30.png)
 
-如果这样做太慢，QUIC还支持TLS 0-RTT会话重新建立。If this is too slow, QUIC also  supports TLS 0-RTT session re-establishment.
+如果这样做太慢，**QUIC还支持TLS 0-RTT会话重新建立**。If this is too slow, QUIC also  supports TLS 0-RTT session re-establishment.
 
 * 它的工作方式与TCP上的TLS类似。This works in a similar way to  TLS over TCP.
 * QUIC客户端和服务器像平常一样建立连接，**服务器向客户端发送`PreSharedKey`和`SessionTicket`**。The QUIC client and  server establish a connection as normal,  and the server sends a PreSharedKey and  a SessionTicket to the client.
 * **当客户端下一次建立与该服务器的quic连接时，它会将`SessionTicket`与`TLS ClientHello`消息一起添加到它在【初始数据包中】发送的`CRYPTO`帧中**。When the client next establishes a QUIC  connection to that server, it adds the  SessionTicket to the CRYPTO frame it sends  in its initial packet, along with the  TLS ClientHello message.
 * 而且它**还包括一个`QUIC 0-RTT`包，其中包含一个`STREAM`帧，该帧承载着使用`PreSharedKey`加密的数据**。And it also includes a QUIC 0-RTT  packet, containing a STREAM frame that carries  data encrypted using the PreSharedKey.
-* **QUIC服务器可以使用`SessionTicket`来查找它的`PreSharedKey`副本，并使用它来解密`0-RTT`包中发送的流数据（客户端初始数据）**。The QUIC server can use the SessionTicket  to look up its copy of the  PreSharedKey, and uses that to decrypt the  stream data sent in the 0-RTT packet.
+* **QUIC服务器可以使用收到的`SessionTicket`来查找它的`PreSharedKey`副本，并使用它来解密`0-RTT`包中发送的流数据（客户端初始数据）**。【此步又可以通过client公号推导出session key】The QUIC server can use the SessionTicket  to look up its copy of the  PreSharedKey, and uses that to decrypt the  stream data sent in the 0-RTT packet.
   * :orange: <font color="red">与TCP上的TLS一样，0-RTT数据包中发送的数据并不是转发秘密，由于它有可能受到重放攻击，所以需要进行幂等化处理</font> As with TLS over TCP, the data  sent in the 0-RTT packet is not  forward secret, and needs to be idempotent  since it’s potentially subject to replay attacks.
 * **然后，服务器会像正常情况一样，用【QUIC初始和握手数据包】进行响应，同时还有一个包含回复的`1-RTT`【短头】数据包** The server then responds with QUIC Initial  and Handshake packets, as normal, along with  a 1-RTT short header packet containing a  reply.
+  * `1-RTT`，数据可以用session key加密，
 
-#### 0-RTT TLS vs QUIC
+## 0-RTT TLS vs QUIC
 
-:orange: 不同的是，QUIC中的0-RTT会话重建确实是在0-RTT后的第一个数据包中发送数据，而TCP上的TLS则是在TCP握手后的第一个数据包中发送数据。The difference is that 0-RTT session re-establishment  in QUIC really does send the data  in the very first packet, after zero  RTTs, whereas TLS over TCP sends it  in the first packet after the TCP  handshake.
+:orange: 不同的是，**QUIC中的0-RTT会话重建确实是在0-RTT后的第一个数据包中发送数据，而TCP上的TLS则是在TCP握手后的第一个数据包中发送数据**（QUIC 0RTT->第二次直接发初始数据【最大性能】，TLS 0RTT->省去一个TLS握手步骤，在TCP握手后直接发初始数据）。The difference is that 0-RTT session re-establishment  in QUIC really does send the data  in the very first packet, after zero  RTTs, whereas TLS over TCP sends it  in the first packet after the TCP  handshake.
 
 * 即，QUIC建立一个安全连接，在通常情况下，只需要一个来回，而TLS通过TCP需要两个来回。The result of all this is that  QUIC establishes a secure connection, in the  usual case, in one round trip,  whereas TLS over TCP needs two round  trips.
 * **QUIC将连接的建立和加密密钥的协商结合到一个单一的握手过程中。TLS-over-TCP则是按顺序进行两次握手。 因此，QUIC加快了连接建立的速度**。QUIC combines connection establishment and encryption key  negotiation into a single handshake. TLS-over-TCP runs  the two handshakes sequentially.  QUIC therefore speeds up the connection establishment.
 
-### 握手结束-短头包: Data Transfer, Streams, Reliability
+## 握手结束（开始数据传输）-短头包: Data Transfer, Streams, Reliability
 
-一旦**握手结束，QUIC就会切换到发送短头包。这些短头包用于传输和确认数据**。Once the handshake has finished, QUIC switches  to sending short header packets. These short  header packets are used to transfer,  and acknowledge, data.
+一旦**握手结束（连接建立后），QUIC就会切换到发送短头包。这些短头包用于传输和确认数据**。Once the handshake has finished, QUIC switches  to sending short header packets. These short  header packets are used to transfer,  and acknowledge, data.
 
 ![](/static/2021-02-13-03-02-53.png)
 
-* **每个短头都包含一个包号字段**。这与TCP段中的序列号起着类似的作用。Each short header contains a **Packet Number** field. This plays a similar role to  the sequence number in TCP segments.
+* **每个短头都包含一个包号字段**。这<font color="red">与TCP段中的序列号起着类似的作用</font>。Each short header contains a **Packet Number** field. This plays a similar role to  the sequence number in TCP segments.
   * **但与TCP不同的是，QUIC包号每发送一个数据包就增加一个。 QUIC中的数据包号计算的是发送的数据包数量**。Unlike TCP, though, QUIC Packet Numbers increase  by one for each packet sent.  Packet numbers in QUIC count the number  of packets sent.
-  * 与此相反，TCP序列号计算的是发送的数据字节数In contrast, the TCP  sequence number counts the number of bytes  of data sent.
+  * 与此相反，**TCP**序列号计算的是**发送的数据字节数** In contrast, the TCP  sequence number counts the number of bytes  of data sent.
 * **另外与TCP相比，QUIC从不重传数据包**。Also in contrast to TCP, QUIC never  retransmits packets.
-  * 如果包含QUIC数据包的UDP数据报丢失，<font color="red">QUIC将在新的QUIC数据包中重传该数据包中的数据帧，这些数据包将有新的序列号</font> If the UDP datagram containing  a QUIC packet is lost, QUIC will  retransmit the frames of data that were  in that packet in new QUIC packets,  and those packets will have new sequence  numbers.
+  * 如果包含QUIC数据包的**UDP数据报丢失**，<font color="red">QUIC将在新的QUIC数据包中重传该数据包中的数据帧，这些数据包将有新的序列号</font> If the UDP datagram containing  a QUIC packet is lost, QUIC will  retransmit the frames of data that were  in that packet in new QUIC packets,  and those packets will have new sequence  numbers.
   * **而TCP则是用原来的序列号重传丢失的数据包**。TCP, on the other hand, retransmits lost  packets with their original sequence number.
-    * 这意味着TCP无法分辨重传数据包的到达和原始数据包的非常延迟的到达之间的区别。This means TCP cannot tell the difference  between the arrival of a retransmitted packet,  and a very delayed arrival of the  original packet.
+    * 这意味着TCP无法分辨**重传数据包的到达**和**未丢包数据包的延迟到达**之间的区别。This means TCP cannot tell the difference  between the arrival of a retransmitted packet,  and a very delayed arrival of the  original packet.
     * <font color="deeppink">QUIC总是可以将这些区分开来，因为它们的数据包号不同。 与TCP相比，这简化了QUIC的拥塞控制算法的设计。</font> QUIC can always tell these  apart, since they have different packet numbers.  This simplifies the design of QUIC’s congestion  control algorithm, compared to TCP.
-* 最后，**一个QUIC短头数据包以【受保护的有效载荷部分】**结束。Finally, a QUIC short header packet ends  with a protected payload section
+* 最后，**一个QUIC短头数据包以【受保护的有效载荷部分**】结束。Finally, a QUIC short header packet ends  with a protected payload section
   * 其中包含<font color="deeppink">经过加密和认证的QUIC帧。这些帧可以是包含数据的`STREAM`帧、包含确认的`ACK`帧或【其他控制数据】</font> This contains  encrypted and authenticated QUIC frames. These can  be STREAM frames containing data, ACK frames  containing acknowledgements, or other control data.
   * **QUIC头不包括任何等同于TCP确认号的内容。 取而代之的是，`ACK`帧作为受保护的【有效载荷数据】的一部分被发送，以指示收到的数据包号**。The QUIC header does not include any  equivalent of the TCP acknowledgement number.  Instead, ACK frames are sent as part  of the protected payload data, to indicate  received packet numbers.
 
 ### ACK帧确认
 
-QUIC 以 ACK 帧的形式为收到的数据包发送确认信息QUIC sends acknowledgements for received packets in  ACK frames.
+QUIC 以 **ACK 帧**的形式为**收到的数据包发送确认信息** QUIC sends acknowledgements for received packets in  ACK frames.
 
 ![](/static/2021-02-13-03-15-58.png)
 
-* **ACK帧是在长头和短头数据包内发送的**。与TCP不同的是，确认响应不属于QUIC包头的一部分。ACK frames are sent inside long- and  short-header packets. Unlike TCP, the acknowledgements are  not part of the QUIC packet headers.
+* **ACK帧是在长头和短头数据包内发送的**。与TCP不同的是，确认ACK响应**不属于QUIC头的一部分**。ACK frames are sent inside long- and  short-header packets. Unlike TCP, the acknowledgements are  not part of the QUIC packet headers.
+  * 更灵活，需要某些帧，只需要在载荷里包含QUIC帧，而不是TCP那样的固定头字段。
 * <font color="red">另外与TCP不同的是，确认响应表示的是收到的QUIC数据包的序列号。 TCP序列号和确认响应计算的是发送的字节数，【而QUIC计算的是发送的数据包数】。</font>Also unlike TCP, acknowledgements indicate the **sequence numbers** of QUIC packets that were received.  TCP sequence numbers and acknowledgements count the  number of bytes sent, whereas QUIC counts  the number of packets sent.
 
-### STREAM Frame帧
+### STREAM Frame帧 & 行首阻塞问题（QUIC流复用）
 
 最后，数据是在**STREAM帧中发送的，这些数据是在QUIC包中发送的，是包含在UDP数据报中的**。Finally, data is sent within STREAM frames,  that are sent within QUIC packets,  that are contained within UDP datagrams.
 
@@ -594,19 +600,19 @@ QUIC 以 ACK 帧的形式为收到的数据包发送确认信息QUIC sends ackno
 
 * 它包含一个**流标识符、流中数据的偏移量、数据的长度和数据本身**。It contains a **stream identifier, the offset  of the data within the stream,  the length of the data, and the  data itself**.
 
-:orange: QUIC在单个连接中提供多个可靠的字节流。QUIC provides multiple reliable byte streams within  a single connection.
+:orange: QUIC<font color="red">在单个连接中提供多个可靠的字节流(就不用，为每个独立数据开一个连接，，允许单个连接中开多个流来传输每个独立数据，流复用</font>）。QUIC provides multiple reliable byte streams within  a single connection.
 
 * **每个数据流的数据按照发送的顺序在该数据流中可靠地传送，但数据流之间的数据顺序不会被保留**。Data for each stream is delivered reliably  and, in the order it was sent,  within that stream, but data order is  not preserved between streams.
   * 例如，假设一个客户端与服务器建立了连接，并在该连接内的两个流上发送数据，即流A和流B，For example, assume that a client has  a connection to a server and is  sending data on two streams, stream A  and stream B, within that connection.  
-  * 客户端先在流A上发送消息，然后再在流B上发送另一个消息。 客户端首先在流A上发送一条消息，然后在流B上发送另一条消息。The client first sends a message on  stream A, and then it sends another  message on stream B.  
+  * 客户端先在流A上发送消息，然后再在流B上发送另一个消息。The client first sends a message on  stream A, and then it sends another  message on stream B.  
   * **所有在流A上发送的数据都会按照发送的顺序可靠地到达。但先发送的流A上的消息可能会在流B上发送的消息之后到达**。All the data sent on stream A  will arrive reliably and in the order  it was sent. The same is true  of stream B. But the message sent  on stream A, which was sent first,  might arrive after the message sent on  stream B.  
-  * <font color="red">也就是说，QUIC避免了流之间的行首阻塞，但没有避免流内的阻塞</font>That is, QUIC avoids head-of-line blocking between  streams, but not within a stream.
+  * <font color="red">也就是说，QUIC避免了流之间的行首阻塞，但没有避免流内（连接内）的阻塞</font>That is, QUIC avoids head-of-line blocking between  streams, but not within a stream.
 
 :orange: There are two ways to view QUIC  streams
 
 * **您可以将 QUIC 流视为允许您在单个连接中发送多个未加帧的字节流**。You can view QUIC streams as allowing  you to send multiple unframed byte streams  sent within a single connection.
   * **在这种观点中，一个 QUIC 连接提供的服务模式与多个并行 TCP 连接相同** In this  view, a QUIC connection offers the same  service model as several parallel TCP connections.
-* **另外，您还可以将每个 QUIC 流视为一个消息的帧。在这种情况下，一个 QUIC 连接会传送一系列有框架的消息，每个消息都在一个单独的流上发送**。Alternatively, you can view each QUIC stream  as framing a message. In this view,  a QUIC connection delivers a series of  framed messages, each sent on a separate  stream.
+* **另外，您还可以将每个 QUIC 流视为一个消息的帧。在这种情况下，一个 QUIC 连接会传送一系列分帧的消息，每个消息都在一个单独的流上发送**。Alternatively, you can view each QUIC stream  as framing a message. In this view,  a QUIC connection delivers a series of  framed messages, each sent on a separate  stream.
 * <font color="red">它们都是完全合理的看待QUIC连接的方式，但它们导致人们以不同的方式使用QUIC。 QUIC相当灵活，与TCP不同。它也是新的。我们仍在开发如何使用它、如何处理多个连接的最佳实践。
 </font>They’re both entirely reasonable ways of looking  at a QUIC connection, but they lead  people to use QUIC in different ways.  QUIC is quite flexible, and is different  to TCP. It’s also new. We’re still  developing best practices for how to use  it, how to view the multiple connections.
 
@@ -614,7 +620,7 @@ QUIC 以 ACK 帧的形式为收到的数据包发送确认信息QUIC sends ackno
 
 QUIC特性 & 避免僵化 & 成本与好处
 
-## QUIC over UDP
+## QUIC over UDP 好处
 
 QUIC的一个不同寻常的特点是，它是一个在另一个传输协议上运行的传输协议。**QUIC在UDP上运行，而不是直接在IP上运行**。---为什么？One of the unusual features of QUIC  is that it’s a transport protocol that  runs over another transport protocol. QUIC runs  over UDP, rather than running directly on  IP.
 
@@ -634,32 +640,33 @@ QUIC的一个不同寻常的特点是，它是一个在另一个传输协议上�
 
 2.**在UDP上运行QUIC的第二个原因是协议僵化**The second reason for running QUIC over  UDP is protocol ossification.
 
-* 几乎每一个连接到互联网的家庭和企业都是通过NAT或防火墙来连接的。Almost every home and business that connects  to the Internet does so via a  NAT or firewall.
-  * NAT设备知道如何查找和翻译TCP和UDP头文件中的端口号。防火墙知道如何检查TCP连接和UDP数据包的头和内容。 NAT devices know how  to find and translate the port numbers  in TCP and UDP headers. Firewalls know  how to inspect the headers and contents  of TCP connections and UDP packets.  
+* 几乎每一个连接到互联网的家庭和企业都是通过**NAT或防火墙（中间盒**）来连接的。Almost every home and business that connects  to the Internet does so via a  NAT or firewall.
+  * **NAT设备**知道如何查找和翻译**TCP和UDP头文件中的端口号（TURN-relay，STUN，P2P**）。**防火墙**知道如何**检查TCP连接和UDP数据包的头和内容**。 NAT devices know how  to find and translate the port numbers  in TCP and UDP headers. Firewalls know  how to inspect the headers and contents  of TCP connections and UDP packets.  
 * 而网络中所有其他代理、网关和中间盒也是如此，**这些设备都无法理解QUIC**。And the same is true of all  the other proxies, gateways, and middleboxes in  the network. None of these understand QUIC.
-* 如果我们在 UDP 数据包内运行 QUIC，它就有可能理解QUIC。If we run QUIC inside UDP packets,  there’s a chance it will work.
-  * 可以在不检查数据包内容的情况下转换 UDP 报头，许多防火墙允许通过建立一个传入的防火墙针孔传出的 UDP 流量，因为像 Zoom 这样的应用程序需要这样做。NATs can translate UDP packet headers without  inspecting the contents of those packets,  and many firewalls allow outgoing UDP traffic  to pass an establish an incoming firewall  pinhole, because this is needed for applications  like Zoom to work
-  * 如果 QUIC 直接在 IP 上运行，情况就不会是这样了。Nat 不知道如何翻译 QUIC 数据包。防火墙倾向于阻止任何非 TCP 或 UDP 的东西。This wouldn’t be the case if QUIC  ran directly over IP. NATs wouldn’t know  how to translate the QUIC packets.  And firewalls tend to block anything that  isn’t TCP or UDP.
+  * **之前协议已经广泛部署了，要让这些设备理解，需要大面积升级，很不现实**
+* **如果我们在 UDP 数据包内运行 QUIC，它就有可能理解QUIC**。If we run QUIC inside UDP packets,  there’s a chance it will work.
+  * 可以在不检查数据包内容的情况下转换 **UDP 报头，许多防火墙允许通过建立一个传入的防火墙针孔传出的 UDP 流量**，因为像 Zoom 这样的应用程序需要这样做。NATs can translate UDP packet headers without  inspecting the contents of those packets,  and many firewalls allow outgoing UDP traffic  to pass an establish an incoming firewall  pinhole, because this is needed for applications  like Zoom to work
+  * 如果 QUIC 直接在 IP 上运行，情况就不会是这样了。<font color="red">Nat 不知道如何翻译 QUIC 数据包。防火墙倾向于阻止任何非 TCP 或 UDP 的东西</font>。This wouldn’t be the case if QUIC  ran directly over IP. NATs wouldn’t know  how to translate the QUIC packets.  And firewalls tend to block anything that  isn’t TCP or UDP.
 
-:orange: 如果我们在 UDP 上运行 QUIC，它可能会在今天的互联网上工作。**但是如果我们直接在 IP 上运行它，那么我们必须在它工作之前更新每一个防火墙和 NAT ——这基本上是不可能的任务**。If we run QUIC over UDP,  it will probably work across the Internet  today. But if we run it directly  over IP, then we’d have to update  every firewall and NAT before it would  work – an essentially impossible task.
+:orange: 如果我们在 UDP 上运行 QUIC，它可能会在今天的互联网上工作。**但是如果我们直接在 IP 上运行它，那么我们必须在它工作之前更新每一个防火墙和 NAT(使所有中间设备理解QUIC，，因为他们只知道TCP/UDP) ——这基本上是不可能的任务，，协议过于僵化**。If we run QUIC over UDP,  it will probably work across the Internet  today. But if we run it directly  over IP, then we’d have to update  every firewall and NAT before it would  work – an essentially impossible task.
 
 ## 僵化例子2
 
-> 图上显示的论文是一项研究，试图测量防火墙和NATs阻止包括标准化但很少使用的扩展的TCP数据包的频率。 以及它们阻止使用非标准扩展的TCP数据包的频率，就像你在试验改变TCP时可能使用的那样。**它表明，TCP扩展很难部署**。而现在这个结果已经有近十年的历史了，但我怀疑对TCP的变化是否变得更容易部署了。
+> 图上显示的论文是一项研究，试图测量防火墙和NATs阻止包括标准化但**很少使用扩展的TCP数据包的频率**。 以及它们**阻止使用非标准扩展的TCP数据包的频率**，就像你在试验改变TCP时可能使用的那样。**它表明，TCP扩展（TCP的更新）很难部署**。而现在这个结果已经有近十年的历史了，但我怀疑对TCP的变化是否变得更容易部署了。
 > The paper shown on the slide is  a study that tries to measure how  often firewalls and NATs block TCP packets  that include standardised but rarely used extensions.  And how often they block TCP packets  that use non-standard extensions, as you might  use when experimenting with changes to TCP.  It showed that TCP extensions were hard  to deploy. And while the results are  almost ten years old now, I doubt  it’s gotten easier to deploy changes to  TCP.
 
 ![](/static/2021-02-13-03-58-59.png)
 
 **数据包头或有效载荷中可见的信息**，**没有经过加密和认证的信息，可以被网络中的设备检查和修改**。 Information that’s visible in the packet headers  or payload, that’s not encrypted and authenticated,  can be inspected and modified by devices  in the network.
 
-* **这意味着NAT和防火墙可以检查IP数据包的内容**。 它们可以判断这些数据包是否包含TCP、UDP或其他内容。之所以能够做到这一点，是因为IP头和有效载荷没有被加密。This means that NATs and firewalls can  inspect the contents of IP packets.  They can tell whether those packets contain  TCP, UDP, or something else. This is  possible because the IP header and payload  are not encrypted.
+* **这意味着NAT和防火墙可以检查IP数据包的内容**。 它们可以判断这些数据包是否包含TCP、UDP或其他内容。之所以能够做到这一点，是因为**IP头和IP有效载荷没有被加密（IP包数据部分，可以包含了TCP/UDP包**）。This means that NATs and firewalls can  inspect the contents of IP packets.  They can tell whether those packets contain  TCP, UDP, or something else. This is  possible because the IP header and payload  are not encrypted.
 * **同样，由于这些IP数据包的内容没有经过认证，这些NAT、防火墙和其他设备可以修改数据包**。Similarly, because the contents of those IP  packets are not authenticated, these NATs,  firewalls, and other devices can modify the  packets.
   * 这意味着我们可以购买NAT盒子，修改数据包。那就是改变IP、TCP和UDP包头，允许多个设备共享一个IP地址。This means we can buy NAT boxes  that modify the packets. That change the  IP, TCP, and UDP packet headers to  allow several devices to share an IP  address.
   * 这意味着我们可以购买检查网络数据包的防火墙，并声称可以保护我们免受恶意软件的侵害。It means we can buy firewalls that  inspect network packets and claim to protect  us from malware.
   * 而这意味着我们可以购买所有其他的代理、缓存和其他检查和修改网络中流量的设备。And it means we can buy all  the other proxies, caches, and other devices  that inspect and modify traffic in the  network.
 * **但也许我们不希望网络读取或修改我们的数据**。But maybe we don’t want the network  to read or modify our data.
-  * 所以我们使用 TLS 来保护 TCP 连接中发送的数据。So we use TLS to protect the  data we send within TCP connections.
-  * 或者数据报 TLS，它对 UDP 数据包中发送的数据做同样的事情。这个方法很有效。但是它不能做的是阻止这些设备检查和修改 TCP 和 UDP 数据包报头。而且它不会阻止他们查看 IP 数据包，并决定阻止它们，因为内容不是 TCP 或 UDP。或者是因为 TCP 或 UDP 报头不完全符合它们对应该如何格式化的理解。Or datagram TLS, that does the same  for data sent within UDP packets.  And that works.  But what it doesn’t do, though,  is stop those devices inspecting and modifying  the TCP and UDP packet headers.  And it doesn’t stop them looking at  the IP packets, and deciding to block  them because the contents are not TCP  or UDP. Or because the TCP or  UDP header doesn’t exactly match their understanding  of how it should be formatted.
+  * 所以我们使用 **TLS 来保护** TCP 连接中**发送的数据（注意TLS局限性，还是会暴露元数据：TCP头，clienthello主机名**）。So we use TLS to protect the  data we send within TCP connections.
+  * 或者数据报 TLS，它对 UDP 数据包中发送的数据做同样的事情。这个方法很有效。<font color="red">但是它不能做的是阻止这些设备检查和修改 TCP 和 UDP 数据包报头。而且它不会阻止他们查看 IP 数据包，并决定阻止它们，因为内容不是 TCP 或 UDP。或者是因为 TCP 或 UDP 报头不完全符合它们对应该如何格式化的理解</font>。Or datagram TLS, that does the same  for data sent within UDP packets.  And that works.  But what it doesn’t do, though,  is stop those devices inspecting and modifying  the TCP and UDP packet headers.  And it doesn’t stop them looking at  the IP packets, and deciding to block  them because the contents are not TCP  or UDP. Or because the TCP or  UDP header doesn’t exactly match their understanding  of how it should be formatted.
   * <font color="red">这意味着像 QUIC 这样的协议必须隐藏在 UDP 数据包中，才有机会通过网络。这使得更难改变 TCP 或 UDP 的工作方式</font>This means protocols like QUIC have to  hide inside UDP packets, to have a  chance of going through the network.  And it makes it harder to change  how TCP or UDP work.
     * 例如，**我们现在不能改变TCP头的格式，因为太多的设备希望采用现有的格式。 同样，即使是新的选项也很难添加到TCP数据包中，因为有太多的设备认为他们了解存在哪些选项，当他们看到一些意外的东西时就会失败**。We couldn’t change the format of the  TCP header now, for example, because too  many devices expect the existing format.  Similarly, it’s difficult to add even new  options to TCP packets, because too many  devices think they understand what options exist,  and fail when they see something unexpected.
 
@@ -667,9 +674,9 @@ QUIC的一个不同寻常的特点是，它是一个在另一个传输协议上�
 
 :orange: 协议僵化正在成为一个越来越严重的问题，Protocol ossification is becoming an increasing problem.
 
-* 当部署TLS 1.3时，它造成了问题。it caused problems when  TLS 1.3 was being deployed.
-* 当试图扩展TCP时，它也会造成问题。
-  * 而这也是为什么QUIC被设计成隐藏在UDP数据包中的原因之一It causes  problems when trying to extend TCP.  And it was one of the reasons  why QUIC is designed to hide within  UDP packets.
+* **当部署TLS 1.3时，它造成了问题**。it caused problems when  TLS 1.3 was being deployed.
+* 当试图**扩展TCP时，它也会造成问题**。
+  * 而这也是**为什么QUIC被设计成隐藏在UDP数据包中的原因之一** It causes  problems when trying to extend TCP.  And it was one of the reasons  why QUIC is designed to hide within  UDP packets.
 
 :orange: 越来越多的标准社区将僵化视为一个问题。Ossification is Increasingly viewed as a problem  by the standards community.
 
@@ -678,27 +685,27 @@ QUIC的一个不同寻常的特点是，它是一个在另一个传输协议上�
 
 ## 避免QUIC僵化：Avoiding Ossification in QUIC 
 
-:orange: QUIC的设计者们为了使QUIC可以部署，防止其僵化，费尽心思。The designers of QUIC went to great  lengths to make QUIC deployable, and to  prevent it from becoming ossified.
+:orange: **QUIC的设计者们为了使QUIC可以部署，防止其僵化**，费尽心思。The designers of QUIC went to great  lengths to make QUIC deployable, and to  prevent it from becoming ossified.
 
 ![](/static/2021-02-13-04-17-37.png)
 
 * **在UDP上运行是其中的第一个**。Running over UDP was the first of these.
 * 而且他们还使用了三种技术：
-  * published the **protocol invariants**
-  * make use of **pervasive encryption of transport header**
-  * **GREASE**
+  * published the **protocol invariants** QUIC协议不变特性
+  * make use of **pervasive encryption of transport header** 利用pervasive encryption 加密传输头
+  * **GREASE**机制（经常使用，经常测试，否则舍弃）
 * **我们的目标是使中间盒难以，最好是不可能干扰QUIC连接。也就是说，网络可以允许QUIC流量，也可以完全阻止它。 但除了不变特性外，它不能检查或修改QUIC流量**。The goal is to make it difficult,  and ideally impossible, for middleboxes to interfere  with QUIC connections. That is, a network  can allow QUIC traffic, or it can  block it entirely.  But it can’t inspect or modify QUIC  flows, apart from the invariant features.
 
-### QUIC不变特性：QUIC Invariants
+### 方法1-QUIC不变特性：QUIC Invariants
 
 **QUIC 不变量是 IETF 表示永远不会改变的 QUIC 属性**。QUIC invariants are the properties of  QUIC that the IETF has indicated will  never change.
 
 ![](/static/2021-02-13-04-20-59.png)
 
 * QUIC的开发者和IETF标准社区已经写下了一套QUIC数据包的属性，他们保证每一个QUIC数据包、所有时间和所有版本都是真实的。The developers of QUIC, and the IETF  standards community, have written down a set  of properties of QUIC packets that they  guarantee will be true for every QUIC  packet, for all time, and for all  versions.
-  * 这些是中间盒、NAT和防火墙被允许检查的属性。 IETF表示，其他任何东西，都会在QUIC的未来版本中发生变化。These are the properties that middleboxes,  NATs, and firewalls are allowed to inspect.  Anything else, the IETF has said,  is subject to change in future versions  of QUIC.
+  * 这些是中间盒、NAT和防火墙被允许检查的属性。 IETF表示，**其他任何东西，都会在QUIC的未来版本中发生变化**。These are the properties that middleboxes,  NATs, and firewalls are allowed to inspect.  Anything else, the IETF has said,  is subject to change in future versions  of QUIC.
 
-:orange: 具体有什么不变特性？ what are those invariants?
+:orange: 具体**有什么不变特性**？ what are those invariants?
 
 * **QUIC数据包将以长头或短头开始。** That QUIC packets will either start with  a long header or a short header.  
   * 没有其他报头格式。There will be no other header formats.  
@@ -712,26 +719,26 @@ QUIC的一个不同寻常的特点是，它是一个在另一个传输协议上�
 
 ### 普遍加密-避免僵化：Avoiding Ossification via Pervasive Encryption
 
-当然，现在，写一个标准，说 "中间盒一定不要看QUIC数据包中的这些字段 "并不能阻止中间盒看这些字段。 。Now, of course, writing a standard that  says “middleboxes MUST NOT look at these  fields in QUIC packets” doesn’t stop middleboxes  looking at those fields.
+当然，现在，写一个标准，说 "中间盒一定不要看QUIC数据包中的这些字段 "**并不能阻止中间盒查看这些字段**。 。Now, of course, writing a standard that  says “middleboxes MUST NOT look at these  fields in QUIC packets” doesn’t stop middleboxes  looking at those fields.
 
-* <font color="red">相应地，QUIC应用了另外两种技术来确保中间盒不能检查它的数据包</font>Accordingly, QUIC applies two other techniques to  make sure middleboxes can’t inspect its packets.
+* <font color="red">相应地，QUIC【应用了另外两种技术来确保中间盒不能检查它的数据包】</font>Accordingly, QUIC applies two other techniques to  make sure middleboxes can’t inspect its packets.
 
 ![](/static/2021-02-13-17-46-43.png)
 
 * 首先是**QUIC尽可能多地对数据包进行加密**。The first is that QUIC encrypts as  much of its packets as possible.
   * 除了不变字段和数据包第一个字节的最后7位之外，其他所有的数据包都是加密的。Everything except the invariant fields, and the  last 7 bits of the first byte  of the packet, is encrypted.
-  * 这使得中间盒不可能检查连接标识符之后的 QUIC 报头的任何部分 This makes  it impossible for middleboxes to inspect any  part of a QUIC header after the  connection identifiers.
+  * **这使得中间盒不可能检查连接标识符之后的 QUIC 报头的任何部分** This makes  it impossible for middleboxes to inspect any  part of a QUIC header after the  connection identifiers.
   * 由于 QUIC 融合了 TLS，所以对于大多数数据包来说，这是直接的Since QUIC incorporates TLS, this is straightforward  to do for most packets.  
 * **在建立连接的过程中，【会商定一个加密密钥- 会话密钥 session key】，并将其用于加密数据包**。An encryption key is agreed using connection  establishment, and this is used to encrypt  the packets.
   * 那么<font color="deeppink">连接建立数据包本身</font>呢？ 它们是如何加密的？ **这些数据包包含了公钥，而公钥应该是公开的，所以它们实际上不需要加密**。What about the connection establishment packets themselves?How are they encrypted?  Well, these contain the public keys,  which are supposed to be public,  so they don’t actually need to be  encrypted
     * 例如，TLS over TCP并没有对这些数据包进行加密。**但是QUIC还是会对它们进行加密** TLS over TCP doesn’t encrypt these  packets, for example. But QUIC encrypts them  anyway.
   * **为什么使用会话密钥**
-    * 它不能使用TLS密钥，因为这些数据包是在TLS握手完成之前发送的，it can’t use a TLS key,  since these packets are sent before the  TLS handshake is completed.
-    * 而且它不能使用PreSharedKey，因为这可能是客户端和服务器第一次通信。And it can’t  use a PreSharedKey, because this might be  the first time the client and server  have communicated.
+    * 它不能使用TLS密钥，因为这些数据包是在TLS握手完成之前发送的（因为QUIC重叠了两个步骤，，之前无密钥可用），it can’t use a TLS key,  since these packets are sent before the  TLS handshake is completed.
+    * **而且它不能使用PreSharedKey，因为这可能是客户端和服务器第一次通信**。And it can’t  use a PreSharedKey, because this might be  the first time the client and server  have communicated.
     * <font color="red">它所做的，是从连接建立数据包中的长头中提取连接标识符，并将其作为加密密钥（会话密钥），对数据包的其他部分进行加密。</font>What it does, is to take the  connection identifiers from the long header in  the connection establishment packets, and use them  as the encryption key to encrypt the  rest of the packet.
     * 从表面上看，这没有任何好处。 当然，它也不提供任何安全保障。On the face of it, this offers  no benefit.  It certainly doesn’t provide any security.
 
-:orange: **连接建立数据包的加密密钥包含在数据包的开头，没有保护**。The encryption key for the connection establishment  packet is included, unprotected, at the start  of the packet
+:orange: **连接建立数据包的加密密钥（连接ID）包含在数据包的开头，没有保护。**。The encryption key for the connection establishment  packet is included, unprotected, at the start  of the packet
 
 * 但这并不存在问题，因为连接建立包中没有什么秘密 That is doesn’t provide security doesn’t matter,  though, since there’s nothing secret in the  connection establishment packets.
 * 它所做的，是让中间盒实现者思考。 你可以通过运行wireshark或tcpdump这样的工具来建立一个TCP中间盒，并在数据包经过时观察它们。What is does do, is make the  middlebox implementors think.  You can build a TCP middlebox by  running a tool like wireshark or tcpdump,  and looking at the packets as they  go by.
@@ -756,7 +763,7 @@ QUIC还大量使用了GREASE。QUIC also makes extensive use of GREASE.
 
 ![](/static/2021-02-14-19-58-49.png)
 
-:orange: 为什么使用QUIC why is quic desirable/ why might you want to use QUIC?
+:orange: **为什么使用QUIC** why is quic desirable/ why might you want to use QUIC?
 
 * **因为它可以加快安全连接的建立**。 Because it can speed-up secure connection establishment;
 * **因为它解决了TLS 1.3在TCP上运行的一些局限性**；because it solves some of the limitations  of TLS 1.3 running over TCP
@@ -764,10 +771,10 @@ QUIC还大量使用了GREASE。QUIC also makes extensive use of GREASE.
 * **而且因为它，希望能够降低骨化的风险，为未来的协议发展提供长期的基础**And because it, hopefully, reduces risk of  ossification, and provides a long-term basis for  future protocol development.
 * <font color="red">也就是说，QUIC是新的。标准还没有公布，我们也没有很多使用该协议的经验。</font>That said, QUIC is new. The standard  hasn’t yet been published, and we don’t  have a lot of experience with using  the protocol.
 
-:orange: QUIC存在的问题，局限性 Why is QUIC problematic
+:orange: **QUIC存在的问题，局限性** Why is QUIC problematic
 
 * 虽然有许多不同语言的**QUIC实现，但它们都还不成熟，文档不完善，而且经常出现错误**。And while there are many implementations of  QUIC, in many different languages, they’re all  still immature, poorly documented, and frequently buggy.  
-* **而且目前，QUIC的速度往往比TCP的TLS慢，而且使用的CPU也更多**And QUIC is often, currently, slower,  and uses more CPU, than TLS over  TCP.
+* **而且目前，QUIC的速度往往比TCP-TLS慢，而且使用的CPU也更多**And QUIC is often, currently, slower,  and uses more CPU, than TLS over  TCP.
   * **这不是因为QUIC的固有局限性。而是因为TCP的实现多了40年的优化和调试时间**。This is not because of inherent limitations  of QUIC. Rather, it’s because the TCP  implementations have had 40 years more optimisation  and debugging time.
   * TCP协议栈目前优化得更好 TCP stack currently much better optimised
   * TCP和TLS经常有硬件卸载，QUIC还没有。TCP and TLS often has hardware offload; QUIC doesn’t yet

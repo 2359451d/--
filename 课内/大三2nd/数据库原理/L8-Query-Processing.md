@@ -32,7 +32,7 @@ Query Processing
   * [NESTED-LOOP JOIN](#nested-loop-join)
     * [具体细节：Algorithm](#具体细节algorithm)
   * [INDEX-BASED NESTED-LOOP JOIN](#index-based-nested-loop-join)
-  * [SORT-MERGE JOIN](#sort-merge-join)
+  * [SORT-MERGE JOIN （需要有序）](#sort-merge-join-需要有序)
     * [Example](#example)
   * [HASH-JOIN](#hash-join)
   * [总结：So Far](#总结so-far)
@@ -99,7 +99,7 @@ sort-merge外部排序方法的成本，给出
 * `b` 文件块数
 * `M` degree of merging
   * number of sorted blocks merged in each loop
-  * 合并程度，一次有多少个区块在一起合并。可为2或大于2的任何值degree of merging, how many blocks at a time that are merging together.can get a value of 2 or any value greater than 2
+  * <font color="red">合并程度，一次有多少个区块在一起合并。可为2或大于2的任何值</font> mndegree of merging, how many blocks at a time that are merging together.can get a value of 2 or any value greater than 2
 * `L` 初始有序子文件数 （merging步骤之前） number of initial sorted sub-files (before entering merging phase)
 
 :candy: **这种方法论(sort-merge strategy)的计算成本很高，因为不能很好地随着块的数量而扩展（`2b`**）。这就是为什么我们在决定对一个大的关系进行排序时，必须非常小心，（特定属性的决策） this methodology is computationally expensive because does not scale well with the number of the blocks. That's why we have to be very careful when we're about to decide on sorting a big relation w.r.t. specific attribute
@@ -153,6 +153,7 @@ sort-merge外部排序方法的成本，给出
 :orange: t层主索引范围查询成本： cost of primary index of level `t` over the key (file sorted by key field)
 
 * t（一趟定位下限块） + 1 （加载下限块）+ **连续块** （因为主索引，源文件一定是根据key排序的，可以直接加载，，最坏情况下加载所有的剩余块）
+  * 即， `t+O(b)` （1是包含在 b里的
 
 :orange: **范围查询不要使用哈希方式** Do not use Hashing for range queries
 
@@ -199,8 +200,8 @@ sparse index - Secondary Index (B+ Tree) over non-ordering, non-key
 成本
 
 * `t` - 多层索引定位 聚簇（block/cluster）
-* `1` - 加载聚簇
-* `O(b)`加载所有记录指针对应的块，最坏情况下，需要加载所有块
+* `1` - 假设这一个记录指针块，包含了所有记录的指针 （当然有可能需要加载不止1个记录指针块，这里只是简单假设）
+* `O(b)` 加载所有记录指针对应的块，最坏情况下，需要加载所有块
 
 ## 析取选择：STRATEGIES FOR DISJUNCTIVE SELECT
 
@@ -283,7 +284,7 @@ two-way equijoin，i.e., join two relations with equality ‘=’ (between forei
 
 :candy: **非常低效（baseline solution），通常结果集为笛卡尔乘积的子集** inefficient, typically the result is a small subset of the Cartesian
 
-* <font color="red">假设最后无元组匹配，那么就浪费了过多开销来执行查询，因此需要进行JOIN选择性预测</font> What-If: no tuples are actually matched; predict the matching tuples in advance(join selectivity)!
+* <font color="red">假设最后无元组匹配（结果集为空），那么就浪费了过多开销来执行查询（拼接），因此需要进行JOIN选择性预测</font> What-If: no tuples are actually matched; predict the matching tuples in advance(join selectivity)!
 
 ---
 
@@ -325,19 +326,19 @@ Algorithm Naïve Join
 基于索引的嵌套循环JOIN
 
 * 每次 `R`中取一个tuple
-  * 使用 关系S的`B`属性索引检索值， `I(r.A)` 检索元组满足条件，`s∈S, s.B=r.A`
+  * 使用 关系S的`B`属性索引`I`检索值， `I(r.A)` 检索元组满足条件，`s∈S, s.B=r.A`
   * 针对满足条件的元组 `s∈S`，**将匹配元组 `(r,s)`添加至结果集**
 
 :candy: **为什么 index-based nested loop比 nested-loop快**？ why much faster compared to the nested-loop join?
 
-* 因为能通过S关系 B属性索引I直接找到 与`r.A`值相同，且满足 `s∈S, s.B=r.A`的元组，避免线性搜索 we get immediate access on s∈S with s.B=r.A by searching for r.A using the index I, avoiding linear search on S
-  * 前例，针对每个R（chunk）中的tuple，，都需要线性扫描 `S`关系的tuple，比较是否满足筛选条件
+* 因为能通过S关系 B属性索引`I`直接找到 与`r.A`值相同，且满足 `s∈S, s.B=r.A`的元组，**避免线性搜索** we get immediate access on s∈S with s.B=r.A by searching for r.A using the index I, avoiding linear search on S
+  * 前例，针对每个`R`（chunk）中的每个块，，都需要线性扫描 `S`关系的tuple，比较是否满足筛选条件
 
 ---
 
 :candy: 如果两个属性都存在Index，那么使用哪个才能最小化JOIN操作成本？Challenge -  Which index to use to minimize the join processing cost?  --- Optimization problem
 
-## SORT-MERGE JOIN
+## SORT-MERGE JOIN （需要有序）
 
 前提：两个relation都根据Join属性排序，以用于sort-merge JOIN方法
 Pre-condition: Relations R and S are physically ordered on their joining A and B;
@@ -419,7 +420,7 @@ Pre-condition: Relations R and S are physically ordered on their joining A and B
   * 否则，首先需要排序他们才能利用该方法 otherwise, if one or both of the lations are not sorted we have to sort them first before proceeding with this method
 * **Hash-Join**
   * hash one or two relations, then about to find matching tuples over the same bucket
-  * precondition: 1 or 2 relations being hashed with respect to the join attributes
+  * precondition: 1 or 2 relations being hashed with respect to the join attributes 【前提，>=1个关系根据JOIN属性哈希】
 
 :orange: 问题
 
@@ -443,7 +444,7 @@ Pre-condition: Relations R and S are physically ordered on their joining A and B
   * 暂存匹配的结果集
 * **剩余块（`nB-2`个块）用来读取外关系的chunk（一组块），即 `nB-2` = Chunk size** rest of the blocks used to transfer a chunk of blocks from the outer relation from the disk to the main memory
   * `nB-2` blocks for reading the outer file `E`: **chunk size.**
-  * 内存一共容纳nB个块，需要一个inner buffer来读内关系的每个块，一个output buffer来写入结果，，所以剩余 nB-2个块来存外关系的块 （1 chunk）
+  * 内存一共容纳nB个块，需要一个**inner buffer来读内关系的每个块**，一个output buffer来写入结果，，所以剩余 nB-2个块来存外关系的块 （1 chunk）
 
 ---
 
@@ -480,7 +481,7 @@ Pre-condition: Relations R and S are physically ordered on their joining A and B
 
 # 基于索引嵌套循环成本预测：INDEX-BASED NESTED-LOOP COST PREDICTION
 
-![](/static/2021-04-17-18-05-02.png)
+![](/static/2021-05-01-20-40-06.png)
 
 **Strategy 1** 每次从E中取一个tuple e，，利用关系**D的B+树**，找 e.SSN值(是否有匹配记录)，满足e.SSN=d.Mgr_ssn（如匹配）
 
@@ -491,7 +492,7 @@ Pre-condition: Relations R and S are physically ordered on their joining A and B
 * `nE + rE*(xD + 1)`
   * `nE` 加载整个 关系`E`
   * `rE*(xD+1)`
-    * `E`中所有tuples匹配检索所需成本
+    * `rE`中所有tuples匹配检索所需成本，一共6000条职工记录
     * `xD` - B+树高，blocks to go down the tree
     * `1` - load actual block（leaf node 指向的物理块）
 
@@ -584,24 +585,26 @@ Lesson Learnt: Think before sort only for joining purposes!
 
 * 注意还需要两个块用于 probing phase (input buffer, output buffer)
 * Best case: Memory `nB >nD +2`
-  * `nD` 最小关系中的块数，，blocks for the smallest of the two relations (e.g. Department)
+  * `nD` **最小关系**中的块数，，blocks for the smallest of the two relations (e.g. Department)
 
 ---
 
 :orange: 步骤
 
+![](/static/2021-05-02-12-54-17.png)
+
 * **partition phase**
-  * **根据特定散列函数，将最小关系分进M个桶（主存中，，）** hashing the smallest relation into M buckets, using the specific hash function
+  * **根据特定散列函数，将【最小关系】分进M个桶（主存中，，）** hashing the smallest relation into M buckets, using the specific hash function
     * **每次加载一个block至input buffer进行散列映射**
   * Whole relation Department fits in memory and is hashed into M buckets.
   * Each Employee tuple is loaded and hashed on joining attribute SSN.
-  * 最终，，整个关系被添加 `nE`
+  * 最终，，整个关系`nE`被添加
 * **probing pahse**
-  * **加载另一个关系，应用相同散列函数，映射找到桶索引**
+  * **加载另一个关系`nD`，应用相同散列函数，映射找到桶索引**
     * **每次加载一个block至input buffer进行散列映射，查找**
       * 在该桶内，查找是否存在匹配元组 The corresponding bucket is found and searched for a matching tuple.
-  * 如，匹配，，结果写入 output buffer 。 The result is stored in another buffer (that’s why nB > nD + 2) 
-  * 最终，，整个关系被添加 `nD`
+  * 如，匹配，，结果写入 **output buffer** 。 The result is stored in another buffer (that’s why nB > nD + 2)
+  * 最终，，整个关系`nD`被添加
 
 :orange: Best Case 成本
 
@@ -610,7 +613,7 @@ Lesson Learnt: Think before sort only for joining purposes!
 
 :orange: Normal Case
 
-* 最小关系无法装入主存，，此时必须应用外部哈希方法，，most of the time, the smallest relation cannot fit in the main memory, have to deal with external hashing method (beyond the scope of the course)
+* <font color="red">最小关系无法装入主存，，此时必须应用外部哈希方法</font>，，most of the time, the smallest relation cannot fit in the main memory, have to deal with external hashing method (beyond the scope of the course)
 * `3(nE + nD)` block accesses
 
 # 所有JOIN算法成本- PUT-ALL-TOGETHER: JOIN COST PREDICTION
@@ -663,6 +666,7 @@ put together to predict the expected cost, based on the context and identify whi
   * 0.9用来使用B+索引，查找特定员工的supervisor
   * `x` - cost of going down the tree
   * `1` - load actual block
+  * `r` - 关系E的记录数
 
 ## 使用基于FK的索引
 

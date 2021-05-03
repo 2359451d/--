@@ -8,8 +8,13 @@
 * [内容分发网：Content Distribution Networks (CDNs)](#内容分发网content-distribution-networks-cdns)
   * [定义](#定义)
   * [负载均衡：Using CDNs to Distribute Load](#负载均衡using-cdns-to-distribute-load)
+    * [对ISP的好处](#对isp的好处)
   * [减少时延:Using CDNs to reduce latency](#减少时延using-cdns-to-reduce-latency)
+    * [CDN需要全局分布缓存 - 投资成本换性能](#cdn需要全局分布缓存---投资成本换性能)
+    * [CDN数据中心推向边缘网 - 低延迟计算](#cdn数据中心推向边缘网---低延迟计算)
   * [使用DNS定位最近的CDN节点：Locating the Nearest CDN Node using DNS](#使用dns定位最近的cdn节点locating-the-nearest-cdn-node-using-dns)
+    * [远程解析器-DNS客户机子网扩展（解析器和客户端不在同一ISP）](#远程解析器-dns客户机子网扩展解析器和客户端不在同一isp)
+  * [局限性: 给DNS带来的负载-短TTL](#局限性-给dns带来的负载-短ttl)
   * [使用任播路由定位最近的CDN节点:Locating the Nearest CDN Node using Anycast Routing](#使用任播路由定位最近的cdn节点locating-the-nearest-cdn-node-using-anycast-routing)
   * [最近CDN节点选择](#最近cdn节点选择)
 * [域间路由：Inter-domain Routing](#域间路由inter-domain-routing)
@@ -59,7 +64,7 @@ Networks and Internet Routing
 
 - 负载平衡和减少延迟 Load balancing and latency reduction
 - 使用DNS实现 Implementation using DNS
-- 使用任播路由的实现 Implementation using anycast routing
+- 使用**任播路由（多个物理主机有相同IP，比如DNS root，就距离来选择到底连入哪个物理主机**）的实现 Implementation using anycast routing
 
 ---
 
@@ -68,42 +73,47 @@ Networks and Internet Routing
 【内容分发网络(cdn)提供可伸缩性、负载平衡和低延迟 Content distribution networks (CDNs) provide scalability, load balancing, and low latency】**内容分发网络是一种为网络内容提供可伸缩的、负载平衡的、低延迟的托管服务** A content distribution network is a service  which provides scalable, load-balanced, low-latency hosting for  web content.  
 
 * CDN 运营商、 Akamai、 CloudFlare 和 Fastly 等公司都从事为客户托管内容的业务 CDN operators, companies such as Akamai,  CloudFlare, and Fastly, are in the business  of hosting content for their customers.
-  * 他们的客户给CDN的网络内容，这可能是图片，可能是软件上传，可能是视频，不管是什么，任何可以放在网上的东西  Their customers give them web content,  and this may be images, it may  be software uploads, it may be video,  doesn't matter what it is, anything that  can sit on the web.  
-* 【**在边缘网络和数据中心为客户提供网络缓存中的内容** Host content for their customers in web caches spread around the world in edge networks and data centres】而 **CDN** 承载着遍布世界各地的网络缓存中的内容。**其中一些位于数据中心，其中一些位于由不同 isp 操作的边缘网络** And the CDN hosts that content in  web caches that are spread around the  world.  And some of these are located in  data centres, some of these are located  in edge networks operated by various ISPs. 
-* 【**减少主服务器的负载——而不是保留文件的本地副本，它们链接到 cdn 托管的副本** Reduces load on the main servers – rather than keep a local copy of the files, they link to the CDN-hosted copy】为了减少主服务器的负载。<font color="red">客户没有保留文件的本地副本，而是将其提供给 CDN 并链接到 CDN 承载的副本</font> the idea is to reduce the  load on the main servers.  Rather than keeping a local copy of  the file, the customer gives it to  the CDN and links to the copy  hosted by the CDN. 
-  * 这减少了客户的负载，**并将负载放到 CDN 上**。这个想法是，<font color="red">cdn 足够大，在足够的数据中心和足够的边缘网络中有足够的缓存，这将负载分散到世界各地，并防止高流量网站超载</font> this reduces  the load on the customer, and puts  the load onto the CDN.  The idea is that the CDNs are  big enough, and have enough caches in  enough data centres and enough edge networks,  that this spreads the load throughout the  world, and prevents from being overloaded for  high traffic sites.
+  * 他们的**客户托管给CDN的网络内容，这可能是图片，可能是软件上传，可能是视频，不管是什么，任何可以放在网上的东西**  Their customers give them web content,  and this may be images, it may  be software uploads, it may be video,  doesn't matter what it is, anything that  can sit on the web.  
+* 【**在边缘网络和数据中心为客户提供网络缓存中的内容（CDN节点，缓存服务器中的内容**） Host content for their customers in web caches spread around the world in edge networks and data centres】而 **CDN** 承载着遍布世界各地的网络缓存中的内容。**其中一些CDN缓存服务器位于数据中心，其中一些位于由不同 isp 操作的边缘网络** And the CDN hosts that content in  web caches that are spread around the  world.  And some of these are located in  data centres, some of these are located  in edge networks operated by various ISPs.
+* 【**减少主服务器的负载——而不是保留文件的本地副本，客户链接到 cdn 托管的副本** Reduces load on the main servers – rather than keep a local copy of the files, they link to the CDN-hosted copy】为了减少主服务器的负载。<font color="red">客户没有保留文件的本地副本，而是将其提供给 CDN 并链接到 CDN 承载的缓存资源副本</font> the idea is to reduce the  load on the main servers.  Rather than keeping a local copy of  the file, the customer gives it to  the CDN and links to the copy  hosted by the CDN. 
+  * 这减少了客户的负载，**并将负载放到 CDN节点 上**。这个想法是，<font color="red">cdn网 足够大，在足够的数据中心和足够的边缘网络中有足够的缓存（服务器），这将负载分散到世界各地，并防止高流量网站超载</font> this reduces  the load on the customer, and puts  the load onto the CDN.  The idea is that the CDNs are  big enough, and have enough caches in  enough data centres and enough edge networks,  that this spreads the load throughout the  world, and prevents from being overloaded for  high traffic sites.
 * 【**减少响应请求的延迟** Reduces latency to respond to requests】它减少了请求的延迟，因为 <font color="deeppink">CDN 将在发出请求的人附近有一个缓存，并且可以遍布全世界</font>  It reduces latency for the requests,  because the CDN will have a cache  near to the person making the request,  and  can sprinkle around the world.
-* 【**减少成功分布式拒绝服务攻击的机会** Reduces chances of successful denial-of-service attack】而且它降低了分布式拒绝服务攻击组织成功攻击的机会，这也是**因为 CDN 的规模和它拥有的缓存数量** And it  reduces the chances of a successful denial  of service attack,  again just because of the sheer size  of the CDN, and the sheer number  of caches it has
-* 【**许多商业 cdn 可用，许多大型机构也运行自己的 cdn** Many commercial CDNs available，Many large organisations run their own，】
+* 【**减少成功分布式拒绝服务攻击的机会** Reduces chances of successful denial-of-service attack】而且它<font color="deeppink">降低了分布式拒绝服务攻击组织成功攻击的机会</font>，这也是**因为 CDN 的规模和它拥有的缓存数量够大** And it  reduces the chances of a successful denial  of service attack,  again just because of the sheer size  of the CDN, and the sheer number  of caches it has
+* 【**许多商业 cdn 可用，许多大型机构也运行自己的 cdn**。 Many commercial CDNs available，Many large organisations run their own，】
   * 特别是，所谓的超级巨头，大公司，如谷歌，Facebook，Netflix，苹果等，都经营自己的大规模内容分销网络。
 
 ## 负载均衡：Using CDNs to Distribute Load
 
 Cdn 的目标是分发负载（负载均衡） The goal of CDNs is to distribute  load.
 
-* 【**Cdn 通过定位世界各地的网络缓存和从本地缓存响应大多数请求来分配负载** CDNs distribute load by locating web caches around the world and answering most requests from a local cache】它们通过缓存世界各地的内容和回答大多数来自本地缓存的请求来分配负载 They distribute load by caching content  all around the world, and by answering  most requests from a local cache.
+* 【**Cdn 通过定位世界各地的【网络缓存】和从【本地（本地CDN）缓存】响应大多数请求来分配负载** CDNs distribute load by locating web caches around the world and answering most requests from a local cache】它们通过缓存世界各地的内容和回答大多数来自本地缓存的请求来分配负载 They distribute load by caching content  all around the world, and by answering  most requests from a local cache.
   * 而且，为了做到这一点，他们需要到处都有服务器。他们需要非常大，并有非常广泛的地理分布   And, in order to do that,  they need to have servers located everywhere.  They need to be very large, and have very wide geographical distribution.
-* 【**需要广泛的投资，与互联网服务供应商、互联网交换点等进行大规模合作** Needs extensive investment, large-scale cooperation with ISPs, Internet Exchange Points, etc.】这意味着他们需要大规模的投资，与网络运营商的大规模合作，与 isp 的合作，与互联网交换点的合作，与数据中心的合作，等等  This means they need a large-scale investments,  large-scale cooperation with network operators, with ISPs,  with Internet exchange points, with data centres,  and the like.
+* 【**需要广泛的投资，与互联网服务供应商ISP、互联网交换点等进行大规模合作** Needs extensive investment, large-scale cooperation with ISPs, Internet Exchange Points, etc.】这意味着他们需要大规模的投资，与网络运营商的大规模合作，与 isp 的合作，与互联网交换点的合作，与数据中心的合作，等等  This means they need a large-scale investments,  large-scale cooperation with network operators, with ISPs,  with Internet exchange points, with data centres,  and the like.
   * 他们尽可能地把**缓存**设置在**离客户最近的地方**  And they try to host caches as  near to the customers as they can.
+
+### 对ISP的好处
+
 * 【**互联网服务提供商(ISP)承载 CDN 的服务器的互利性** Mutual benefit for an ISP to host the servers for a CDN】
-  * 大型ISP肯定会为其他大型CDN提供缓存服务，ISP承载这种CDN缓存的互利性
-  * 【**增加 CDN 的覆盖面和健全性** Increases the reach and robustness of the CDN】很明显，从 CDN 的角度来看，**如果能够在尽可能多的网络中放置缓存，那么它将增加 CDN 的覆盖范围和健壮性** clearly, from the CDNs point of  view, it increases the reach and the  robustness of the CDN, if they can  put caches in as many networks as  possible.
-  * 【**减少ISP网络的负载** Reduces the load on the ISP’s network】从 ISP 的角度来看，它减少了他们网络的负载
-    * 【**发送到缓存的内容的一个副本; 然后缓存会分发多次** One copy of the content sent to cache; the cache then distributes many times】CDN 可以将**文件的一个副本推送到缓存中，然后将其分发给该 ISP 的其他客户** The CDN can push one copy of  a file into the cache, and it  can then distribute it to the other  customers of that ISP.
-    * 【**避免从 ISP 到外部世界的链接过载** Avoids overload of link from ISP to outside world】这意味着<font color="red">所有的负载都来自 ISP 的网络，而不需要通过昂贵的广域连接到互联网的其他部分。这样就避免了从 ISP 到外部世界的链接过载</font> And it means that all of that  load is then served from within the  ISP’s network, without having to go over  the expensive wide-area links to the rest  of the Internet.  And this avoid overloading the links from  the ISP to the outside world..
-      * 一些流行服务的规模意味着这是必要的 And the scale of some of the  popular services means that this is necessary
-      * 例如，Netflix 每秒发布“数十兆兆比特”的视频——不可能从单个数据中心发送; 需要本地分发 e.g., Netflix distribute “tens of terabits per second” of video – not possible from a single data centre; needs local fanout
-        * 例如，Netflix 谈到他们如何每秒发布10兆兆位的视频，而这显然是不可能从一个单一的数据中心。它必须在一个层次结构中被推出，**中央数据中心(源站)将数据推出到 CDN，CDN 将数据推出到边缘缓存，再分发给客户**   Netflix, for example, talk about how they  distribute 10s of terabits of video per  second, and this clearly isn't possible from  a single data centre.  It has to be pushed out in  a hierarchy, with the central data centre  pushing data out to a CDN,  which pushes it out to edge caches,  which distribute to the customers.
+  * <font color="deeppink">大型ISP肯定会为其他大型CDN提供缓存服务，ISP承载这种CDN缓存的互利性</font>
+  * 【**增加 CDN 的覆盖面和健全性** Increases the reach and robustness of the CDN】很明显，从 CDN 的角度来看，**如果能够在尽可能多的网络中放置缓存服务器（CDN节点），那么它将增加 CDN 的覆盖范围和健壮性** clearly, from the CDNs point of  view, it increases the reach and the  robustness of the CDN, if they can  put caches in as many networks as  possible.
+* 【**减少ISP网络的负载** Reduces the load on the ISP’s network】从 ISP 的角度来看，它减少了他们网络的负载
+  * 【**发送到缓存的内容的一个副本; 然后缓存会分发多次** One copy of the content sent to cache; the cache then distributes many times】CDN 可以将**文件的一个副本推送到缓存中，然后将其分发给该 ISP 的其他客户** The CDN can push one copy of  a file into the cache, and it  can then distribute it to the other  customers of that ISP.
+  * 【**避免从 ISP 到外部世界的链接过载** Avoids overload of link from ISP to outside world】这意味着<font color="red">所有的负载都来自本地 ISP 的网络，而不需要通过昂贵的广域连接到互联网的其他部分。这样就避免了从 ISP 到外部世界的链接过载</font> And it means that all of that  load is then served from within the  ISP’s network, without having to go over  the expensive wide-area links to the rest  of the Internet.  And this avoid overloading the links from  the ISP to the outside world..
+    * 一些流行服务的规模意味着这是必要的 And the scale of some of the  popular services means that this is necessary
+    * 例如，Netflix 每秒发布“数十兆兆比特”的视频——**不可能从单个数据中心发送; 需要本地（边缘网络）分发** e.g., Netflix distribute “tens of terabits per second” of video – not possible from a single data centre; needs local fanout
+      * 例如，Netflix 谈到他们如何每秒发布10兆兆位的视频，而这显然是不可能从一个单一的数据中心。它必须在一个层次结构中被推出，**中央数据中心(源站)将数据推出到 CDN，CDN 将数据推出到边缘ISP网络中的缓存服务器（CDN节点），再分发给客户**   Netflix, for example, talk about how they  distribute 10s of terabits of video per  second, and this clearly isn't possible from  a single data centre.  It has to be pushed out in  a hierarchy, with the central data centre  pushing data out to a CDN,  which pushes it out to edge caches,  which distribute to the customers.
         * 你不能在一个单一的数据中心，在一个单一的网站上托管所有这些，你必须将负载分散到世界各地。You can't  host all of this from a single  data centre, from a single site,  you have to spread the load around  the world.
 
 ## 减少时延:Using CDNs to reduce latency
 
 【**Cdn 的另一个关键好处是可以减少延迟→内容从附近的缓存传递** Key CDN benefit is reducing latency → content is delivered from nearby caches】
 
-* 我们的目标是内容**不仅因为负载平衡的原因而分散在不同的地理位置**，还因为总是有一个**本地副本在请求数据用户附近** The goal is that the content is  not only spread geographically for load balancing  reasons, but it’s spread geographically so that  there's always a local copy near to  the person requesting the data.
+* 我们的目标是内容**不仅因为负载平衡的原因而分散在不同的地理位置**，还因为总是有一个**本地副本（CDN缓存节点在ISP内部网）在请求数据用户附近** The goal is that the content is  not only spread geographically for load balancing  reasons, but it’s spread geographically so that  there's always a local copy near to  the person requesting the data.
   * **这样可以减少请求的延迟，因为它可以缓存在您附近**  And this reduces the latency for your  requests, because it can be cached near  to you
   * 例如，对基于美国的服务的请求通过欧洲的 CDN 缓存进行响应，而不需要跨越到美国的长途路径 e.g., requests to a US-based service are answered from a CDN cache in Europe, rather than having to cross long-distance path to the US
     * 这意味着当你从一个受欢迎的网站请求内容时，如果你在欧洲，你从一个受欢迎的网站请求内容，它不必去网站所在的美国，但可以被回答，但请求可以被回答，从位于欧洲的CDN缓存。
+
+### CDN需要全局分布缓存 - 投资成本换性能
 
 【但是，**需要 CDN 代理缓存的全局分布** Requires global distribution of CDN proxy caches】
 
@@ -111,15 +121,17 @@ Cdn 的目标是分发负载（负载均衡） The goal of CDNs is to distribute
   * 如果我们看看这张来自 Netflix 的图片，我们会发现如果你在欧洲或北美，肯定有很多 CDN 缓存，而且有一个就在你附近。如果你位于南美洲的某些地区，如果你位于西澳大利亚人口稠密的地区，如果你位于新加坡，或者日本，或者其他类似的地方，你附近就会有 CDN
   * 但是，如果你**在非洲，你可能得不到很好的服务。如果你在亚洲的大部分地区，你就不会得到很好的服务**
 * 【**向世界发展中地区提供互联网接入需要的不仅仅是提供连接** Providing effective Internet access to developing regions requires more than just connectivity; also needs data centres and infrastructure to host the CDN nodes】
-  * 如果你想为非洲部分地区，比如亚洲部分地区，提供高质量的互联网接入，你不仅需要提供带宽，<font color="red">你不仅需要提供网络链接，你还需要提供数据中心，这些数据中心可以承载 CDN 缓存</font>  If you want to provide high-quality Internet  access to parts of Africa, for example,  or parts of Asia which don't have  it yet, you don't just need to  provide bandwidth, you don't just need to  provide network links, you need to provide  data centres that can host CDN caches.
+  * 如果你想为非洲部分地区，比如亚洲部分地区，提供高质量的互联网接入，你<font color="red">不仅需要提供带宽，你不仅需要提供网络链接，你还需要【提供数据中心，这些数据中心可以承载 CDN 缓存服务器</font>】  If you want to provide high-quality Internet  access to parts of Africa, for example,  or parts of Asia which don't have  it yet, you don't just need to  provide bandwidth, you don't just need to  provide network links, you need to provide  data centres that can host CDN caches.
 * **因此，它增加了获得良好网络性能所需的投资成本** So it's increasing the investment needed to  get good performance.
+
+### CDN数据中心推向边缘网 - 低延迟计算
 
 【**可缓存的静态内容(视频、软件更新、图像)可能需要边缘计算基础设施来支持其他应用程序**  Effective for cacheable static content – video, software updates, images – may need edge compute infrastructure to support other applications】
 
 * 这对可缓存的静态内容有效。内容发布网络一直专注于视频、图像、软件更新，以及发布大型文件，它们在这方面的表现令人难以置信地好  And this works for cacheable static content.  CDNs have historically been focused on video,  and images, and software updates, and distributing  large files, and they work incredibly well  for that.
-* 但我们也开始看到人们谈论**边缘计算应用程序**。还有一些应用程序，在**靠近客户的地方进行某种计算**。这通常适用于扩增实境游戏和类似的应用程序，你需要【**低延迟的计算服务器---- 数据中心**】 But we're also starting to see people  talk about edge compute applications.  And applications where there is some sort  of computation going on near to the  customer. And this tends to be for  augmented reality games, and applications like that,  where you need low latency to the  compute server, the data centre
-  * <font color="red">Cdn 开始承载这类内容，开始允许计算被推入边缘（边缘计算）</font> CDNs are starting to host  this sort of content, starting to allow  compute to be pushed into the edges.
-  * **这意味着他们不仅需要【缓存】和【边缘数据存储】，还需要大规模的【计算基础设施**】   And, again, this means that they don't  just need caching and data storage at  the edges, but they need large scale  computing infrastructure.
+* 但我们也开始看到人们谈论**边缘计算应用程序**。还有一些应用程序，在**靠近客户的地方进行某种计算**。这通常适用于扩增实境游戏和类似的应用程序，你需要【**低延迟的计算服务器---- 数据中心（最好在ISP本地网内，离客户越近越好**】 But we're also starting to see people  talk about edge compute applications.  And applications where there is some sort  of computation going on near to the  customer. And this tends to be for  augmented reality games, and applications like that,  where you need low latency to the  compute server, the data centre
+  * <font color="red">Cdn 开始承载这类内容，开始允许计算被推入边缘（ISP边缘网络）</font> CDNs are starting to host  this sort of content, starting to allow  compute to be pushed into the edges.
+  * **这意味着他们不仅需要【缓存服务器】和【边缘数据存储】，还需要大规模的【计算基础设施**】   And, again, this means that they don't  just need caching and data storage at  the edges, but they need large scale  computing infrastructure.
   * 世界上**发达国家**的这一目标也是显而易见的。在**发展中国家**，这种基础设施还没有到位  Again, developed parts of the world this  is eminently achievable. In developing, in less  well-developed parts of the world, this infrastructure  isn't yet there.
 
 ## 使用DNS定位最近的CDN节点：Locating the Nearest CDN Node using DNS
@@ -130,34 +142,41 @@ Cdn 的目标是分发负载（负载均衡） The goal of CDNs is to distribute
 
 * **有两种方法找到最近CDN节点**
   * DNS
-  * Anycast路由技术
+  * Anycast路由技术 （多个主机，相同IP，就近选择）
 
 :orange: **对于使用 DNS 的 CDN，目标是通过对 DNS 查询，找到最近的 CDN 节点，并给出节点位置**  For the CDNs they use the DNS,  the goal is that they locate the  nearest CDN node based on,  and give you an answer for where that node is, by playing games with  the DNS queries.
 
 * 【**CDN 托管的每个资源都有一个唯一的 DNS 名称——每个资源都有一个不同的域名** Each resource hosted by the CDN has a unique DNS name – each resource is given a different domain name】<font color="deeppink">当 CDN 的客户将资源提供给要托管的 CDN 时，CDN 将提供该资源对应的唯一的域名</font> when a customer  of the CDN gives a resource to  the CDN to be hosted, the CDN  gives that resources unique domain name.
   * **CDN 上的每个图像、每个资源、每个文件都有一个唯一的主机名**
-  * 例如，如果“ site example. com”试图在 CDN 上托管一个小猫的图像，CDN 会给它一个唯一的主机名  For example, if the "site example.com" is  trying to host an image of a  kitten on a CDN, the CDN would  give that a unique hostname
+  * 例如，如果“ site example. com”试图在 CDN 上托管一个小猫的图像，**CDN 会给它一个唯一的主机名**  For example, if the "site example.com" is  trying to host an image of a  kitten on a CDN, the CDN would  give that a unique hostname
     * e.g., the CDN hosts https://example.com/images/kitten.jpg as https://9BC1C10B7947A890B9.cdn-example.com/kitten.jpg
 * 【**注意，资源对应的域名不一定总是指向真实主机（源站**）they don't alway refer  to real hosts. 】<font color="deeppink">域名都是 DNS 中指向缓存中特定服务器的条目，但是它提供了灵活性</font> They’re all entries in  the DNS which point to a particular  server in the cache, but it gives  the flexibility.
   * 因为 CDN 上的每个文件，每张图片，每段内容，都有一个不同的主机名，**CDN 可以为每个图片，每个文件返回一个不同的 IP 地址，并且它可以指向一个适当的副本**   Because every file, every image, every piece  of content, on the CDN has a  different hostname, the CDN can return a  different IP address for each image,  each file, and it can point it  at an appropriate replica
-* 【CDN 的 DNS 服务器为一个域名返回不同的 a 或 AAAA 记录，**具体取决于请求位置，哪个CDN 缓存中有数据**】 DNS server for the CDN returns different A or AAAA records for a name, depending on where it’s requested from, what CDN caches have the data
-  * 【**根据进行查询的DNS解析程序的 IP 地址指向本地缓存**】 Directs to local cache based on IP address of resolver making the query
-    * CDN 在获得此主机的DNS域名查找时，通过返回一个**引用本地缓存的不同 IP 地址**来重定向它 CDN,  when it gets the name look-up for  this  host, redirects it by returning a different  IP address that refers to a local  cache.
-    * 如果我在家里查找这个域名，我可能会在我的 ISP 里找到一个特定的 CDN 缓存，如果你在**不同 ISP 的网络里，在你家里做同样的查找，你会得到一个不同的 IP 地址，指向不同的由 CDN 托管的缓存**   And if I look up  this name from my home, I might  get particular CDN cache located in the  ISP I have, and if you make  the same look-up from your home,  in a different ISP’s network, you’ll get  a different IP address back for that  name, pointing to a different cache that's  hosted by the CDN.
-    * <font color="red">这是基于解析器的 IP 地址，因为 CDN 看到的只是来自本地（DNS服务器）解析器的请求</font>  And this is based on the IP  address of the resolver, because all the  CDN sees is the requests coming from  the local resolvers.
-  * 【**远程解析器的 DNS 客户机子网扩展[ RFC7871]** DNS client subnet extension [RFC7871] for remote resolvers】但是 DNS 解析器有一个名为 DNS 客户端子网扩展的扩展，<font color="red">所以如果客户端和解析器不在同一个地方，解析器可以告诉 CDN 客户端的 IP 地址</font>  But the DNS resolver has an extension  called DNS client subnet extension, so if  the client is not in the same place as the resolver, the resolver can  tell the CDN the IP address where  the client came from.
+* 【CDN 的 <font color="deeppink">DNS 服务器可能为一个域名返回不同的 a 或 AAAA 记录</font>，**具体取决于请求位置（最近的），哪个CDN 缓存中有数据，以及TTL（一般很短**)】 DNS server for the CDN returns different A or AAAA records for a name, depending on where it’s requested from, what CDN caches have the data
+  * 【**根据进行查询的DNS解析器的 IP 地址，分配，返回本地CDN缓存的IP**】 Directs to local cache based on IP address of resolver making the query
+    * CDN。 在获得此主机的DNS域名查找时，通过返回一个**引用本地CDN缓存的不同 IP 地址**来重定向它。 CDN,  when it gets the name look-up for  this  host, redirects it by returning a different  IP address that refers to a local  cache.
+    * 如果我**在家里**查找这个域名，我可能会在**我的 当前ISP** 里找到一个特定的 CDN 缓存， And if I look up  this name from my home, I might  get particular CDN cache located in the  ISP I have,
+    * 如果你在**不同 ISP 的网络里，在你家里做同样的查找，你会得到一个不同的 IP 地址，指向不同的由 CDN 托管的缓存**   and if you make  the same look-up from your home,  in a different ISP’s network, you’ll get  a different IP address back for that  name, pointing to a different cache that's  hosted by the CDN.
+    * <font color="red">这是基于解析器的 IP 地址，因为 【CDN 看到的只是来自本地ISP的DNS解析器请求】，，客户端与选定的解析器通信，让它做请求</font>  And this is based on the IP  address of the resolver, because all the  CDN sees is the requests coming from  the local resolvers.
+
+### 远程解析器-DNS客户机子网扩展（解析器和客户端不在同一ISP）
+
+【**远程解析器的 DNS 客户机子网扩展[ RFC7871]** DNS client subnet extension [RFC7871] for remote resolvers】但是 DNS 解析器有一个名为 DNS 客户端子网扩展的扩展，<font color="red">所以如果【客户端和解析器不在同一个地方，不在一个ISP网里】，解析器可以【告诉 CDN】 【客户端的 IP 地址】</font>  But the DNS resolver has an extension  called DNS client subnet extension, so if  the client is not in the same place as the resolver, the resolver can  tell the CDN the IP address where  the client came from.
+
+## 局限性: 给DNS带来的负载-短TTL
+
 * <font color="deeppink">CDN 必须查找发出请求的 IP 地址，无论是解析器的 IP 地址还是客户机子网扩展的 IP 地址，并尝试猜测它在世界的哪个地方。它需要查找 IP 地址，并有一个 IP 地址到位置的映射</font> And the CDN has to look-up the  IP address where it sees the requests  coming from, that of the resolver or  that of the client with the client  subnet extension, and try and guess where  in the world it is.  It needs to look-up the IP address,  and have a mapping of IP addresses  to locations.
   * 这并不需要特别精确。我们的目标是弄清楚你是否在英国，并且直接连接到位于伦敦的缓存，而不是纽约的缓存。它并不真的在乎你是否意识到你在格拉斯哥，或者曼彻斯特，或者其他什么地方，主要的是它知道你在英国，所以你应该去英国的缓存  And this doesn't need to be particularly  accurate. The goal is to figure out  if you're in the UK, and direct  to the cache based in London,  rather than the cache based in New  York, for example
 * 【**允许非常细粒度的控制，但给 DNS 带来高负载** Allows very fine-grained control, but puts high load on DNS】这使 CDN 具有非常细粒度的控制
-  * 它可以把 **DNS 响应**的**存活时间降低到几秒钟**，所以每次客户端查找一个图像，对于 CDN 托管的每个不同的图像，每个不同的资源，它都可以返回不同的答案 And this gives the CDN very fine-grained  control. It can put the time-to-live on  its DNS responses down to be a  small number of seconds, so  every time a client looks up an  image, for every different image, every different  resource the CDN is hosting, it can  return a different answer.
-  * 因此，它可以在不同的数据中心之间，快速地在不同的缓存之间进行负载平衡。So it can  very rapidly load balance among it’s different  caches,  amongst it’s different data centres.
-  * **但是它给 DNS 带来了很高的负载，这意味着有大量的 DNS 查询正在发生，而且它们不能被长时间缓存** But it  puts a high load on the DNS,  it means there's lots of DNS queries  happening, and they can't be cached for  very long.
+  * 它可以把 **DNS 响应**的**存活时间TTL降低到几秒钟**，<font color="red">所以每次客户端查找一个图像，对于 CDN 托管的每个不同的图像，每个不同的资源，它都可以返回不同的答案</font> And this gives the CDN very fine-grained  control. It can put the time-to-live on  its DNS responses down to be a  small number of seconds, so  every time a client looks up an  image, for every different image, every different  resource the CDN is hosting, it can  return a different answer.
+  * 因此，它可以<font color="red">在不同的数据中心之间，【快速地】在不同的缓存之间进行负载平衡</font>。So it can  very rapidly load balance among it’s different  caches,  amongst it’s different data centres.
+  * **但是它给 DNS 带来了很高的负载，这意味着有大量的 DNS 查询正在发生，而且它们不能被长时间缓存【因为TTL过短，动不动得负载均衡，更新缓存记录** But it  puts a high load on the DNS,  it means there's lots of DNS queries  happening, and they can't be cached for  very long.
 
 ## 使用任播路由定位最近的CDN节点:Locating the Nearest CDN Node using Anycast Routing
 
 如果**同时向同一源站服务器发出许多请求**，该服务器可能会**不堪重负，无法有效响应其他传入请求**。
 
-* 在 Anycast 网络中，主要流量不是由一台**源站**服务器来承担，其**负载可以分散到其他可用的数据中心（也就是缓存，CDN服务器所在位置**），每个数据中心都具有能够处理和响应传入请求的服务器
+* 在 Anycast 网络中，主要流量不是由一台**源站**服务器来承担，其**负载可以分散到其他可用的数据中心（也就是，CDN缓存服务器，CDN服务器所在位置**），每个数据中心都具有能够处理和响应传入请求的服务器
 
 ![](/static/2021-04-27-15-03-04.png)
 
@@ -168,17 +187,17 @@ Cdn 的目标是分发负载（负载均衡） The goal of CDNs is to distribute
 :orange: 【**CDN托管的每个资源都有一个独特的文件名** Each resource hosted by the CDN has a unique filename】CDN 托管的每一个资源，都会给它一个不同的文件名
 
 * 【**DNS域名总是映射到相同的IP地址 - 该IP地址指向CDN数据中心的负载平衡器** The DNS name always maps to the same IP address – that IP address is a load balancer at the entrance to a data centre】
-* 【**CDN使用多个数据中心--都使用相同的IP地址**】The CDN uses multiple data centres – all using the same IP addresses
+* 【**CDN有多个数据中心--都使用相同的IP地址（指向不同负载均衡器**）】The CDN uses multiple data centres – all using the same IP addresses
   * 例如，CDN 有三个数据中心，它们都使用 IP 地址192.0.2.4  example,  the CDN has three data centres,  all of which are using IP address  192.0.2.4
   * 【**每个数据中心通过BGP公布其地址** Each data centre advertises its addresses via BGP】**CDN 在世界各地有许多数据中心，它们都使用相同的 IP 地址范围**。他们将这些 IP 地址范围广告到路由系统，到 **BGP 路由系统** And the CDN has many data centres  around the world, and they all use  the same IP address ranges. And they  advertise those IP address ranges into the  routing system, into the BGP routing system
-  * 【**域间互联网路由将确保流量进入离源头最近的数据中心** Inter-domain Internet routing will ensure traffic goes to the closest data centre to source】互联网路由然后确保流量到最近的数据中心来源
-    * <font color="deeppink">通过从多个地方向路由发送相同的 IP 地址，路由系统确保流量到达最近的数据中心</font>  By advertising the same IP address into  the routing from multiple places, the routing  system makes sure that the traffic goes  to the nearest data centre. 
+  * 【**域间互联网路由，将确保流量进入离请求源头最近的CDN数据中心** Inter-domain Internet routing will ensure traffic goes to the closest data centre to source】互联网路由然后确保流量到最近的数据中心来源
+    * <font color="deeppink">通过从多个地方向路由【发送相同的 IP 地址（因为CDN数据中心的域名相同，尽管资源对应的域名不同）】，路由系统确保流量到达最近的数据中心</font>  By advertising the same IP address into  the routing from multiple places, the routing  system makes sure that the traffic goes  to the nearest data centre.
 
 ## 最近CDN节点选择
 
 :orange: anycast是对路由的滥用。**它有意宣传来自多个地方的同一 IP 地址，让路由负责数据如何到达那里**。 And it's an abuse of routing.  It's intentionally advertising the same IP address  from multiple places,  letting the routing take care of how  the data gets there.
 
-* Cdn 使用哪种方法？可能两者都有。  Which approach do CDNs use? Probably a  mix of both. 
+* Cdn 使用哪种方法？可能两者都有（DNS or anycast交给路由处理）。  Which approach do CDNs use? Probably a  mix of both. 
 * 其中一些大公司只使用基于 dns 的方法，其中一些公司使用两种方法的混合，**两种方法都有效，而且它们有不同的权衡** Some of the large ones just use  the DNS-based approach, some of them use  a mix of both approaches, and both  approaches work, and they have different trade-offs.
 
 # 域间路由：Inter-domain Routing
@@ -196,7 +215,7 @@ Cdn 的目标是分发负载（负载均衡） The goal of CDNs is to distribute
 * **每个网络都是一个自治系统（AS**） Each network is an Autonomous System (AS)
   * 它独立运作
 * **每个网络都是一个独立的路由域** Each network is a separate routing domain
-  * 它在内部自己决定如何在自己的网络中路由数据 It makes its own decisions internally  how to route data around its own  network.
+  * 它在<font color="deeppink">内部自己决定如何在自己的网络中路由数据</font> It makes its own decisions internally  how to route data around its own  network.
 
 :orange: 域间路由是寻找从**源网络到目的网络的最佳路径的问题** Inter-domain routing is the problem of finding the best path from the source network to the destination network
 
