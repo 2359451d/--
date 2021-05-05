@@ -12,6 +12,9 @@ what is the goal of cyber security?
 content
 
 * [Lecture 1](#lecture-1)
+* [一个使用所有最好的加密技术的系统如何仍然是不安全的](#一个使用所有最好的加密技术的系统如何仍然是不安全的)
+* [各种场景涉及的安全问题](#各种场景涉及的安全问题)
+* [什么是安全工程，它与软件工程有什么相似/不同之处？](#什么是安全工程它与软件工程有什么相似不同之处)
 * [资产 & 资产保护机制：Assets & Protection Mechanism](#资产--资产保护机制assets--protection-mechanism)
   * [保密性 & 隐私：Confidentiality & Privacy](#保密性--隐私confidentiality--privacy)
   * [完整性：Integrity](#完整性integrity)
@@ -59,6 +62,28 @@ content
     * [密码段连接模式（CBC） & 电子密码本模式（EBC）：Cipher Block Chaining & Electronic Codebook](#密码段连接模式cbc--电子密码本模式ebccipher-block-chaining--electronic-codebook)
   * [数据擦除算法：Erase Algorithm](#数据擦除算法erase-algorithm)
 * [【】AES Using JAVA](#aes-using-java)
+
+# 一个使用所有最好的加密技术的系统如何仍然是不安全的
+
+一个使用所有最好的加密技术的系统如何仍然是不安全的 Explain, with examples, how a system that uses all the best encryption techniques can still be insecure.
+
+* 工作人员可能会绕过安全机制来完成他们的工作。他们可能被迫使用强大的密码，并把它们写下来。他们可能会分享密码，以便其他人可以为他们打掩护。Staff may bypass security mechanisms to get their work done. They may be forced to use strong passwords and write them down. They may share passwords so that other people can cover for them.
+
+# 各种场景涉及的安全问题
+
+举例说明在硬件、软件、网络、人员、场地和组织中如何出现安全问题。你的每个例子会影响到CIA的哪些方面？Explain with examples how security problems can arise in hardware, software, networks, personnel, site and organization. What CIA aspects are affected by each of your examples
+
+* 硬件。系统可能出现故障，影响可用性。Hardware: The system may fail, affecting availability.
+* 软件。软件可能不按预期工作，无论是故意的还是由于错误的。这将影响CIA的所有方面。Software: The software may not work as intended, either deliberately or through bugs. This would affect all the CIA aspects.
+* 网络。流量可能被窥探，影响保密性；流量可能被替换，影响完整性；网络可能被DOS攻击所淹没，影响可用性。Networks: Traffic can be spied on, affecting confidentiality, traffic can be replaced, affecting integrity, and the network can be overwhelmed with a DOS attack, affecting availability.
+* 人员。内部攻击会影响保密性和完整性。Personnel: An insider attack can affect confidentiality and integrity.
+* 场地。场地可能容易发生自然事件，影响可用性。组织。可能存在不正当的激励机制，即如果决定是错误的，做出决定的人不负责任。这可能会导致钱花在错误的地方，影响CIA的所有方面。Site: The site may be prone to natural events, affecting availability. Organisation: There may be perverse incentives, where those making decisions are not responsible if the decisions are bad. This may lead to money being spent on the wrong things, affecting all CIA aspects.
+
+# 什么是安全工程，它与软件工程有什么相似/不同之处？
+
+什么是安全工程，它与软件工程有什么相似/不同之处？What is security engineering and how is it similar to / different from Software Engineering?
+
+软件工程是一种构建软件的系统方法。安全工程是一种构建安全软件的系统方法。它涉及到识别安全要求，以及误用案例和其他技术。下一步是创建政策以满足需求。最后一步是创建和使用机制，以确保对政策的遵守。Software engineering is a systematic approach to building software. Security engineering is a systematic approach to building secure software. It involves identifying the security requirements, with misuse cases and other techniques. The next step is creating policies to satisfy the requirements. The last step is to create and use mechanism to ensure compliance with the policies.
 
 # 资产 & 资产保护机制：Assets & Protection Mechanism
 
@@ -520,6 +545,12 @@ recycling, to be reused as part of another file later on
 * spy场景，alice获取信息后在安全地点将信息告知bob
 * 不适用于购物情景，因为网上购物不会存在线下见面交易
 
+---
+
+举出一些安全传输媒介的例子。这种加密方法的局限性是什么？Give some examples of a secure transmission medium. What are the limitations of this approach to encryption?
+
+* 两个人可以在一个隔音的房间里见面。他们必须确保便携式电脑，如手机，没有人在听。应该没有窗户，以避免读唇语。这很难实现，只在有限的情况下实用。Two people can meet in a soundproof room. They have to make sure that portable computers, such as mobile phones, are not listening. There should be no windows to avoid lip reading. This is difficult to achieve and is only practical in a limited number of cases.
+
 ## 隐藏信息协议：Protocol - Hiding in Plain Sight
 
 ![](/static/2021-01-27-01-23-16.png)
@@ -594,6 +625,12 @@ how protocol works - encrypted secure area & transferred by an insecure medium �
 
 ## 保密加密算法协议：Protocol- Use a Secret Algorithm
 
+使用秘密算法进行加密和解密有什么问题？什么是更好的解决方案？What is wrong with using a secret algorithm for encryption and decryption? What is a better solution?
+
+算法的发明者要承担个人风险。该算法不会受到广泛的审查，很可能包含弱点。最好是有一个带有秘密钥匙的公开算法。The inventor of the algorithm is at personal risk. The algorithm will not be subject to a wide review and may well contain weaknesses. It is better to have a public algorithm with a secret key.
+
+---
+
 ![](/static/2021-01-27-16-38-57.png)
 
 :orange: 保密加密算法的实现细节 keep the details of the algorithm secret（use secret algorithm）
@@ -605,6 +642,12 @@ how protocol works - encrypted secure area & transferred by an insecure medium �
   * 很容易自欺欺人地认为算法比实际情况更安全（如果不进行审阅）It is easy to fool oneself that an algorithm is more secure than it really is （without peer review）
 
 ## 单秘钥/对称加密: Public Algorithm & Secret Key
+
+单一密钥加密是如何工作的，它的主要问题是什么？How does single key encryption work and what is the major problem with it?
+
+* 算法是公开的，而密钥是秘密的。交易双方都必须知道秘密密钥，这导致了密钥分配问题。密钥也很难记住，所以必须储存起来以备将来使用，这就导致了密钥储存问题。The algorithm is public while the key is secret. Both parties to the transaction have to know the secret key, leading to the key distribution. Keys are also hard to remember and so must be stored for future use, leading to the key storage problem.
+
+---
 
 > 加密解密使用相同密钥算法，且加密解密算法细节公开 Details of the encryption and decryption algorithms are public
 
@@ -664,6 +707,12 @@ how protocol works - encrypted secure area & transferred by an insecure medium �
 * Also consider an erase algorithm
 
 ## DES: data encryption standard
+
+想象一下，你的任务是设计一个基于DES芯片的硬件加密设备。你的公司预计，一个资金雄厚的组织将认真尝试破解你的设备所加密的数据。你将如何选择使用DES芯片？Imagine you have the task of designing a hardware encryption device based on DES chips. Your company anticipates that a well funded organisation will make a serious attempt to break the data encrypted by your device. How would you choose to employ the DES chips?
+
+DES本身是相当弱的，因为它的密钥很短。它可以被修改为使用更长的密钥，因此可以使用一种组合方法，如双密钥三重DES或三密钥三重DES。DES itself is rather weak because of the short key. It can be modified to use a longer key and so a combination method such as two key triple DES or three key triple DES could be used.
+
+---
 
 ![](/static/2021-01-27-18-26-24.png)
 
@@ -740,6 +789,12 @@ o **密码块链和初始化向量的使用** Cipher block chaining and the use 
 
 ## AES：advanced encryption standard
 
+描述选择AES算法的过程与导致DES的过程有什么不同。新的过程是更好还是更坏？AES在哪些方面比DES好？Describe how the process of choosing the AES algorithm was different from the one that led to DES. Was the new process better or worse? In what ways is AES better than DES?
+
+DES是秘密委托的，而导致AES的过程是公开的。因此，尽管没有发现DES的后门，但人们更相信AES的过程更安全。DES的主要问题是密钥长度太短，AES已经解决了这个问题。 DES was secretly commissioned, while the process that led to AES was public. There is thus more confidence that the AES process is more secure, even though no backdoors in DES have been discovered. The main problem with DES was the short key length, which has been fixed with AES.
+
+---
+
 history
 
 ![](/static/2021-01-27-19-20-33.png)
@@ -810,6 +865,14 @@ history
 * 必须作为明文和加密文件/块一起传输，以便文件能被解密 It must be transmitted as plain text with the file so that the file can be decrypted
 
 :orange: 【为什么需要IV，好处】 --- 如果我们有许多文档都以相同的块开始，加密后的密文将是不同的，因为它们**有不同的初始化向量（随机）**
+
+---
+
+描述电子密码本和使用DES等区块密码的密码块链方法，提及每种操作模式的优点和缺点。Describe the electronic codebook, and cipher block chaining methods of using block ciphers such as DES, mentioning the strengths and weaknesses of each mode of operation.
+
+电子密码本一次对数据进行一个块的加密。它的弱点是，相同的明文块总是产生相同的密码文本块，使其容易受到统计分析的影响。Electronic codebook encrypts the data one block at a time. Its weakness is that the same block of plain text always produces the same block of cipher text, making it vulnerable to statistical analysis.
+
+密码块链在加密前将纯文本块与前一个密码文本块进行排他性处理，对第一个块使用初始化向量。这不容易受到统计分析的影响。一个初始的随机块称为初始化向量，也必须提供并与信息一起传输。Cipher block chaining exclusive ors the plain text block with the previous cipher text block before encrypting, using an initialisation vector for the first block. This is not vulnerable to statistical analysis. An initial random block,called the Initialisation Vector, must also be provided and transmitted with the message.
 
 ## 数据擦除算法：Erase Algorithm
 

@@ -1,5 +1,11 @@
 # 公钥基础设施：Public Key Infrastructure
 
+MegaCorp是一个跨国组织，在许多不同的地点运作。这些网站使用公钥加密进行通信。
+你想监视他们的通信，并改变信息的内容。请描述你可以实现这一目标的几种方法，并概述你成功所需的资源。在每一种情况下，描述MegaCorp可以用来挫败你的企图并保护他们的资产和通信的反制措施。MegaCorp is a multination organisation that operates on many different sites. The sites communicate using public key encryption.
+You would like to spy on their communications and also change the contents of messages. Describe several ways in which you can achieve this, outlining the resources needed for you to succeed. In each case describe the countermeasures that MegaCorp can use to foil your attempts and protect their assets and communications.
+
+你需要能够截获两个站点之间的通信，并能够替换信息。然后，你可以用你自己的公钥替换传输中的公钥。MegaCorp可以通过在公钥证书内发送他们的密钥来进行防御。MegaCorp可以依靠一个受信任的认证机构来签署证书，在这种情况下，你可以尝试让受信任的机构给你颁发假的证书。最有效的方法是内部攻击，即颠覆进行身份检查的人之一。认证机构需要建立一个程序来防止这种情况的发生，也许可以通过监控其参与身份检查的工作人员的所有活动。你也可以黑进目标网站，把你自己的一个主证书添加到他们的证书列表中。MegaCorp可能大到足以创建自己的证书签署程序，并使用它来签署其每个站点的公钥证书。然后，它可以在自己的技术人员访问现场时交付主证书。这里的弱点是，他们不会像受信任的认证机构那样有经验，可能会犯错。You need to be able to intercept the communications between two sites, and be able to replaces messages. You can then replace public keys in transit with your own public keys. MegaCorp can defend by sending their keys inside public key certificates. MegaCorp could rely on a trusted certifying authority to sign the certificates, in which case you try and get the trusted authority to issue you with fake certificates. The most effective way of doing this is an insider attack where you subvert one of the people doing the identity checks. The certifying authority needs to put in place a process to prevent this, perhaps by monitoring all the activities of its staff involved in ID checks. You could also hack into the target site and add one of your own master certificates to their list of certificates. MegaCorp is probably big enough to create its own certificate signing process and use it to sign the public key certificates on each of its sites. It can then deliver the master certificate during site visits by its own technical staff. The weakness here is that they will not be as experienced as the trusted certifying authority and can make mistakes.
+
 ## 中间人攻击：Man in the Middle Attacks
 
 ![](/static/2021-02-25-15-43-19.png)
@@ -8,6 +14,14 @@
 * 如果B将公钥送给A，E尝试用自己的公钥替换B的公钥
   * 当A发送密文给B，认为用的是“B的公钥”加密，然而此时E可以用自己的秘钥解密该明文
   * E可以二次篡改，并用B的公钥加密后发送给B
+
+---
+
+解释公钥基础设施（PKI）如何防止中间人攻击。描述与芯片和密码系统相关的PKI，并解释使其容易受到中间人攻击的缺陷。Explain how a public key infrastructure (PKI) prevents a man-in-the-middle attack. Describe the PKI associated with the Chip and PIN system and explain the flaws that made it vulnerable to a man in the middle attack.
+
+公钥证书包含一个公钥、识别公钥所有者的信息和其他特定应用信息。它是用一个受信任的机构的秘密钥匙签署的。该证书必须用受信机构的公开密钥解锁，该密钥必须是安全分发的。可以构建证书链，以便只需要安全地分发单个可信机构的公开密钥。A public key certificate contains a public key, information identifying the owner of the public key and other application specific information. It is signed with the secret key of a trusted authority. The certificate must be unlocked with the public key of the trusted authority, which must have been distributed securely. Certificate chains can be constructed so that only the public key of a single trusted authority needs to be distributed securely.
+
+终端和卡片都可以决定一个用户是否已经被认证。他们之间的通信是不加密的，因此中间人可以截获通信并向卡和终端提供 "已验证 "的答案。Both the terminal and the card can decide if a user has been authenticated. The communications between them are not encrypted and so a man in the middle can intercept communications and give the 'verified' answer to both the card and terminal.
 
 ## 公钥证书：Public Key Certificate
 
@@ -64,6 +78,13 @@ MegaCorp is a multination organisation that operates on many different sites. Th
 ![](/static/2021-02-25-16-21-28.png)
 
 # 公钥系统使用-芯片&PIN：Chip & PIN
+
+## 证书树 & 信任网
+
+证书树的一个替代方案是信任网。这是一种基于同行的方法，没有一个中央认证机构。你从你信任的人那里积累了足够多的公钥证书版本，以信任该公钥。讨论证书树和信任网的优点和缺点。
+ An alternative to certificate trees is the web-of-trust. This is a peer-based approach without a central certifying authority. You accumulate enough versions of a public key certificate from people you trust to trust the public key. Discuss the advantages and disadvantages of certificate trees and a web-of- trust.
+
+赞成的理由与赞成点对点网络而不是一个中央服务器的理由相同。你不必依赖一个中央机构。缺点是寻找值得信赖的人加入你的圈子。该算法更复杂，你的圈子的每个成员都有一个信任等级。这些评级是动态的，新成员开始时信任度较低，随着经验的增加，信任度也会增加。新成员通常由现有成员推荐，如果太多的成员由同一个人推荐，这可能是危险的。The arguments in favour are the same as in favour of peer-to-peer networks rather than one central server. You don't have to rely on one central authority. The disadvantages are finding trustworthy people to add to your circle. The algorithm is more complicated, with each member of your circle given a trust rating. These ratings are dynamic, with a new member starting with a low trust rating, which increases with good experience. New members are normally recommended by existing members, which can be dangerous if too many members were recommended by the same person.
 
 ## Context
 
@@ -363,6 +384,12 @@ offline attack - cannot send the info to the bank for digital info
 * It replaced SSL, Secure Sockets Layer.
   * A number of flaws of SSL were discovered over time
 
+---
+
+描述一下TLS握手协议，在该协议中，客户和服务器就如何在他们之间安全地传输数据达成一致。他们如何能确定对方是真实的？Describe the TLS handshake protocol where a client and a server agree on how to transmit data between themselves securely. How can they be sure the other is genuine?
+
+* 客户端提供一个它所支持的协议列表，服务器选择使用其中的哪一个。在理想的情况下，使用公钥证书，但如果它们不可用，那么它们可以退回到Diffie-Hellman密钥交换的形式。D-H可以只是一个会话（短暂的），也可以是更持久的。The client provides a list of protocols that it supports and the server chooses which of these to use. In an ideal situation a public key certificates are used, but if they are not available then they can fall back on a form of Diffie-Hellman key exchange. The D-H can be for just one session (ephemeral) or longer lasting.
+
 ## 握手协议：Handshake Protocol
 
 ![](/static/2021-02-27-15-08-40.png)
@@ -423,6 +450,11 @@ offline attack - cannot send the info to the bank for digital info
 * 进行缓存后，每次会话都比较公钥证书和第一次缓存的公钥证书
 
 ## 证书绑定 - 避免中间人共攻击：Certificate Pinning
+
+解释PKI和Diffie-Hellman在TLS中的作用。说明在各种通信情况下，如何打败中间人攻击 Explain the role of PKI and Diffie-Hellman in the TLS. Show how a man-in- the-middle attack can be defeated in the various communication scenarios.
+
+* PKI通过证书交换公钥来防止MiM。证书必须是可信的，客户必须有一个公共密钥发行者的根证书。一旦证书被交换，客户端就会生成一个用于批量传输的会话密钥，并用服务器的公钥对其进行加密。服务器通过解密会话密钥来表明它是真实的，而不是仅仅重放一个捕获的公钥证书。PKI protects against MiM by exchanging public keys via certificates. The certificates must be trusted and the client must have a root certificate for the public key issuer. Once certificates are exchanged, the client generates a session key for bulk transmission and encrypts it with the servers public key. The server shows that it is genuine, and not just replaying a captured public key certificate, by decrypting the session key.
+* 如果对证书的真实性有一些怀疑，那么可以使用证书钉住。这假定与服务器第一次接触时交换的证书是真实的，所有随后的证书都与之核对。另一种方法是证书透视，让第三方（或不止一个）为客户获得所需的证书。If there is some doubt that the certificate is genuine then certificate pinning can be used. This assumes that the certificate exchanged with the first contact with the server is genuine and all subsequent certificates checked with it. Another approach is certificate perspectives, getting a third party (or more than one) to get the required certificate for the client.
 
 ![](/static/2021-02-27-16-04-00.png)
 

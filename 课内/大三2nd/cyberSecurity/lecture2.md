@@ -10,12 +10,14 @@
 * [Overview](#overview)
 * [传输秘钥问题：Problem-Communicating a Secret](#传输秘钥问题problem-communicating-a-secret)
 * [公钥加密：Protocol: Public Key System](#公钥加密protocol-public-key-system)
+  * [解决密钥分配问题](#解决密钥分配问题)
   * [例子：Example: Alice sends a Secret to Bob](#例子example-alice-sends-a-secret-to-bob)
   * [密钥/信息认证问题：Key/Message Authentication Problem](#密钥信息认证问题keymessage-authentication-problem)
     * [身份认证问题：Problem-Authentication](#身份认证问题problem-authentication)
   * [中间人攻击：Man in the Middle Attack](#中间人攻击man-in-the-middle-attack)
     * [中间人攻击局限性：Problem-Authentication](#中间人攻击局限性problem-authentication)
 * [公钥-电子签名：Protocol-Public Key Digital Signatures](#公钥-电子签名protocol-public-key-digital-signatures)
+  * [数字签名 & 公钥证书？](#数字签名--公钥证书)
   * [电子签名-性质：Properties of Digital Signatures](#电子签名-性质properties-of-digital-signatures)
   * [保密和真实性：Secrecy and Authenticity](#保密和真实性secrecy-and-authenticity)
   * [公钥证书：Public Key Certificates](#公钥证书public-key-certificates)
@@ -32,6 +34,7 @@
     * [椭圆曲线密码学：Elliptic Curve Cryptography](#椭圆曲线密码学elliptic-curve-cryptography)
       * [原理：Elliptic Curve Crypto](#原理elliptic-curve-crypto)
     * [优点：Advantages of Elliptic Curve Cryptography](#优点advantages-of-elliptic-curve-cryptography)
+  * [D-H vs RSA](#d-h-vs-rsa)
 * [信息摘要：Message Digest](#信息摘要message-digest)
   * [信息摘要要求：Requirements of Message Digest](#信息摘要要求requirements-of-message-digest)
   * [信息摘要-Hash函数：A Survey of Hash Functions](#信息摘要-hash函数a-survey-of-hash-functions)
@@ -43,6 +46,7 @@
     * [问题-Dual_EC_DRBG随机数生成器](#问题-dual_ec_drbg随机数生成器)
       * [转折：OpenSSL](#转折openssl)
       * [不再推荐使用：NIST and RSA](#不再推荐使用nist-and-rsa)
+  * [真实随机数 vs 伪随机数 vs加密安全的](#真实随机数-vs-伪随机数-vs加密安全的)
 * [JAVA：Public Key Systems](#javapublic-key-systems)
 
 # 传输秘钥问题：Problem-Communicating a Secret
@@ -64,6 +68,12 @@
 * 通常一个算法
   * 公钥加密 used with the public key encrypts
   * 私钥解密 used with the secret key decrypts
+
+## 解决密钥分配问题
+
+使用公钥系统可以解决密钥分配的问题，但它真的能解决这个问题吗？How does using a public key system solve the problem of key distribution, but does it really solve it?
+
+加密密钥是公开的，因此发送秘密信息的人可以轻易获得它，解决了密钥分配问题。他们将使用公共传输媒介，因此这很容易受到中间人攻击，攻击者可以在传输过程中替换密钥。The encryption key is public and so the person sending the secret message can obtain it easily, solving the key distribution problem. They will use a public transmission medium and so this is vulnerable to a man-in-the-middle attack where the attacker can substitute keys while they are in transmission.
 
 ## 例子：Example: Alice sends a Secret to Bob
 
@@ -138,6 +148,12 @@ Bob’s).
 3. 中间人可以篡改明文后，用发方公钥加密再传输给发方
 4. 发方用自己秘钥解密中间人传来的密文
 
+---
+
+描述中间人攻击是如何工作的。如何解决这个问题？Describe how a man in the middle attack works. How can it be solved?
+
+爱丽丝向鲍勃发送了一条信息，要求他提供公钥。夏娃在听，并被提醒到这一点。鲍勃向爱丽丝发送了他的公钥，但夏娃截获了它，并用她的公钥替换了它。爱丽丝用夏娃的公钥加密了她的信息（以为是鲍勃的），并将其发送给鲍勃。夏娃拦截了该信息，解密了它（它是用她的公钥加密的），阅读和/或改变了它。然后，她用鲍勃的真实公钥进行加密，并发送给他。鲍勃向爱丽丝发送他的公钥证书，这就解决了。Alice sends a message to Bob asking for his public key. Eve is listening and is alerted to this. Bob sends his public key to Alice, but Eve intercepts it and replaces it with her public key. Alice encrypts her message with Eve’s public key (thinking it is Bob’s) and sends it to Bob. Eve intercepts the message, decrypts it (it was encrypted with her public key), reads and / or changes it. She then encrypts it with Bob’s real public key and sends it to him. It is solved by Bob sending Alice his public key certificate.
+
 ### 中间人攻击局限性：Problem-Authentication
 
 中间人攻击局限性 limitations
@@ -161,6 +177,12 @@ The encryption and decryption operations must cancel each other, no matter which
 ---
 
 ![](/static/2021-02-11-00-03-53.png)
+
+## 数字签名 & 公钥证书？
+
+什么是数字签名和公钥证书？
+
+用数字签名签署文件意味着用所有者的秘密密钥对其进行加密。只有他们能做到这一点。任何人都可以撤销签名，从而通过用公钥解密来验证它。公钥证书包含一个公钥和识别所有者的信息，全部由受信任的第三方签署。Signing a document with a digital signature means encrypting it with the owners secret key. Only they can do this. Anyone can undo the signature and thus verify it by decrypting with the public key. A public key certificate contains a public key together with information identifying the owner, all signed by a trusted third party.
 
 ## 电子签名-性质：Properties of Digital Signatures
 
@@ -263,6 +285,12 @@ message digest is very low.
 # 公钥加密算法：Public Key Algorithms
 
 ## RSA: Public Key Encryption- RSA
+
+描述一下RSA公钥加密算法被接受的过程。为什么它需要2048的密钥长度才是安全的，而128的密钥长度对AES来说已经足够好了？Describe the process whereby the RSA public key encryption algorithm was accepted. Why does it require a key length of 2048 to be secure, while a key length of 128 is good enough for AES?
+
+RSA是基于众所周知的数论数学，很容易证明它和整数分解问题一样安全。RSA is based on well known number theory maths and it is easy to prove that it is as secure as the integer factorisation problem.
+
+对AES的主要攻击是蛮力攻击，因此128位的密钥意味着有太多不同的可能性可以尝试。对RSA的主要攻击是因子化攻击，需要更长的整数来防止这种攻击。The main attack on AES is a brute force attack and so a 128 bit key means there are too many different possibilities to try. The main attack on RSA is a factorisation attack, and longer integers are needed to prevent this.
 
 ![](/static/2021-02-11-01-51-22.png)
 
@@ -382,6 +410,16 @@ So the RSA algorithm gives us gives us signatures and the like. And the ElGamal 
 
 ### 椭圆曲线密码学：Elliptic Curve Cryptography
 
+什么是椭圆曲线，在密码学中使用它们有什么好处？
+
+椭圆曲线不是椭圆，而是用来寻找计算椭圆周围距离问题的数字解决方案的。Elliptic curves are not ellipses but are used to search for a numerical solution to the problem of calculating the distance around an ellipse.
+
+计算中使用的数值要小得多，因此速度更快。RSA是一种非常缓慢的算法。The values used in the calculations are much smaller and so faster. RSA is a very slow algorithm.
+
+
+
+---
+
 ![](/static/2021-02-11-16-59-12.png)
 
 所以，首先，我们知道椭圆是什么，但它没有什么更多的它与椭圆和椭圆或扁圆没有直接关系。所以还有一个椭圆的公式。所以注意它有x平方减y平方。但是在计算中使用椭圆有一个问题，就是计算椭圆部分的距离。这一点非常重要，因为椭圆是行星的轨道，卫星会接受椭圆的请求，宇宙飞船在没有动力的情况下，也会接受椭圆的请求。所以计算它们航行了多长时间是相当重要的，而且这种计算必须用数值积分来完成，但后来做了相当多的工作，试图找到一个计算距离的公式。这是前段时间几个诗人A写的一篇混沌理论论文。所以，最后我们不得不用数值积分的方法来兔子关于追踪距离的问题。所以这是一个小题大做，但是你曲线是在试图从嘴唇的距离领域找到数学函数的过程中产生的曲线。所以这就是椭圆椭圆位在他们名字中的由来So, first of all, we know what the ellipse is, but it's nothing more it's not directly related to ellipses and ellipses or squashed circle. So there's an equation for another ellipse. So notice it's got x squared minus y squared. But one problem with using ellipses in calculations is calculating the distance partway around the ellipse. And this is quite important because ellipses are the orbits of planets and satellites take requests to an ellipse and also spaceships when they're coasting without power. And so calculating how long they've traveled is quite important and bye This calculation has to be done using numerical integration, but then quite a lot of work done on trying to find a formula to calculate the distance stay away. crops up in surprising places to places. Here's a chaos theory paper written by a couple of poets A while back. And so, in the end we had to use numerical integration to the rabbits about tracing the distance. all round ellipses. So That's a little digression but you curves are curves that arise in an attempt to find a mathematical function from the distance realm of lips. So that's where the elliptic elliptic bit comes in their name. 
@@ -416,6 +454,14 @@ So the RSA algorithm gives us gives us signatures and the like. And the ElGamal 
 * 所以我已经提到了比特币的曲线，还有一个曲线25519现在很流行。所以这就是这个椭圆曲线的公式。mentioned the Bitcoin curve, there's another one curve 255 point nine is now quite popular. So that's the formula for this elliptic curve.
   * 所以，基于密码学的复制品的公钥系统已经定义了比特币使用，所以它们也可以用于随机数生成器和分解算法 So public key systems based on the replica of cryptography have been defined Bitcoin uses so they can also be used in random number generators and factoring algorithms.
 
+## D-H vs RSA
+
+说明Diffie-Hellman密钥交换与RSA算法有什么不同？它是否也容易受到中间人的攻击？
+
+每一方都提供一个公共/秘密密钥对，而不是RSA算法中的一方。公钥被交换以产生一个共享密钥。Each party provides a public / secret key pair, rather than just one party in the RSA algorithm. The public keys are exchanged to generate a shared key.
+ 
+任何交换公共信息的算法都容易受到中间人的攻击。Any algorithm that exchanges public information is vulnerable to a man-in-the- middle attack.
+
 # 信息摘要：Message Digest
 
 ![](/static/2021-02-11-19-46-42.png)
@@ -426,6 +472,12 @@ So the RSA algorithm gives us gives us signatures and the like. And the ElGamal 
 * 信息摘要的唯一性保证了其安全性，用秘钥加密消息摘要与签属原始文件生成的电子签名一样有效 It will be just as valid as a signed version of the original document.
   * 提供不同的文件，不能创建相同的消息摘要。 Provided a different document with the same message digest cannot be created.
   * 创建一个新的文件，这个文件的信息摘要和之前的文件一样 So the reason for this condition for this to happen is that we can create a new document that has the same message digest as the previous document
+
+---
+
+解释一下信息摘要这个术语？解释为什么64位消息摘要容易被滥用？
+
+* 一个文件的小而独特的摘要。一个64位的信息摘要很容易受到生日攻击，即两个不同的文件可以用相同的信息摘要构建。它被称为生日攻击，因为在一个房间里找到两个有相同生日的人（如果房间里有23个人，有50%的机会），比找到与讲师有相同生日的人（50%的机会需要183人）要容易。A small but unique summary of a document. A 64 bit Message Digest is vulnerable to a birthday attack whereby two different documents can be constructed with the same Message Digest. It is called a birthday attack because it is easier to find 2 people in a room who share the same birthday (50% chance if there are 23 people in the room), than find someone with the same birthday as the lecturer (50% chance requires 183).
 
 ## 信息摘要要求：Requirements of Message Digest
 
@@ -639,6 +691,12 @@ flaw 2
 2013年9月，NIST强烈建议不再使用Dual_EC_DRBG。 In September 2013 NIST strongly recommended that Dual_EC_DRBG no longer be used.
 
 然后RSA也建议不要使用它。 RSA then also recommended that it not be used.
+
+## 真实随机数 vs 伪随机数 vs加密安全的
+
+描述真实随机数、伪随机数和加密安全的伪随机数序列之间的区别。给出一种产生上述每种类型的随机数的算法（共三种算法）。Describe the differences between real random number, pseudo random number and cryptographically secure pseudo random number sequences. Give one algorithm for producing each of the above types of random numbers (three algorithms in total).
+
+一个真正的随机数序列是无法预测的。伪随机数序列具有与真实随机数相同的分布，但在需要时可以再次生成。它将有一个种子来开始，使用相同的种子会产生相同的序列。通常情况下，如果以前的数字是已知的，就有可能预测下一个数字，但这在加密安全的伪随机数字序列中是不可能的。A real random number sequence cannot be predicted. A pseudo-random number sequence has the same distribution as real random numbers but can be generated again if required. It will have a seed to start things off and using the same seed generates the same sequence. Normally it is possible to predict the next number if the previous numbers are known, but this is not possible with a cryptographically secure pseudo-random number sequence.
 
 # JAVA：Public Key Systems
 

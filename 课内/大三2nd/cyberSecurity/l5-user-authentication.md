@@ -3,14 +3,19 @@
 * [Content](#content)
 * [用户认证：User Authentication](#用户认证user-authentication)
   * [密码：Passwords](#密码passwords)
+  * [消息摘要算法是否适合用于散列密码](#消息摘要算法是否适合用于散列密码)
+  * [选择密码的最佳方式是什么？](#选择密码的最佳方式是什么)
   * [密码熵：Password Entropy](#密码熵password-entropy)
   * [密码相关攻击-字典攻击：Dictionary Attacks](#密码相关攻击-字典攻击dictionary-attacks)
     * [字典创建选择例子：David Klein’s Dictionary](#字典创建选择例子david-kleins-dictionary)
+  * [UNIX的用户认证方案](#unix的用户认证方案)
   * [加盐-阻止字典攻击：Salt](#加盐-阻止字典攻击salt)
   * [通行短语：Pass Phrases](#通行短语pass-phrases)
 * [图形密码&认证：Alternative User Authentication](#图形密码认证alternative-user-authentication)
   * [为什么使用图形密码：Graphical Passwords](#为什么使用图形密码graphical-passwords)
   * [3种图形密码类型: Graphical Password Types](#3种图形密码类型-graphical-password-types)
+  * [几个不同的图形密码认证系统的例子](#几个不同的图形密码认证系统的例子)
+  * [为什么使用 or 不使用](#为什么使用-or-不使用)
   * [例子：基于识别类型认证：Passface - A Recognition Based System](#例子基于识别类型认证passface---a-recognition-based-system)
   * [例子：基于回忆类型认证：Draw a Secret (DAS) - Recall Based](#例子基于回忆类型认证draw-a-secret-das---recall-based)
   * [例子-基于线索的回忆型：ClickPoints - Locimetric](#例子-基于线索的回忆型clickpoints---locimetric)
@@ -56,6 +61,20 @@
 :orange: **因此，就算电脑被黑了也不会造成问题，，攻击者无法知道密码明文** This theoretically means that there is not a problem if the encrypted password file is stolen
 
 * The initial versions of UNIX made the password file publicly readable
+
+## 消息摘要算法是否适合用于散列密码
+
+消息摘要算法是否适合用于散列密码 Are message Digest algorithms good for hashing passwords?
+
+是的，如果它们在密码学上足够安全，而且密码是加盐的。Yes if they are cryptographically secure enough, and passwords are salted.
+
+## 选择密码的最佳方式是什么？
+
+选择密码的最佳方式是什么？What is the best way to choose passwords?
+
+复杂的密码很难记住，导致用户把它们写下来，或者更糟的是重复使用它们。 斯坦福大学和CESG建议用户根据输入的设备，使用不同长度的密码。Complex passwords are hard to remember, leading to users  writing them down, or worse reusing them.  Stanford  University,  and  CESG  are suggesting that users use different length passwords depending on which device they are inputted to.
+
+例如，当你在移动设备上输入密码时，长的令人难忘的密码短语更适合。 然而，如果你只使用台式机/笔记本电脑的键盘，更短更复杂的密码可能更好。For example, long memorable pass phrases are better suited when you are inputting the password on  a  mobile  device.  However,  shorter  more complex ones might be better if you are only using  a  desktop/laptop keyboard.
 
 ## 密码熵：Password Entropy
 
@@ -134,6 +153,12 @@ keyboard patterns, etc: 60,000.
 
 如果我们在搜索引擎中输入 "常用密码列表"，会得到大量的列表，大小从10k到10M不等。 If we type “common password lists” into a search engine we will get a large number of lists, ranging in size from 10k to 10M
 
+## UNIX的用户认证方案
+
+描述UNIX的用户认证方案，解释密码文件和盐机制的使用。解释该系统如何被攻击，以及盐在防止某些攻击中的作用。 Describe the UNIX user authentication scheme, explaining the use of a password file and the salt mechanism. Explain how the system might be attacked, and the role of salt in preventing some attacks.
+
+用户必须提供一个密码，该密码用于生成一个消息摘要，并与存储在密码文件中的值进行比较。在加密前，盐机制会在密码中加入两个随机字符。这些字符也被存储在密码文件中。攻击的主要方式是使用字典，根据常见的用户习惯来构建合理的密码。盐并不能减缓对单个密码的攻击，但可以防止构建一个似是而非的密码表，并利用它来攻击一个完整的密码文件。Users have to provide a password, which is used to generate a message digest which is compared with the value stored in the password file. The salt mechanism adds two random characters to the password before it is encrypted. These characters are also stored in the password file. The main way of attacking is to use a dictionary to construct plausible passwords based on common user habits. Salt does not slow down the attack on a single password, but does prevent the construction of a table of plausible passwords and its use to attack a complete password file.
+
 ## 加盐-阻止字典攻击：Salt
 
 salt is a good way to foiling dictionary attacks on a large number of passwords
@@ -186,6 +211,12 @@ graphical password & authentication
 * **what you are**
   * biometrics
 
+认证可分为：(a)你所拥有的；(b)你所知道的；(c)你是什么。解释这三个术语，并分别举例说明 Authentication can be classified as either (a) what you have, (b) what you know or (c) what you are. Explain these three term, giving examples of each.
+
+* 例如，你所拥有的可以是一把物理钥匙、一张智能卡或一个员工徽章。你所知道的可以是一个密码或你母亲的婚前姓氏。你是什么是一个生物识别，如指纹。与其他两种不同的是，它不能被改变，而且是公共知识 What you have can be a physical key, a smart card or an employee badge, for example. What you know can be a passwords or your mother's maiden name. What you are is a biometric such as a fingerprint. Unlike the other two, it cannot be changed and is public knowledge.
+
+---
+
 :orange: 例子：One common way of authentication
 
 * passport --- 2 factor authentication
@@ -223,6 +254,18 @@ WHY：<font color="red">以视觉形式记忆复杂的信息比较容易</font>�
 * 如：你得到一个大图像。you get an image, one big image.
   * **当你注册的时候，你在图像上选了一些点**， When you register, you pick some points on the image
   * **当你登录的时候，你又要按照同样的顺序记住这些点** when you log in, you have to remember the same points again in the same order.
+
+## 几个不同的图形密码认证系统的例子
+
+图形密码已经被提出来作为基于文本的密码的替代品。举出几个不同的图形密码认证系统的例子，说明每个系统的优点和缺点。Graphical passwords have been proposed as an alternative to text based passwords. Give examples of several different graphical password authentication systems, describing the pros and cons of each one.
+
+图形密码可以是基于回忆的，你必须重新绘制一个简单的形状，如签名或 "画一个秘密"。也可以是基于识别的，即你必须从分散注意力的事物中识别出你所创造的或先前选择的事物。它可以是基于位置的，即你必须记住一个特定的位置或图像中的一系列位置。Graphical passwords can be recall based where you have to redraw a simple shape, such as a signature or 'draw a secret'. The can be recognition based, where you have to recognise something you have either created or chosen earlier from amongst distractors. It can be location based, where you have to remember a particular location or series of locations in an image.
+
+## 为什么使用 or 不使用
+
+想一想你个人为什么喜欢使用图形密码系统或不喜欢使用图形密码系统的原因。Think of reasons why you, personally, would either like to use a graphical password system or not like to use one.
+
+图形密码可能更容易记忆，但更难设置。多个图形密码可能更难记住，特别是因为不可能在多个账户中重复使用相同的密码。Graphical passwords can be easier to remember but harder to set up. Multiple graphical passwords may be harder to remember, especially because it is not possible to reuse the same ones for multiple accounts.
 
 ## 例子：基于识别类型认证：Passface - A Recognition Based System
 
@@ -345,6 +388,10 @@ On login
 
 # 生物识别：Biometrics
 
+哪些生物识别技术是最好的!
+
+这取决于它们将被如何使用。照片被广泛使用，但要依靠人将人与照片进行比较，因为图像识别软件仍然不是那么精确。如果没有人在那里检查，那么指纹就不是那么好，因为它们可以被伪造。那么虹膜图案就比较好，因为它们比较难伪造。这些生物识别技术也需要昂贵的设备。It depends on how they will be used. A photograph is widely used but relies on a human comparing the person to their photo since image recognition software is still not that precise. If no person is there to check, then fingerprints are not that good because they can be faked. Iris patterns are then better because they are harder to fake. These biometrics also require expensive equipment.
+
 ## 主要生物识别技术：指纹 & 虹膜
 
 ![](/static/2021-04-10-11-14-59.png)
@@ -411,6 +458,12 @@ FN - 预测为负，真实为正
   * 会**减少假阴性匹配** reduce the false negative match
     * 因为如果一个人的长相和照片略有不同，还是会让他通过识别 Because if someone looks slightly different from their photo, they'll still be let him in
 
+---
+
+解释术语假阳性和假阴性，举例说明如何在安全方面考虑它们。Explain the terms false positive and false negative, giving examples of how they can be taken into account in security.
+
+* 假阳性会错误地说两件事情是相同或相似的，而它们不是。如果对罕见事件进行大规模筛选，这将是一个问题。如果漏掉一个真实事件的惩罚很高，假阴性就会成为大规模筛查的问题。False positives wrongly say that two things are the same or similar when they are not. This will be a problem if undertaking mass screening for rare events. False negatives are a problem in mass screening if the penalty of missing a real event is high.
+
 ## 多因素识别&生物识别不利于身份识别：multi authentication & not good for identification
 
 :candy: <font color="deeppink">由于存在假阴性问题，不应使用生物识别技术进行【身份识别】</font>。 Biometric should not be used for identification because of the false negative problem
@@ -469,6 +522,11 @@ FN - 预测为负，真实为正
   * 局域网，所有计算机可以事先配置好，不需要公钥加密，只使用单钥加密
 
 ---
+
+描述Kerberos认证协议。	特别是，描述票证和认证器的结构和使用。Describe the Kerberos authentication protocol.	In particular, describe the structure and use of a ticket and an authenticator.
+
+在使用一个服务之前，必须向该服务出示一个票据。它验证了使用该票证的人是被授予该票证的人。它包含客户的ID和地址、时间戳和会话密钥。所有这些信息都用服务器的密匙进行了加密。认证器用于验证客户是否是票据授予服务的预期收件人。它包含客户的ID和地址，一个时间戳和一个可选的nonce，用于相互认证。它是用会话密钥加密的。A ticket must be presented to a service before that service can be used. It verifies that the person using the ticket is the person for whom it was granted. It contains the client’s ID and address, a timestamp and session key. All of this information is encrypted with the server's secret key. An authenticator is used to verify that the client was the intended recipient from the ticket granting service. It contains the clients ID and address, a timestamp and an optional nonce for mutual authentication. It is encrypted with the session key.
+
 
 ## （非正式）几种不安全的连入服务器认证方式
 
@@ -723,6 +781,10 @@ FN - 预测为负，真实为正
     * 不再需要记住时间戳已经过期的票据 They no longer need to remember tickets whose timestamps have expired.
 
 ## 软件缺陷 & 保证Kerberos有效的前提：Software Weaknesses
+
+描述Kerberos系统的四个弱点，并在每个案例中解释如何克服这些弱点。
+
+* 客户端认证是基于一个密码的。运行 Kerberos 的机器必须是安全的。存储 Kerberos 数据库的机器必须是安全的。Kerberos 进程不应该被特洛伊木马所取代。Client authentication is based on a password. The machine running Kerberos must be secure. The machine storing the Kerberos database must be secure. The Kerberos processes should not be replaced by a Trojan horse.
 
 ![](/static/2021-04-10-20-38-07.png)
 

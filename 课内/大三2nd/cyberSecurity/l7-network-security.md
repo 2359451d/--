@@ -46,6 +46,21 @@
   * [应用感知和控制: Application Awareness and Control](#应用感知和控制-application-awareness-and-control)
 * [虚拟专用网：Virtual Private Network (VPN)](#虚拟专用网virtual-private-network-vpn)
 * [Attacks:Heartbleed](#attacksheartbleed)
+* [基于网络的应用程序的安全性:Security of a Web Based Application](#基于网络的应用程序的安全性security-of-a-web-based-application)
+  * [客户端威胁 Threats : Client](#客户端威胁-threats--client)
+  * [反措施 : 客户 Countermeasures : Client](#反措施--客户-countermeasures--client)
+  * [威胁：网络服务器-Threats : Web Server](#威胁网络服务器-threats--web-server)
+      * [反措施](#反措施)
+  * [进程服务器-Threats : Process Server](#进程服务器-threats--process-server)
+  * [数据库 & 其他服务 - Threats : Database and Other Services](#数据库--其他服务---threats--database-and-other-services)
+    * [反措施](#反措施-1)
+  * [威胁: 计算机之间的连接 - Threats : Connections Between Computers](#威胁-计算机之间的连接---threats--connections-between-computers)
+  * [安全矩阵： security matrix](#安全矩阵-security-matrix)
+  * [为什么4层架构对网站有用？Why is a 4 tier architecture useful for web sites?](#为什么4层架构对网站有用why-is-a-4-tier-architecture-useful-for-web-sites)
+  * [客户机上有哪些问题，如何缓解这些问题？](#客户机上有哪些问题如何缓解这些问题)
+  * [网络服务器机器上有哪些问题，如何缓解这些问题？为什么它在DMZ中？](#网络服务器机器上有哪些问题如何缓解这些问题为什么它在dmz中)
+  * [在系统中，用户在哪里被认证？](#在系统中用户在哪里被认证)
+  * [如何处理电子邮件？为什么选择这种解决方案？](#如何处理电子邮件为什么选择这种解决方案)
 
 # Wired vs Wifi Network
 
@@ -119,6 +134,14 @@ Wi Fi标准显然是不同的标准 Wi Fi standard which is different standard o
 ![](/static/2021-04-18-11-11-57.png)
 
 # 无线加密：WiFi Security
+
+WiFi安全有哪些问题，如何克服这些问题？What are the problems with WiFi Security and how can they be overcome?
+
+任何人都可以监听WiFi通信，因为它们必须是广播的。Anyone can listen in to WiFi communications since they have to be broadcast.
+
+所有数据包都必须进行加密，因此双方都需要知道密钥。  在WPA中，密钥在初始通信中被交换，然后每个数据包根据共享的主密钥得出不同的密钥。  这一点很难做到，WPA2协议被Krack攻击所破坏。All packets have to be encrypted and so both parties need to know the key.   In WPA keys are exchanged in the initial communications and then each packet derives a different key based on the shared master key.   It has been difficult to make this work and the WPA2 protocol was broken by the Krack attack.
+
+---
 
 在基于连接的网络中，数据包被限制在电缆（和数据包嗅探器）上 Packets are constrained to cables (and packet sniffers) in a connectionbased network.
 
@@ -197,6 +220,22 @@ Wi Fi标准显然是不同的标准 Wi Fi standard which is different standard o
 
 ### AC 泛洪：Switch Downgrading: ARP/MAC flooding
 
+什么是ARP泛滥？对它有什么防御措施？ What is ARP flooding? What defence is there against it?
+
+运行ARP的交换机维护一个响应各种IP/端口请求的MAC地址表。  这个表是一个固定的大小。如果该表变满，那么交换机就会广播一个不在表中的服务请求。
+
+攻击者将试图填满该表，从而使MAC帧被广播，并收到它们。
+
+防御方必须尝试过滤数据包以防止表被填满。这可以在防火墙中完成。
+
+The switch running ARP maintains a table of MAC addresses that respond to various IP/port requests.   This table is a fixed size. If the table becomes full then the switch broadcasts a request for a service that is not in the table.
+
+An attacker will try and fill up the table so that the MAC frames are broadcast and they receive them.
+
+The defence must try and filter packets to prevent the table filling up. This can be done in the firewall.
+
+---
+
 :orange: 交换机将 A switch will:
 
 * 接收一个MAC帧 Receive a MAC frame
@@ -227,6 +266,14 @@ The Attack
   * 从某设备沿着链路到另一个设备，最大限度减少流量。如果数据包广播到多个设备连接上，增加流量，降低性能come into the device, and go out onto the next device along the connection. And so that minimizes the traffic. If the packet comes in and goes out on lots and lots of connections rebroadcast then it increases the traffic and reduces the performance. 
 
 ### ARP欺骗：ARP Poisoning
+
+什么是ARP中毒？对它有什么防御措施？What is ARP poisoning? What defence is there against it?
+
+这种攻击试图将攻击者的IP地址插入ARP表，使数据包通过他们被路由。它反复说它承载了所请求的服务。这使得中间人攻击成为可能。This attack tries to insert the attackers IP address into the ARP table so that packets are routed through them. It repeatedly says it hosts the requested service. This allows a man-in-the-middle attack.
+
+重复的托管要求应被拒绝。Repeated hosting claims should be rejected.
+
+---
 
 :orange: **这种攻击的目的不是使表溢出，而是插入不正确的值** The aim of this attack is not to fill up the table but to insert incorrect values.
 
@@ -272,6 +319,12 @@ The Attack
 * Connects/translate text network addresses to IP addresses.
 
 ## DNS缓存中毒：DNS Poisoning
+
+什么是DNS中毒？对它有什么防御措施？What is DNS poisoning? What defence is there against it?
+
+* DNS表将网站名称与IP地址相匹配。  攻击的目的是在表中插入虚假的条目。拒绝服务攻击会重定向到127.0.0.1，而审查会重定向到一个不同的网站。The DNS table matches web site names with IP addresses.   The attack aims to insert bogus entries into the table. A denial of service attack would redirect to 127.0.0.1, while censorship would redirect to a different site.
+
+---
 
 本地计算机上的`/hosts`文件是域名服务器进程中的第一个接触点。/hosts file on the local computer is the first point of contact in the Domain Name Server process.
 
@@ -435,6 +488,10 @@ SYN用于请求建立连接 SYN asks for a connection.
 * 它们通常被放置在网关上，以控制对内部网络的访问。 They are usually placed on gateway machines to control access to an internal network.
 * 可以在外部使用隧道模式 Can use tunnel mode outside.
 
+什么是防火墙？什么是DMZ？
+
+* 防火墙是一个允许或阻止数据包通过的门。  防御可以用2个或更多的防火墙来分层。防火墙之间的机器不太安全，形成一个DMZ。A firewall is a gate that either allows or prevents packets from passing.   The defence may be layered with 2 or more firewalls. The machines between the firewalls are less secure and form a DMZ.
+
 ## 例子-深度防御：Defence in Depth
 
 我们提供了多个防火墙，如下面的例子  We provide more than one firewall, as in the example below.
@@ -451,6 +508,12 @@ Web服务器位于DMZ（非军事区） The Web Server is in a DMZ (demilitarise
 
 ## 防火墙-代理服务：Proxy Service
 
+什么是代理服务，它能提供什么保护？
+
+* 代理服务通过一台计算机路由所有网络请求。这使得访问控制和入侵检测更容易，它都在一个地方。它也更有效率，因为许多计算机请求的页面可以被缓存。A proxy service routes all web requests through one computer. This makes control of access and intrusion detection easier, it is all in the one place. It is also more efficient since pages that many computers request can be cached.
+
+---
+
 防火墙提供代理服务
 
 **所有与互联网的连接都通过防火墙进行**。All connections to the Internet are routed through the firewall.
@@ -462,6 +525,12 @@ Web服务器位于DMZ（非军事区） The Web Server is in a DMZ (demilitarise
 * **日志都在一个地方，便于监控**。Logs are all in one place for ease of monitoring
 
 ## 包过滤功能：Packet Filetering
+
+如何过滤单个数据包？
+
+* 它们可以根据来源（黑名单或白名单）、请求的服务（端口）和目的地进行过滤。内容也可以被检查，只要它没有被加密。They can be filtered on origin (blacklist or whitelist), service requested (port), destination. The content can also be inspected, provided it is not encrypted.
+
+---
 
 防火墙包过滤功能 - **根据一组规则对数据包进行检查，以确定数据包是否应该通过**。 The packets are checked against a set of rules to determine if a packet should pass.
 
@@ -478,6 +547,12 @@ Web服务器位于DMZ（非军事区） The Web Server is in a DMZ (demilitarise
     * 涉及隐私，严格规定什么时候允许深度检查 it has privacy implications if the actual content of each packet is inspected and so stringent rules on when this has allowed. 
 
 ## 状态检测-防火墙技术：Stateful Inspection
+
+入侵检测/预防与数据包过滤有什么不同？How does intrusion detection / prevention differ from packet filtering?
+
+* 这是基于数据包的收集和识别行为。This is based on a collection of packets and identifying behaviour.
+
+---
 
 :orange: **只需检查数据包的关键部分，并应用匹配算法**。 Just check key parts of the packet and apply a matching algorithm.
 
@@ -533,7 +608,13 @@ Example rule
 * Application awareness and control.应用感知和控制
   * Are threat focussed.以威胁为中心
 
+---
+
 ## 入侵检测：Intrusion Detection
+
+基于签名的 "和 "基于异常的 "入侵检测之间有什么区别？
+
+* 签名是已知的行为，可以在数据库中表示为规则。这是一种快速捕捉已知攻击的方法。异常检测试图从一般的规则而不是具体的行为模式来检测攻击。A signature is known behaviour that can be represented as rules in a database. It is a quick way of catching known attacks. Anomaly detection trys to detect an attack from general rules rather than specific behaviour patterns.
 
 **网络流量，而不是单个数据包（防火墙是基于但数据包，而入侵检测，流量为整体），检查是否出现攻击**。 Network traffic, rather than single packets, is examined to see if an attack is underway.
 
@@ -541,7 +622,7 @@ Example rule
   * 用已知攻击数据库检查 Check with a database of known attacks.
   * 通过攻击的 "签名 "来识别他们 Recognise them by their ‘signature’
   * 不会识别新攻击。Will not recognise a novel attack.
-* 异常检测 Anomaly detection.
+* **基于异常检测** Anomaly detection.
   * AI，通常是机器学习，寻找非标准的情况，并试图将其分类为攻击或只是正常的变化。 AI, typically machine learning, looks for non-standard situations and tries to classify them as an attack or just normal variation.
   * Of course this will be false positives and false negatives with sort of classification.
   * AI is not good enough to be fully trusted
@@ -556,6 +637,12 @@ Example rule
 
 ## 应用感知和控制: Application Awareness and Control
 
+什么是 "应用意识和控制"？
+
+* 了解受到攻击的资产的价值，因此花费适当的金额来保护它们。Knowing the value of assets under attack and so spending an appropriate amount to protect them.
+
+---
+
 **以威胁为中心** Threat focussed.。
 
 * 了解哪些资产的风险最大，并将其添加到背景信息中。Know which assets are most at risk and add this to context information.
@@ -568,6 +655,10 @@ Example rule
   * 有一个最近事件的列表，等待同样的攻击发生不止一次 have a list of recent events, waiting for the same attack to happen more than once. 
 
 # 虚拟专用网：Virtual Private Network (VPN)
+
+VPN使用隧道模式将数据包从用户的计算机传送到VPN供应商的计算机，在那里，数据包被释放并被送上路。观察者将只看到与VPN机器的通信，而不是被联系的实际网站。A VPN uses tunnel mode to transport a packet from the user’s computer to the VPN provider’s computer, where it is let loose and sent on its way. An observer will just see the communication with the VPN machine and not the actual sites being contacted
+
+---
 
 VPN是保护提供商提供网络安全的另一种方式。VPNs are another way of protecting providers providing security with networks.
 
@@ -596,3 +687,250 @@ Results travel in reverse.
 * **发送部分RAM的转储来证明存货性** The server replies by sending a dump of a portion of RAM to prove that it is alive.
   * 这个RAM转储通常会包含密码和其他敏感信息，其形式容易识别。 This dump will typically contain passwords and other sensitive information in an easily recognisable form.
   * 这个功能现在已经被删除，但旧的实现将不得不升级。 This feature has now been removed, but older implementations will have to be upgraded.
+
+# 基于网络的应用程序的安全性:Security of a Web Based Application
+
+我们将研究一个典型的四级网络应用的安全威胁和可能的对策。这四个层次是
+
+* o 客户端
+* o 网络服务器
+* o 应用服务器
+* o 数据库和其他专业设施。
+
+每个层次都有自己的安全问题和解决方案，层次之间的三种通信方式也是如此。
+
+我们将依次讨论每个领域，考虑威胁和对策。
+
+We will look at the security threats and possible counter-measures of a typical 4 level web based application. The four levels are:
+
+* o	Client
+* o	Web Server
+* o	Application Server
+* o	Database and other specialist facilities.
+
+Each level has its own security problems and solutions, as do the three types of communications between the levels.
+
+	We will discuss each area in turn, considering threats and countermeasures.
+
+## 客户端威胁 Threats : Client
+
+客户机不在我们的控制范围之内。The client machine is outside our control.
+
+* 我们希望客户端使用标准的浏览器，但是如果客户端决定攻击我们，他们可以自己生成手工制作的 HTTP 请求。We expect the client to use a standard browser, but oponents can generate their own hand crafted HTTP requests if they decide to attack us.
+
+未能登出 Failure to logout
+
+* 这将允许访问与用户相关的信息。This would allow access to user related information.
+
+虽然严格来说不是我们的问题，但是我们可以采取措施限制用户的错误造成的任何损害。While not strictly our problem, we can take measures to limit any damage from this mistake by the user.
+
+Browser Cache
+
+* 浏览器可能会缓存网页或 cookies，以防再次需要。The browser may well cache pages or cookies in case they are needed again.
+* 这些缓存的页面将位于用户的文件系统中，其他人可以访问它们These cached pages will be in the user's file system, where someone else can access them.
+
+可下载资料 Downloadable Information
+
+* 任何在客户机上运行的代码都可以看到。Any code that runs on the client can be seen.
+* 这可以帮助我们深入了解我们系统的内部运作。This can provide insight into the internal workings of our systems.
+* 这对知识产权有影响。This has implications for intellectual property rights.
+* ID 号码也可用来猜测内部网页的 url、请求的结构等等 ID numbers may also be used to guess at the URLs of internal web pages, the structure of requests, and so on
+
+## 反措施 : 客户 Countermeasures : Client
+
+删除客户端代码中的含义Remove Meaning from Client Side Code 
+
+* C1 客户端代码不应包含任何注释，也应尽可能地模糊化。Client side code should not contain any comments and should also be obfuscated as much as possible.
+* C2 客户端代码中不应该出现业务逻辑，它应该只处理表现问题。No business logic should appear in client side code, which should only deal with presentation issues.
+
+避免缓存 Avoid Caching
+
+* C3 将页面过期设置为即时，这样浏览器就不会对页面进行缓存。不幸的是，后退按钮将不再带我们回到这些页面。
+* C4 不要使用永久性的cookies。暂时性的内存cookie可以用来记录会话信息，但仍然可以被任何能够访问内存的人看到。
+
+字段验证 Field Validation
+
+* C5 对来自客户端的所有输入进行长度验证，以防止缓冲区溢出攻击。Length validation of all input from the client, to prevent buffer overflow attacks.
+* C6 对来自客户端的所有数据进行内容验证，以确保其格式正确。这也将处理特殊字符，如&和<。Content validation of all data from client, to make sure that it is in the correct format. This would also deal with special characters such as & and <.
+* C7 对所有往返信息使用消息摘要，如ID号码，以检测篡改和重放攻击。Use message digests on all round trip information such as ID numbers to detect tampering and replay attacks
+
+避免在清晰的信息中Avoid In Clear Information 
+
+* C8 不要使用HTTP GET命令，用POST代替。C9 使用TLS对HTTP主体进行加密。Do not use HTTP GET command, use POST instead。Encrypt HTTP body using TLS.
+* C10 参考号码只在会话期间有效，不包含任何有意义的信息。Reference numbers are only valid during the session, and do not contain any meaningful information.
+* C11 隐藏字段可用于记录会话信息，但它们也可能存在安全弱点。 Hidden fields can be used to record session information, but they can also have security weaknesses.
+  - 攻击者可以保存一个页面，改变一个隐藏字段的值，然后重新播放该页面。An attacker can save a page, change a hidden field value and then replay that page.
+  - 不要使用隐藏字段 Do not use hidden fields
+
+## 威胁：网络服务器-Threats : Web Server
+
+网络服务器在我们的控制之下，但仍有许多攻击需要我们去防范。The web server is under our control, but there are still many attacks that we need to protect against.
+
+**利用服务器软件的漏洞** Exploiting Vulnerabilities of Server Software
+
+* 像IIS这样的服务器有许多众所周知的漏洞，因此我们需要确保所有的补丁都是最新的。Servers such as IIS have a number of well known vulnerabilities, and so we need to make sure that all the patches are up to date.
+* 新的漏洞不时出现，因此我们需要随时了解文献和相关网站的最新情况。New vulnerabilities come to light from time to time, and so we need to keep up to date with the literature and relevant web sites.
+
+敏感信息的缓存 Caching of Sensitive Information
+
+* 这在服务器上问题不大，但与会话相关的信息仍可能被缓存。This is less of a problem on the server, but session related information might still be cached.
+
+拒绝服务攻击 Denial of Service Attacks
+
+冒充用户 Impersonation of Users
+
+重放攻击 Replay Attack
+
+* 例如，重放可能是一个登录请求或付款请求。The replay may be a login request or a payment request, for example.
+
+主持内向攻击 Hosting an Onward Attack
+
+* 内部域的结构可以被发现，使敌人可以攻击它。The structure of the internal domain can be discovered, allowing an enemy to attack it.
+
+跨进程污染 Cross Process Contamination
+
+* 目的地为一个进程的信息可能被发送到另一个进程。Information destined for one process may be sent to another.
+* 这可能发生在我们使用组件和网络服务时。This can happen when we use components and web services.
+
+#### 反措施
+
+C12	No Direct Access to Business Data. This access is achieved at the process server level.
+C12无法直接访问业务数据。此访问是在流程服务器级别实现的。
+
+This is the reason for this additional layer.
+这就是这个额外层的原因。
+
+C13	Session Timeout.
+C13会话超时。
+
+Protect against users who leave while still logged in.
+防止用户在登录时离开。
+
+C14	Null Memory After Use.
+使用后 C14空记忆体。
+
+Memory that has not been nulled is similar to a cache.
+未为空的内存类似于缓存
+
+C15	Session Management.
+C15会话管理。
+
+oCorrectly identify which session any client activity belongs to.
+正确识别任何客户端活动属于哪个会话。
+
+	DOS countermeasures have already been covered.
+DOS 反制措施已经包括在内
+
+## 进程服务器-Threats : Process Server
+
+The process server processes requests from the web server.
+进程服务器处理来自 web 服务器的请求。
+
+* It can be attacked from a compromised web server or another machine masquerading as a web server. * 它可以被攻击从一个受损的网络服务器或其他机器伪装成一个网络服务器。
+* We thus need to defend in depth. * 因此，我们需要进行深度防御。
+
+Illegitimate Request 非法请求
+
+* If the format of a valid request is known and authentication has been bypassed. 如果已知有效请求的格式，并且已绕过身份验证
+
+Denial of Service 分布式拒绝服务攻击
+
+* This would typically be from a single web server machine, and so not as series as a DDOS attack. 这通常来自单一的 web 服务器机器，因此不像 DDOS 攻击那样是一系列的
+
+不合法的部件 Illegitimate Components
+
+* 系统的某些部分可能已经被替换，要么是被成功的攻击，要么是被内部人攻击
+
+---
+
+![](/static/2021-05-05-20-52-21.png)
+
+![](/static/2021-05-05-20-52-53.png)
+
+![](/static/2021-05-05-20-53-02.png)
+
+![](/static/2021-05-05-20-53-59.png)
+
+## 数据库 & 其他服务 - Threats : Database and Other Services
+
+The database is where we keep all of our persistent information. 数据库是我们保存所有持久信息的地方。
+
+*	A lot of damage can be done if it is compromised. 如果它被破坏了，会造成很大的伤害。
+
+Illegitimate Requests 非法请求
+
+*	数据库将响应来自任何具有适当访问权限的机器的任何格式良好的查询。 The database will respond to any well formed query from any machine with the appropriate access rights.
+
+来自组织内部的内部攻击。Internal Attack from someone inside our organisation.
+
+* Database tools such as Query Analyser and Enterprise Manager may be used to compromise data 可以使用诸如 queryanalyser 和 enterprisemanager 之类的数据库工具来妥协数据
+*	Other parts of the system may also be vulnerable to an internal attack, but an attack on the database would be especially bad. 系统的其他部分也可能容易受到内部攻击，但是对数据库的攻击尤其糟糕
+
+### 反措施
+
+![](/static/2021-05-05-21-19-55.png)
+
+![](/static/2021-05-05-21-20-07.png)
+
+## 威胁: 计算机之间的连接 - Threats : Connections Between Computers
+
+客户机、 web 服务器、进程服务器和数据库服务器都是连接的，而且连接都是脆弱的。	The client machines, web servers, process servers and database servers are all connected, and the connections are all vulnerable
+
+向数据包分析员披露 	Disclosure to Packet Analysers
+
+* 数据包分析器放置在通信电缆旁边，记录所有来回传递的数据包，将它们重新组装成流 Packet analysers are placed next to communication cables and record all of the packets passing to and fro, reassembling them into streams.
+
+## 安全矩阵： security matrix
+
+什么是安全矩阵，为什么它是有用的？ What is a security matrix and why is it useful
+
+它列出了所有的威胁和建议的反措施。它确保了没有任何东西被遗忘。It lists all threats and proposed countermeasures. It makes sure nothing is forgotten.
+
+## 为什么4层架构对网站有用？Why is a 4 tier architecture useful for web sites?
+
+客户机在我们的控制之外，可以发起攻击。网络服务器是第一道防线，所以最容易被攻击。由于这个原因，它只是处理客户端，不包含任何业务逻辑和活动。这些都是由进程服务器处理的。数据库持有所有有价值的数据，所以在它自己的机器上。 The client machine is outside our control and can launch attacks. The web server is the first line of defence and so most vulnerable to being compromised. For this reason it just handles the clients and does not contain any business logic and activities. These are handled by the process server. The data base hold all the valuable data and so is on its own machine.
+
+## 客户机上有哪些问题，如何缓解这些问题？
+
+3.	客户机上有哪些问题，如何缓解这些问题？What are some of the problems on the client machine, and how can they be mitigated?
+
+发送给客户端的任何信息和代码都可以被攻击者看到。这可能显示系统是如何工作的。它不应该包含任何业务逻辑。往返信息不应透露序列号，并应通过消息摘要进行验证。
+
+用户可能会忘记注销。我们将操作一个超时，并要求重新认证。
+
+攻击者可能会尝试SQL注入或XSS。我们将验证所有的用户输入。
+
+Any information and code that is sent to the client can be seen by an attacker. This might show how the system works. It should not contain any business logic. Round trip information should not reveal sequence numbers and should be verified by message digests.
+
+The user might forget to logout. We will operate a timeout and require re- authentication.
+
+An attacker might try SQL injecting or XSS. We will validate all user input.
+
+## 网络服务器机器上有哪些问题，如何缓解这些问题？为什么它在DMZ中？
+
+网络服务器机器上有哪些问题，如何缓解这些问题？为什么它在DMZ中？
+What are some of the problems on the web server machine, and how can they be mitigated? Why is it in a DMZ?
+
+重放攻击，通过会话管理来防止。Replay attacks, which are prevented by session management.
+
+通过使用无状态组件可以防止跨进程污染。Cross process contamination is prevented by using stateless components.
+
+## 在系统中，用户在哪里被认证？
+
+在系统中，用户在哪里被认证？Where are users authenticated in the system?
+
+在进程服务器上。On the process server.
+
+## 如何处理电子邮件？为什么选择这种解决方案？
+
+如何处理电子邮件？为什么选择这种解决方案？How is email handled? Why was this solution chosen?
+
+我们不能对发送给用户的电子邮件进行加密，因此我们必须实现我们自己的电子邮件或信息传递系统。We cannot encrypt email that we send to a user and so we have to implement our own email or messaging system.
+
+---
+
+一个恶意的内部人员如何攻击这个系统？How can a malicious insider attack this system?
+
+他们可以使用数据库检查和管理工具。我们应该启用数据库日志，并定期监测它们。They can use database inspection and management tools. We should enable database logs and monitor them regularly.
+
+他们可以在初始安装和配置时安装被破坏的组件。我们将使用组件证书来防止这一点。They can install compromised components during initial installation and configuration. We will use component certificates to prevent this.
