@@ -12,6 +12,8 @@ Part A.2: SQL & Advanced SQL
   * `NULL`值处理 dealing with NULL values
 * Nested Correlated & Uncorrelated Queries
 
+---
+
 * [Lecture 3 - SQL](#lecture-3---sql)
 * [背景：PHILOSOPHY OF THE DECLARATIVE LANGUAGE](#背景philosophy-of-the-declarative-language)
 * [建库-数据库结构：CREATE SCHEMA/DATABASE](#建库-数据库结构create-schemadatabase)
@@ -532,7 +534,10 @@ SQL支持3类逻辑
 -- 即，NOT EXISTS返回的[集合为空时返回True]，满足WHERE筛选条件
 SELECT s.Name
 FROM Student as s
-WHERE NOT EXISTS(SELECT * FROM Grades as g WHERE s.StudentID = g.StudentID AND Grade <> 'A');
+WHERE NOT EXISTS(
+  SELECT * FROM Grades as g
+  WHERE s.StudentID = g.StudentID AND Grade <> 'A'
+  );
 ```
 
 * 注意 <>不包含null检测，，如果存在null可能会忽略为unknown

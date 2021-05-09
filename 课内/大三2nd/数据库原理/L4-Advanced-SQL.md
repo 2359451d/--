@@ -276,9 +276,9 @@ having筛选
 
 ![](/static/2021-02-15-21-16-06.png)
 
-* 先group by dno, 聚合出count(number)
-* 对1的查询集进行再聚合算出max(number) 
-* group by dno，聚合求count(*),且筛选出count(*)=2的max num的tuple
+* 先group by dno, 聚合出count(number)，每个部门的人数
+* 对1的查询集进行再聚合算出max(number) ，最大部门人数
+* group by dno，聚合求`count(*)`,且筛选出`count(*)`=2的max num的tuple
 
 # DML数据操作语言: Modification Query
 

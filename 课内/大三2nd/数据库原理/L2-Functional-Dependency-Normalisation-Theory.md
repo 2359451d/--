@@ -158,7 +158,7 @@ Relational Design
 
 :candy: <font color="deeppink">涉及的问题 - 如何最佳选择一个共同属性用来join relation，以后续连接不会出现fictitious tuples？</font>
 
-* 需要利用theory来找到不会产生虚构元组的最佳关联属性 find the best splitting attribute that does not generate fictitious tuples…a Theory is imperative! --- 【**Functional Dependency Theory**】
+* 需要利用theory来找到不会产生虚构元组的最佳关联属性(join attr) find the best splitting attribute that does not generate fictitious tuples…a Theory is imperative! --- 【**Functional Dependency Theory**】
 
 # 函数依赖理论: Theory of Functional Dependency
 
@@ -281,7 +281,7 @@ smaller ones, such that, when we re-join them, it guarantees that no information
 
 ![](/static/2021-01-29-22-27-49.png)
 
-> 通过渐进式分解，找到基本关系，可以有效地重构整个信息，避免冗余，避免组成后的虚构元组。find, via progressive decomposition, the basic relations, which can reconstruct the entire information efficiently avoiding redundancy and avoiding fictitious tuples after their composition
+> 通过渐进式分解，**找到基本关系，可以有效地重构整个信息，避免冗余，避免组成后的虚构元组**。find, via progressive decomposition, the basic relations, which can reconstruct the entire information efficiently avoiding redundancy and avoiding fictitious tuples after their composition
 
 * 标准化步骤首先要利用FD（**找到最优分解属性 optimal splitting attribute**），一步步分解大relation成多个subrelation
 * 之后join relation时，**不能生成任何虚构元组**（fictitious tuples），避免冗余
@@ -314,6 +314,8 @@ smaller ones, such that, when we re-join them, it guarantees that no information
 :orange: prime attribute 主属性
 
 * **属于relation的CK集合中的一个属性** an attribute that belongs to some candidate key of the relation
+  * 包含在任一候选码中的属性称主属性。简单来说，**主属性是候选码所有属性的并集**
+  * 如果**一个属性是构成某一个候选关键字（候选码）的属性集中的一个属性**，则称它为主属性
   * SSN& Pnumber
 
 :orange: non-prime attribute 非主属性
@@ -545,7 +547,7 @@ is a PK, i.e., the left-hand side should be a PK 【BCNF形式的relation，如�
 
 * `R`为非BCNF形式relation，存在`FD：X->A`，违反BCNF
 * 则首先需要将`R`分成两个subrelation `R1` & `R2`，满足 Then, the relation R should be decomposed into two relations, such that
-  * `R1`具有所有属性，除了right hand side违反BCNF的属性 **R1 with attributes: R\{A} (all attributes in R apart from A)**
+  * `R1`具有所有属性，除了right hand side违反BCNF的属性 **R1 with attributes: `R\{A}` (all attributes in R apart from A)**
   * `R2`具有 `X` & `A`属性 **R2 with attributes: {X} U {A} (put together X and A)**
 * 之后，检查 `R1`和`R2`是否为BCNF形式 If either R1 or R2 is not in BCNF, repeat the process.
   * 如果其中一个不是，需要重复操作，直到两个relation都不违反BCNF

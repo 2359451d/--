@@ -113,6 +113,7 @@ index-entry = (index-value, block-pointer)
 Secondary Index: index field is:
 
  非有序，键字段，如唯一的passport number，在有序文件(如按SSN排序)或非有序文件； non-ordering, key field, e.g., unique passport number, over an ordered (e.g., by SSN) or a non-ordered file.
+
  非顺序、非键字段，例如工资，在一个有序文件(例如按SSN)或无序的文件上； non-ordering, non-key field, e.g., salary, over an ordered (e.g., by SSN) or a non-ordered file.
 
 ---
@@ -183,6 +184,8 @@ ordering , non key field (sparse index)
 ### 是否建立聚簇索引 & 无穷大唯一值时线性搜索成本：Decision Making
 
 ![](/static/2021-03-29-01-25-02.png)
+
+* 有序非键字段上进行exit特性的线性搜索成本严格小于 原生线性搜索成本的一半
 
 ### 聚簇索引开销&效率图：Tradeoff overhead vs speed
 
@@ -264,7 +267,7 @@ primary of primary
 ![](/static/2021-03-29-23-01-30.png)
 
 * `m` 足够大，
-* 给定level-1 index， 其块因子 `m`（fan out）
+* 给定level-1 index， 其**索引块因子** `m`（fan out）
   * 最大多级索引层数(即，块访问成本) - `t=logm b`
 
 ## 例子

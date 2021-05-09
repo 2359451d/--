@@ -20,7 +20,7 @@
 * [B Tree: Index on Non-ordering key](#b-tree-index-on-non-ordering-key)
   * [例子1 - 检索](#例子1---检索)
   * [例子2](#例子2)
-    * [索引文件大小 & 索引包含块数](#索引文件大小--索引包含块数)
+    * [例子-索引文件大小 & 索引包含块数](#例子-索引文件大小--索引包含块数)
 * [最大化扇出&最小化存储开销：Maximize fan-out & minimize storage](#最大化扇出最小化存储开销maximize-fan-out--minimize-storage)
 * [B+树-非排序键索引：B+ tree - index on non-ordering key](#b树-非排序键索引b-tree---index-on-non-ordering-key)
 * [B+ Tree：Internal Nodes](#b-treeinternal-nodes)
@@ -157,9 +157,11 @@ B树索引确保所有叶结点都处于同一层 ensures that all the leaf node
 
 ---
 
-### 索引文件大小 & 索引包含块数
+### 例子-索引文件大小 & 索引包含块数
 
 ![](/static/2021-04-02-21-17-24.png)
+
+* 注意B树最后一层没有树指针！！！所以是16+256+4096
 
 # 最大化扇出&最小化存储开销：Maximize fan-out & minimize storage
 
@@ -239,14 +241,14 @@ B树索引确保所有叶结点都处于同一层 ensures that all the leaf node
 
 ![](/static/2021-04-03-19-52-55.png)
 
-* 因为B+树，平衡，需要go down the whole tree to access the actual block,因此成本可预计
-  * 而B树未知，所以通常在root注入 the most popular searching values in order to avoid going down the whole tree to avoid retreiving many blocks
+* 因为B+树，平衡，需要**go down the whole tree** to access the actual block,因此成本可预计
+  * 而B树未知，所以**通常在root注入 the most popular searching values** in order to avoid going down the whole tree to avoid retreiving many blocks
 
 ---
 
 ## Range query：B/B+ tree accessing pattern
 
-注意：因为相当于 secondary index,,所以原本的data file根据SSN无序，，无法利用连续加载相邻数据块的特性
+注意：因为相当于 secondary index（**非排序**）,,所以原本的data file根据SSN无序，，**无法利用连续加载相邻数据块的特性**
 
 ![](/static/2021-04-03-22-53-07.png)
 
@@ -419,7 +421,7 @@ Recall，
     * <font color="red">因为此之前已经加载了第一个leaf node(包含lower bound的)，因此，还需要`[U-L / p] - 1`个兄弟节点</font>
 * 因为 range ratio `α= U-L / n`
   * 带入 需要的兄弟节点数 `[U-L / p] - 1`，<font color="red">得到 `[αn / p] -1`</font>
-* 每次访问兄弟节点，也需要访问其中每个data blocks
+* 每次访问兄弟叶节点，也需要访问每个叶节点其中的每个data blocks
   * `（[αn / p] -1）* q`
 
 ![](/static/2021-04-04-15-46-55.png)

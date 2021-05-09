@@ -575,7 +575,7 @@ pseudocode
 
 ![](/static/2021-03-05-19-43-11.png)
 
-From theory,
+From theory,最坏情况
 
 * M=3，有3个桶，每个桶概率相同，因此1/3=33%
 * 假设访问

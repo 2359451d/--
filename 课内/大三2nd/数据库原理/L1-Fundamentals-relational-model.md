@@ -284,7 +284,7 @@ relation - 注重一个，互相离不开引用（“关系”）
 
 ![](/static/2021-01-17-19-10-48.png)
 
-* **key constraint**
+* **key constraint** 键约束
   * 定义属性，唯一确定一个tuple
 * **Entity Integrity Constraint** 完整性约束
   * 某些KEY不能为`NULL`
@@ -329,7 +329,9 @@ relation - 注重一个，互相离不开引用（“关系”）
 Let `K = {A1, …, Ak}`, then:
 
 > K is candidate key ↔ K’ = K \ {Ai} is not a SK for any Ai ∈ K
+>
 > the removal of any attribute from K results in K' that is no longer a superkey
+>
 > 从K candidate key中删除任意属性构成的K' 都不属于superkey（因为K本身需要满足是SK中属性最少的，最小的SK）
 
 * 即，如果从`K`中删除任意属性构成的`K'`为SK，则原`K`不是CK

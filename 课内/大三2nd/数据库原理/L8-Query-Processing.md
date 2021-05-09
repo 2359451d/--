@@ -14,8 +14,8 @@ Query Processing
 
 * [Content](#content)
 * [为什么存在基本的内部排序：FUNDAMENTAL TOOL: SORTING](#为什么存在基本的内部排序fundamental-tool-sorting)
-* [外部哈希概念 & 成本：EXTERNAL SORTING- OVERVIEW](#外部哈希概念--成本external-sorting--overview)
-  * [外部哈希概念/原理](#外部哈希概念原理)
+* [外部排序概念 & 成本：EXTERNAL SORTING- OVERVIEW](#外部排序概念--成本external-sorting--overview)
+  * [外部排序概念/原理](#外部排序概念原理)
   * [外部哈希成本](#外部哈希成本)
 * [Strategies for Select](#strategies-for-select)
   * [普通选择查询：Simple selection query](#普通选择查询simple-selection-query)
@@ -70,9 +70,9 @@ Query Processing
 * **无法在内存中存储完整关系（large relation**）relation用任何排序算法用来排序记录 --- 【**内部排序** internal sorting 】Fundamental Limitation: we cannot store the entire relation into memory for sorting the records (bubble sort; quick sort; heap sort; merge sort; …)
 * <font color="red">所以需要引入外部排序方法/算法，用于处理相对大的关系，因为大多数时间这些关系都无法装入主存</font> introduce a new sorting algorithm which is called external sorting algo and using that to deal with relatively large relations as most of the time a relation cannot fit in the main memory. i.e. cannot do that internally
 
-# 外部哈希概念 & 成本：EXTERNAL SORTING- OVERVIEW
+# 外部排序概念 & 成本：EXTERNAL SORTING- OVERVIEW
 
-## 外部哈希概念/原理
+## 外部排序概念/原理
 
 当relation过大情况下，，外部排序的概念 & 基于块访问，通过外部排序排序记录所需成本
 
@@ -152,8 +152,8 @@ sort-merge外部排序方法的成本，给出
 
 :orange: t层主索引范围查询成本： cost of primary index of level `t` over the key (file sorted by key field)
 
-* t（一趟定位下限块） + 1 （加载下限块）+ **连续块** （因为主索引，源文件一定是根据key排序的，可以直接加载，，最坏情况下加载所有的剩余块）
-  * 即， `t+O(b)` （1是包含在 b里的
+* t（一趟定位下限块） + **连续块** （因为主索引，源文件一定是根据key排序的，可以直接加载，，最坏情况下加载所有的剩余块）
+  * 即， `t+O(b)`
 
 :orange: **范围查询不要使用哈希方式** Do not use Hashing for range queries
 
@@ -219,7 +219,7 @@ Final result: contains tuples satisfying the **union of all selection conditions
   * **如**：build a secondary index over the salary and primary index over the name. use both indexes to retrieve those tuples of satisfying the first condition and those tuples satisfying the second condition. then take the union of these subsets
 * <font color="red">如果所有属性（条件中涉及的）不存在索引/哈希 e.g.,B+/hash/primary-index，或是 只有几个属性存在访问结构</font> if none or some of the attributes have an access path,
   * linear search is unavoidable
-  * **为什么**：I have built an index over the salary. but built nothing over the Name attribute. So can exploit the index over the salary attribute to retrieve as fast as possible. But have not built a secondary access path or primary access path over Name, so have to deal with the linear search
+  * **为什么**：我已经在工资上建立了一个索引，但在姓名属性上没有建立任何索引。所以可以利用工资属性的索引来尽可能快地检索。但是没有在Name上建立二级访问路径或一级访问路径，所以必须处理线性搜索。 I have built an index over the salary. but built nothing over the Name attribute. So can exploit the index over the salary attribute to retrieve as fast as possible. But have not built a secondary access path or primary access path over Name, so have to deal with the linear search
 
 :orange: <font color="red">因此处理这类查询的时候，要警惕是否为条件中涉及的字段建立额外访问结构，以此来加速查询效率；否则线性搜索不可避免</font>
 
@@ -626,7 +626,7 @@ put together to predict the expected cost, based on the context and identify whi
 * winner: index based nested loop join algo
   * built a B+ Tree over the PK attribute of the join relation,
 * but 每次生成匹配元组后将他们存入内存缓冲，，缓冲满时需要暂停，，**还需要包括将缓冲写回外存的成本** the cost for writing the result-set buffer (block) from memory to disk in each strategy is not yet considered!
-* **还需要明确，具体要写回多少个块**（因为JOIN是基于多个关系的,并不是考虑写，读单个块） have to identify how many blocks are about to be written
+* **还需要明确，具体要写回多少个块**（因为JOIN是基于多个关系的,并不是考虑写，读单个块，，**也就是之后的JOIN选择性成本，，把中间结果集写回的块数**） have to identify how many blocks are about to be written
 * **多少个元组会被匹配** how many tuples are about to be matched
 
 # 例子-递归关系：基于索引嵌套循环Join
