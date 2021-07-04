@@ -1,26 +1,48 @@
 {
 	"version": "2.0.0",
+	"command": "pdflatex",
+	"args": [
+		"-interaction=nonstopmode",
+		"-file-line-error",
+		"1.tex"
+	],
+	"problemMatcher": {
+		"owner": "latex-preview",
+		"fileLocation": [
+			"relative",
+			"${workspaceRoot}"
+		],
+		"pattern": {
+			"regexp": "^(.*):(\\d+):\\s+(.*)$",
+			"file": 1,
+			"line": 2,
+			"message": 3
+		}
+	},
 	"tasks": [
 		{
+			"label": "pdflatex",
 			"type": "shell",
-			"label": "C/C++: gcc.exe build active file",
-			"command": "C:\\MinGW\\bin\\gcc.exe",
+			"command": "pdflatex",
 			"args": [
-				"-g",
-				"${file}",
-				"-o",
-				"${fileDirname}\\${fileBasenameNoExtension}.exe"
+				"-interaction=nonstopmode",
+				"-file-line-error",
+				"1.tex"
 			],
-			"options": {
-				"cwd": "${workspaceFolder}"
+			"problemMatcher": {
+				"owner": "latex-preview",
+				"fileLocation": [
+					"relative",
+					"${workspaceRoot}"
+				],
+				"pattern": {
+					"regexp": "^(.*):(\\d+):\\s+(.*)$",
+					"file": 1,
+					"line": 2,
+					"message": 3
+				}
 			},
-			"problemMatcher": [
-				"$gcc"
-			],
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			}
+			"group": "build"
 		}
 	]
 }

@@ -41,7 +41,7 @@
 :orange: Expression `E` is of type `T`
 
 * if, when evaluation of E terminates normally, it is guaranteed to yield a value v of type T
-* 当表达式E正常执行结束，并产生类型T的值v时，称E为类型为T的表达式
+* 当**表达式E正常执行结束，并产生类型T的值v时，称E为类型为T的表达式**
 
 ## 基本类型：Primitive Types
 
@@ -263,7 +263,7 @@ index value
 
 :orange: 函数基数 - funtion types cardinality
 
-* 函数类型的基数/映射可为无穷 `#S=∞` 因为其输出结果按需计算 funciton can represent an infinite mapping(where #S=∞ since its results are computed on demand)
+* 函数类型的基数/映射(`#(S->T)`)可为无穷  因为其输出结果按需计算`#S=∞` funciton can represent an infinite mapping(where #S=∞ since its results are computed on demand)
 
 ##### 一元函数例子
 
@@ -281,6 +281,7 @@ index value
 
 * `f:(S1x..xSn)->T`
 * 参数为笛卡尔积类型 cartesian product type
+  * 多元形参formals
 
 ##### 多元函数例子
 
@@ -294,7 +295,7 @@ from Lab solution2
 
 > Arrays and functions are fundamentally different in that the mapping represented by an array is stored in its entirety (and therefore must be a finite mapping), whereas a function is applied to its arguments on demand (and therefore may be an infinite mapping).
 
-数组和函数有本质上的不同，数组所代表的映射是完整存储的（因此必须是有限映射），而函数则是按需应用于它的参数（因此可能是无限映射）。
+数组和函数有本质上的不同，数组所代表的映射是完整存储的（因此必须是**有限映射**），而函数则是按需应用于它的参数（因此可能是**无限映射**）。
 
 * 也许还可以提一手数组index range必须为有限numerical类型（或值为numerical的表达式），而函数映射输入没有限制于numerical
 
@@ -399,6 +400,8 @@ java不存在实质“列表”定义，LIST接口之类的只是集合collectio
 
 ![](/static/2021-02-01-01-36-45.png)
 
+* 即使不知道具体值，但编译时期可以通过类型推断来避免一些类型错误
+
 ## 动态类型检查：Dynamic Typing
 
 ![](/static/2021-02-01-01-00-35.png)
@@ -429,11 +432,11 @@ java不存在实质“列表”定义，LIST接口之类的只是集合collectio
 * **静态类型**
   * 更高效，只需要编译时期类型检查 Static typing is more efficient: it requires only compiletime type checks
   * 更安全，编译器保证程序无类型错误（否则无法通过编译）Static typing is more secure: the compiler can guarantee that the object program contains no type errors.
-  * 不灵活，某些计算无法自然表示
+  * **不灵活，某些计算无法自然表示**
 * **动态类型** Static typing is less flexible: certain computations cannot be expressed naturally
   * 需要运行时期检查（使程序运行更慢），强制标记所有值（占更大内存空间）Dynamic typing requires run-time type checks (making the program run slower), and forces all values to be tagged (using up more space).
-  * 不安全，编译器不能保证无类型错误，编译时期无类型检查Dynamic typing provides no such security.
   * 处理编译时期未知数据更灵活，自然 Dynamic typing provides no such security
+  * **不安全，编译器不能保证无类型错误，编译时期无类型检查**Dynamic typing provides no such security.
 
 # 表达式：Expression
 
