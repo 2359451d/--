@@ -24,6 +24,7 @@ J2EE & Distributive Techniques
 
 * [X] ~~*Nginx*~~ [2020-11-21]
 * [X] ~~*Docker*~~ [2021-07-05]
+* [X] ~~*servlet*~~ [2021-07-10]
 * [ ] Dubbo
 * [ ] SSM
 * [ ] Cloud
