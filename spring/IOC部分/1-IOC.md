@@ -9,7 +9,6 @@
   * [Spring配置文件注册组件](#spring配置文件注册组件)
   * [根据ID取出组件](#根据id取出组件)
   * [IOC容器配置文件路径](#ioc容器配置文件路径)
-* [](#)
 
 # 概述
 
@@ -143,5 +142,3 @@ IOC容器配置文件在类路径下
 IOC容器配置文件在磁盘路径下
 
 * `FileSystemXmlApplicationContext("path")`
-
-# 
