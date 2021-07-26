@@ -1,5 +1,7 @@
 # Study List
 
+不记进度了捏
+
 JAVASE
 
 - [X] ~~*fundamental*~~ [2020-08-30]
