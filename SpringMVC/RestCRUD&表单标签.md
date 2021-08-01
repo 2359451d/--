@@ -102,7 +102,7 @@ GetAll
 
 :bulb: 利用scripts，超链接提交表单
 
-* 注意默认js请求交给tomcat，前端控制器拦不到
+* 注意默认js请求被拦截,`/`交给前端控制器，但前端控制器不存在方法能处理，不会到tomcat的`DefaultServlet`
 * spring‘配置 `mvc:default-servlet-handler`告诉spring，自己映射的请求自己处理，不能处理的交给tomcat
 
 ![](/static/2021-07-31-22-43-18.png)
