@@ -88,7 +88,10 @@
     * [配合拦截器使用](#配合拦截器使用)
 * [============](#-5)
 * [异常处理](#异常处理)
-  * [](#-6)
+  * [@ExceptionptionHanler](#exceptionptionhanler)
+  * [全局异常处理类](#全局异常处理类)
+  * [@ResponseStatus](#responsestatus)
+  * [SimpleMappingExceptionHandle](#simplemappingexceptionhandle)
 
 # 简介
 
@@ -179,7 +182,7 @@ spring配置文件
 * `@Controller`
 * `@RequestMapping`
 
-这种未改进方法返回的路径太长了 ，可以配一个视图解析器
+这种未改进方法返回的路径太长了 ，**可以配一个视图解析器**
 
 ```java
 /*
@@ -461,6 +464,8 @@ controller指定method
 POJO类 （有参无参）
 ![](/static/2021-07-29-16-02-55.png)
 
+* 因为默认他是自己new出来（再通过getter/setter通过表单里的值设置值），而不是查出来，，所以必须有无参构造器
+
 表单指定的请求参数名要对应的上
 ![](/static/2021-07-29-16-04-08.png)
 
@@ -592,6 +597,8 @@ spirngmvc可以通过以下方式输出数据
 ![](/static/2021-07-30-17-37-01.png)
 
 * **不写入参前ModelAttribute注解也可以，但是请求域中key名称要对应的上入参变量名**
+  * 不写入参ModelAttribute，，会先去BindingAwareModelMap里找跟入参标识符一样的key，，有就取出来赋值
+  * 不然只能显示的写明，并@ModelAttribute（“key”）指明到底入参基于哪个key封装
 
 将数据return也会放在请求域，默认key为返回类型名小写
 
@@ -699,7 +706,7 @@ DispatcherServlet中9个属性 --- Springmvc9大组件（全是接口）
 * 多个视图解析器都会尝试是否能得到视图对象
 * 视图对象不同就可以具有不同功能
 
-`mv.handle()` 任何方法值最终被封装成ModelAndView
+`ha(handlerAdapter).handle()` 任何方法值最终被封装成ModelAndView
 
 ![](/static/2021-07-31-17-00-26.png)
 ![](/static/2021-07-31-17-10-39.png)
@@ -761,7 +768,7 @@ spring中bean标签配，或者导包
 ![](/static/2021-07-31-18-33-43.png)
 
 * 遍历所有视图解析器，看看哪个视图解析器能处理视图名
-  * ![](/static/2021-07-31-18-35-05.png)![](/static/2021-07-31-18-36-33.png)发现Internalxxxx解析器不能处理，但是会创建一个普通视图渲染至视图名路径（造成404），**所以要配置优先度**
+  * ![](/static/2021-07-31-18-35-05.png)![](/static/2021-07-31-18-36-33.png)发现Internalxxxx解析器(JSTL国际化视图解析器)不能处理，但是会创建一个普通视图渲染至视图名路径（造成404），**所以要配置优先度**
 
 自定义视图解析器实现`Ordered`接口，确保能保证执行优先级（越小越优先）
 
@@ -843,7 +850,7 @@ javaBean和页面提交的数据进行一一绑定，牵扯到以下操作
 * 直接返回视图响应的请求，不走控制器，`mvc:view-controller`，注意配置`mvc:annotation-driven`不然其他控制器用不了
 * CRUD删除时，静态资源（js）无法访问到，要配置`mvc:annotaiton-driven` & `mvc:default-servlet-handler`
   * **会在springmvc上下文中定义一个`DefaultServletHttpRequestHandler`，对进入`DispatcherServlet`的请求进行筛查，如果发现是未经映射的请求，交给WEB服务器（tomcat）默认的`DefaultServlet`处理。如果不是静态资源，才继续由`DispatcherServlet`前端控制器处理**
-  * 原本/拦截所有请求，不包括jsp页面（\*.jsp)，其他请求（如\*.html静态资源），原本交给DefaultServlet，但是如果子模块覆写url-pattern为/，会禁用掉DefaultServlet，转而交给前端控制器来处理
+  * 原本/拦截所有请求，不包括jsp页面（\*.jsp)，其他请求（如\*.html静态资源），原本交给DefaultServlet，但是如果子模块覆写url-pattern为/，会禁用掉DefaultServlet，转而交给前端控制器来处理（所以我们想把这些未经映射的静态资源，先交给DefaultServlet处理
     * 如果不存在方法能处理这个静态资源，那么就返回404
 * 配置类型转换器
   * 指定需要用到的类型转换器
@@ -977,7 +984,7 @@ Hibernate Validator已实现国际化信息
 
 1.导包(jakson)
 
-![](/static/ 2021-08-01-19-20-35.png)
+![](/static/2021-08-01-19-20-35.png)
 
 2.目标方法添加`@ResponseBody`注解
 

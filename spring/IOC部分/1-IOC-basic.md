@@ -133,7 +133,7 @@ public void test() {
 注意：
 
 * src 源码包开始的路径都会在**类路径**下 /bin
-* web项目会在 /WEB-INF/classes 里面（作为类路径）
+* web项目会在 **`/WEB-INF/classes`** 里面（作为类路径）
 
 IOC容器配置文件在类路径下
 

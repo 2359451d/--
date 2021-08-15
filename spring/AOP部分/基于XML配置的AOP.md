@@ -10,6 +10,8 @@
 1. 目标类 & 切面类添加进ioc容器
 2. 声明哪个是切面类 `@Aspect`
 3. 切面类中使用AspectJ通知注解 & 切面表达式，何时何地切入
+   * `@Before/After/...(execution="切入点表达式")`
+   * 可重用切入点`@PointCut`定义在void空方法上，通知注解`pointcut`属性引用
 4. 开启基于注解的AOP功能
 
 # 基于XML配置的AOP

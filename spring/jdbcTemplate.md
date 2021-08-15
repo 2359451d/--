@@ -78,7 +78,7 @@ String sql = "INSERT INTO employee(emp_name, salary) VALUES(?, ?)";
 
 `SELECT emp_id empId，emp_name <别名> FROM employee WHERE emp_id=?`
 
-* 注意javaBean需要和数据库中字段名一致，否则无法封装对象
+* 注意**javaBean属性需要和数据库中字段名一致**，否则无法封装对象
   * 起别名
 * jdbctemplate查询方法级别进行了区别
   * **查询集合** - jdbctemplate.query()
