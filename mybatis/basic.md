@@ -372,8 +372,8 @@ public class Author {
 
 ![](/static/2021-08-04-18-38-24.png)
 
-* 注意普通DAO还是得和配置文件同目录
-  * ![](/static/2021-08-04-18-39-38.png)可以配置文件放在同名包里
+* 注意普通DAO还是得和映射文件同目录
+  * ![](/static/2021-08-04-18-39-38.png)可以映射文件放在同名包里
 
 # SQL映射文件
 
@@ -389,7 +389,7 @@ i nsert 、 update 、 delete属性
 
 ![](/static/2021-08-06-16-36-15.png)
 
-* 需要配置让mybatis自动将自增id注入bean
+* 需要配置让mybatis自动将自增id注入bean(属性)
   * `useGeneratedKey=True`使用自动生成的主键
   * `keyProperty`将自增的id封装给哪个属性
 
@@ -403,6 +403,7 @@ i nsert 、 update 、 delete属性
 
 * 不支持自增型主键的db，可以使用这个子元素
 * `order="BEFORE"`可以在核心sql语句之前运行一个查询sql，查到id，然后通过`keyProperty`赋值至属性
+  * 类似分步sql了
 
 ## 参数传递
 
@@ -428,7 +429,7 @@ i nsert 、 update 、 delete属性
 
 :bulb: POJO传递
 
-* `#{pojo属性}`
+* 直`#{pojo属性}`
 
 :bulb: map传递
 
@@ -485,7 +486,7 @@ i nsert 、 update 、 delete属性
 * map
   * key - **字段名**
   * value - **字段值**
-* **这里是单条，所以返回类型可以写成map**
+* **这里是查询单条记录，所以返回类型可以写成map**
 
 查询多条记录，封装map
 
@@ -530,7 +531,7 @@ i nsert 、 update 、 delete属性
 
 ![](/static/2021-08-06-17-51-28.png)
 
-* `resultMap=“自定义结果集唯一表示”`
+* `resultMap=“自定义结果集唯一标识”`
 
 ## 联合查询
 
