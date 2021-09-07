@@ -484,8 +484,8 @@ i nsert 、 update 、 delete属性
 ![](/static/2021-08-06-17-27-35.png)
 
 * map
-  * key - **字段名**
-  * value - **字段值**
+  * key - **bean字段名**
+  * value - **bean字段值**
 * **这里是查询单条记录，所以返回类型可以写成map**
 
 查询多条记录，封装map
