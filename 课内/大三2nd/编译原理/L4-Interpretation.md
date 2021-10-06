@@ -23,7 +23,7 @@
   * [编译阶段：Compilation Phases](#编译阶段compilation-phases)
 * [案例学习：Fun](#案例学习fun)
   * [程序例子](#程序例子)
-  * [Fun语法：Fun Syntax](#fun语法fun-syntax)
+  * [Fun语言语法：Fun Syntax](#fun语言语法fun-syntax)
   * [Fun编译器& 编译阶段（Fun Compiler）](#fun编译器-编译阶段fun-compiler)
   * [Fun驱动器：Fun Driver](#fun驱动器fun-driver)
 * [抽象语法树：Abstract Syntax Tree](#抽象语法树abstract-syntax-tree)
@@ -127,7 +127,7 @@ in such an interpreter:
 
 ## JAVA SVM interpreter
 
-状态由变量表示，指令通过检查/和或更新状态来执行
+状态由变量表示，指令通过检查/和或更新状态来执行【**注意是解释器**】
 
 ![](/static/2021-02-25-19-17-44.png)
 
@@ -146,7 +146,7 @@ in such an interpreter:
 
 ## 初始化
 
-初始化状态，重复匹配&执行指令
+初始化状态，重复匹配下条指令&执行当前指令
 
 ![](/static/2021-02-25-21-01-07.png)
 
@@ -175,8 +175,8 @@ in such an interpreter:
 ![](/static/2021-02-25-21-14-56.png)
 
 * 编译阶段 compilation phases
-  * 语法分析 syntactic analysis
-  * 上下文分析 contextual analysis
+  * 语法分析（&文法分析） syntactic analysis
+  * 上下文分析（语义分析） contextual analysis
   * 代码生成 code generation
 * 抽象语法树 abstract syntax trees
 * Fun 案例学习
@@ -190,7 +190,7 @@ A **S → T** compiler translates a source program in S to object code in T, if 
 这表明编译器可以分解为三个阶段。
 
 * syntactic analysis 语法分析阶段
-* contextual analysis 上下文分析阶段
+* contextual analysis 上下文分析阶段（语义分析）
 * code generation 代码生成阶段
 
 ## 编译阶段：Compilation Phases
@@ -199,7 +199,8 @@ A **S → T** compiler translates a source program in S to object code in T, if 
 
 * **语法分析 Syntactic analysis**
   * 根据源语言的语法，对源程序进行解析，检查其是否完善，并确定其短语结构 Parse the source program to check whether it is well formed, and to determine its phrase structure, in accordance with the source language’s syntax.
-* **上下文分析 Contextual analysis**
+  * 也包含了文法分析
+* **上下文分析（语义分析） Contextual analysis**
   * 分析解析程序，检查它是否符合源语言的作用域规则和类型规则。 Analyze the parsed program to check whether it conforms to the source language’s scope rules and type rules
 * **代码生成 code generation**
   * 根据源语言的语义，将解析后的程序翻译成对象代码。 Translate the parsed program to object code, in accordance with the source language’s semantics.
@@ -238,7 +239,7 @@ A **S → T** compiler translates a source program in S to object code in T, if 
 
 空格，缩进，EOL无严格要求
 
-## Fun语法：Fun Syntax
+## Fun语言语法：Fun Syntax
 
 ![](/static/2021-02-25-22-08-09.png)
 

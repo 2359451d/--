@@ -193,6 +193,8 @@ A virtual machine (or abstract machine) is one whose “machine code” is execu
 Suppose we have designed the architecture and instruction set of a new machine, MVM.假设我们设计了一台新机器MVM的架构和指令集
 A hardware prototype of MVM will be expensive to build and modify.MVM的硬件原型制造，修改成本高
 
+* 在x86上运行MVM解释器，，相当于x86上MVM虚拟机。因为MVM原型打造成本高。这么做缺点是解释器，执行很慢
+
 ![](/static/2021-02-07-23-54-43.png)
 ![](/static/2021-02-07-23-56-15.png)
 
@@ -225,13 +227,15 @@ This is based on the JVM (Java Virtual Machine), a virtual machine initially des
 # （Selective）JIT(Just-in-time) compilers
 
 ![](/static/2021-02-08-00-06-52.png)
+![](/static/2021-10-04-06-38-13.png)
 
-A just-in-time (JIT) compiler translates virtual machine code to native machine code just prior to execution. 及时编译器(JIT)在执行前将虚拟机代码转化为本地机器代码。
+A just-in-time (JIT) compiler translates virtual machine code to native machine code just prior to execution. 及时编译器(JIT)在执行前将虚拟机代码(字节码bytecode)转化为本地机器代码。
 
 * Java JIT编译器有选择地翻译JVM代码 More usually, a Java JIT compiler translates JVM code selectively:
   * 解释器和JIT编译器一起工作。The interpreter and JIT compiler work together.
   * 解释器的工具是用来计算方法调用。The interpreter is instrumented to count method calls.
   * 当解释器发现某个方法频繁调用，它就会告诉JIT编译器将该方法翻译成本地代码。 When the interpreter discovers that a method is “hot” (called frequently), it tells the JIT compiler to translate that particular method into native code.
+    * **频繁调用的方法，交JIT给编译器处理，很少执行的可以用解释器直接解释为机器码**
 
 # 可移植编译器：Portable compilers
 
@@ -240,7 +244,9 @@ A just-in-time (JIT) compiler translates virtual machine code to native machine 
 如果一个程序能够以最小的改动在不同的机器上运行，那么它就是可移植的。A program is portable if it can be made to run on different machines with minimal change:
 
 * 一个生成原生机器代码的编译器在特殊意义上是不可移植的。**如果必须改变它的目标机器，它的代码生成器必须被替换**。 A compiler that generates native machine code is unportable in a special sense. If it must be changed to target a different machine, its code generator must be replaced.
+  * 。。。某架构机器码翻译成别的目标机器码，比较困难
 * 然而，生成合适的虚拟机代码的编译器是可以移植的。However, a compiler that generates suitable virtual machine code can be portable.
+  * 比如java编写的程序，，，各平台存在合适编译器，就可以运行在各个平台上
 
 ## 例子：portable compiler kit
 
@@ -249,7 +255,13 @@ A just-in-time (JIT) compiler translates virtual machine code to native machine 
 * 存在问题：需要考虑到底先实现哪个(解释器or编译器)
 
 ![](/static/2021-02-08-00-22-36.png)
+
+* 先得到能在M机器上运行的JVM，，形成M机器的JVM（java虚拟机
+
 ![](/static/2021-02-08-00-24-22.png)
+
+* javac - 编译器本身也是个java程序（已经是字节码，，直接在JVM上编译解释运行）
+* **编译过程很慢（因为要通过虚拟机），但是可以通过自举优化**
 
 # 自举：Bootstrapping
 
@@ -257,20 +269,26 @@ A just-in-time (JIT) compiler translates virtual machine code to native machine 
 
 假设一个翻译程序 `S->T`
 
-* 自举 --- 程序语言编译器用自身的语言及其特性来编译自己 Such a translator can be used to translate itself! This is called bootstrapping.
+* 自举 --- **程序语言编译器用自身的语言及其特性来编译自己** Such a translator can be used to translate itself! This is called bootstrapping.
 
 :orange:自举是改进现有编译器的有用工具 Bootstrapping is a useful tool for improving an existing compiler:
 
-* making it compile faster
-* making it generate faster object code.
+* making it compile faster **编译过程更快**
+* making it generate faster object code. **更快生成目标码**
 
 :orange: <font color="deeppink">我们可以通过将虚拟机代码翻译成本机代码，来自举一个可移植的编译器，使之成为一个真正的编译器</font>。 We can bootstrap a portable compiler to make a true compiler, by translating virtual machine code to native machine code.
+
+* 比如把JVM字节码翻译成机器码，跳过虚拟机执行编译过程，直接在本机上执行编译过程
 
 ## 例子
 
 ![](/static/2021-02-08-00-29-55.png)
 ![](/static/2021-02-08-00-36-30.png)
+
+* javac(java->jvm)编译,编译器(jvm->M)本身
+
 ![](/static/2021-02-08-00-37-42.png)
 ![](/static/2021-02-08-00-40-20.png)
 ![](/static/2021-02-08-00-41-38.png)
 
+* 自举后，不再需要通过虚拟机执行源程序编译了。后序执行也不需要通过虚拟机。
