@@ -33,12 +33,13 @@
 
 > 上下文分析 - 检查源程序（AST表示）是否满足源语言的作用域&类型规则。Contextual analysis checks whether the source program (represented by an AST/syntax tree) satisfies the source language’s scope rules and type rules
 
-上下文分析可分为两步： contexual analysis could be broken down into 2 steps
+上下文分析（语义分析）可分为两步： contexual analysis could be broken down into 2 steps
 
 * scope checking 作用域检测
   * 确保每个标识符都提前声明了 ensuring every identifier used in the source program is previously declared
 * type checking 类型检测
   * 确保每个操作的操作数都有预期类型 ensuring every operation has operands with the expected ytpes
+* ![](/static/2021-10-09-22-43-08.png)
 
 # 例子：Fun 编译 - Fun Compilation
 
@@ -137,7 +138,7 @@ AST生成之后，可以通过**遍历AST**来进行上下文分析 Contextual a
 
 ![](/static/2021-03-20-16-14-23.png)
 
-* varaible declaration
+* varaible declaration 变量声明过程
 
 ---
 

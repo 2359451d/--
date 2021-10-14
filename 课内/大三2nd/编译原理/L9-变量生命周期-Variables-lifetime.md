@@ -44,7 +44,7 @@
 
 ![](/static/2021-04-11-11-26-56.png)
 
-为了理解变量，设想有一个抽象的存储模型(代码生成阶段的内存抽象) To understand such variables, assume an abstract storage model:
+为了理解变量，设想有一个抽象的**存储模型**(代码生成阶段的内存抽象) To understand such variables, assume an abstract storage model:
 
 * 存储是存储单元的集合，每个单元都有一个**唯一的地址** A store is a collection of cells, each of which has a unique address
 * 每个存储单元要么是**分配的**要么**未分配**的。 Each cell is either allocated or unallocated.
@@ -73,7 +73,7 @@
 * A tuple variable is a tuple of component variables.
 * index到组成变量的映射 An array variable is a mapping from an index range to a group of component variables.
 
-:orange: 基于PL，符合变量的更新可分为 depending on the PL, a composite var can be:
+:orange: 基于PL，复合变量的更新可分为 depending on the PL, a composite var can be:
 
 * **totally updated**
   * 一次性更新 update the composite variable at once
@@ -146,19 +146,19 @@ special case: recursion
 显式**销毁指定堆变量**的操作 A **deallocator** is an operation that explicitly destroys a designated heap variable
 
 * c deallocator - library function `free()`
-* java - 有gcc回收机制
+* java - 有gc回收机制
 
 # Reachability
 
 ![](/static/2021-04-12-10-15-12.png)
 
-堆变量可达: 只要可以通过指针访问到（全局/局部变量）A heap variable remains reachable as long as it can be accessed by following pointers from a global or local variable
+**堆变量可达: 只要可以通过指针访问到（全局/局部变量**）A heap variable remains reachable as long as it can be accessed by following pointers from a global or local variable
 
 一个**堆变量**的寿命从它被创建开始一直到 A heap variable’s lifetime extends from its creation until:
 
-* it is destroyed by a deallocator,or
-* <font color="deeppink">it becomes unreachable, or</font>
-* the program terminates
+* it is destroyed by a deallocator,or 显式回收
+* <font color="deeppink">it becomes unreachable, or</font> 不可达
+* the program terminates 程序结束时
 
 # Pointers
 
@@ -170,9 +170,9 @@ special case: recursion
 
 * referent is something which refer with the pointer
 
-空指针是一个特殊的指针值，它没有引用。A null pointer is a special pointer value that has no referent
+**空指针**是一个特殊的指针值，它没有引用。A null pointer is a special pointer value that has no referent
 
-指针本质上是它在存储中的引用地址 A pointer is essentially the address of its referent in the store
+指针本质上是它在存储中的**引用地址** A pointer is essentially the address of its referent in the store
 
 * 然而，每个指针也有一个类型，一个指针的类型允许我们推断出它的引用的类型。 However, each pointer also has a type, and the type of a pointer allows us to infer the type of its referent
 
@@ -180,7 +180,7 @@ special case: recursion
 
 ![](/static/2021-04-12-10-24-13.png)
 
-指针和堆变量可以用来表示**递归值**，如列表和树 Pointers and heap variables can be used to represent **recursive values** such as lists and trees.
+指针和堆变量可以用来表示**递归值**，如**列表和树** Pointers and heap variables can be used to represent **recursive values** such as lists and trees.
 
 但指针本身是一个低级的概念。对指针的操作是出了名的容易出错和难以理解。 But the pointer itself is a low-level concept. Manipulation of pointers is notoriously error-prone and hard to understand.
 
@@ -194,28 +194,28 @@ special case: recursion
 
 ![](/static/2021-04-12-10-29-20.png)
 
-指向非法内存地址的指针（指向已摧毁变量的指针）A dangling pointer is a pointer to a variable that has been destroyed
+悬挂指针 - **指向非法内存地址的指针（指向已摧毁变量的指针**）A dangling pointer is a pointer to a variable that has been destroyed
 
 何时出现？
 
-* 堆变量摧毁后仍指向改变量的指针 a pointer to a heap variable still exists after the heap variable is destroyed by a deallocator
+* 堆变量摧毁后仍指向该变量的指针 a pointer to a heap variable still exists after the heap variable is destroyed by a deallocator
 * 在退出声明局部变量的代码块时，指向局部变量的指针仍然存在。 a pointer to a local variable still exists at exit from the block in which the local variable was declared
 
 deallocator会立即销毁一个堆变量；所有指向该堆变量的现有指针都会变成野指针。 A deallocator immediately destroys a heap variable; all existing pointers to that heap variable then become dangling pointers
 
-* 因此deallocators本质上是不安全的。 Thus deallocators are inherently unsafe
+* 因此deallocators**本质上是不安全的**。 Thus deallocators are inherently unsafe
   * 如，需要用户自己检查现有的变量是否被正确操作
 
 ---
 
 ![](/static/2021-04-12-10-36-40.png)
 
-* c
+* c - 极其不安全
   * 在一个堆变量被销毁后，指向它的指针可能仍然存在。 After a heap variable is destroyed, pointers to it might still exist.
   * 在退出块时，指向局部变量的指针可能仍然存在（例如，如果存储在全局变量中，那么退出时这个全局变量的值可能还未改变） At exit from a block, pointers to its local variables might still exist (e.g., if stored in global variables)
-* java
-  * It has no deallocator.
-  * Pointers to local variables cannot be obtained
+* java - 安全
+  * It has **no deallocator**.
+  * Pointers to local variables cannot be obtained 无法获得指向局部变量的指针
 
 ## Example: C dangling pointers
 
@@ -233,25 +233,25 @@ deallocator会立即销毁一个堆变量；所有指向该堆变量的现有指
 
 * **skip command**
   * does nothing
-* **assignment command**
+* **assignment command** 赋值命令
   * uses a value to update a var
-* **procedure call**
+* **procedure call** 过程调用
   * calls a proper procedure with arguments. Its net effect is to update some var
 
 :orange: compound commands
 
 ![](/static/2021-04-12-10-52-22.png)
 
-* **sequential command**
+* **sequential command** 序列命令
   * executes its sub-commands in sequence
-* **conditional command** (if)
+* **conditional command** (if) 条件命令
   * chooses one of its sub-commands to execute
-* **iterative command** (while, for)
+* **iterative command** (while, for) 迭代命令
   * executes its sub-command repeatedly
   * definite iteration (where the number of repetitions is known in advance)
   * indefinite iteration (where the number of repetitions is not known in advance).
-* **block command**
-  * contains declarations of local variables, etc
+* **block command** 块命令
+  * contains declarations of local variables, etc 局部变量声明
 
 ## Example: Java commands
 
@@ -274,7 +274,7 @@ block command
 
 # 表达式副作用：Expressions with side effects
 
-> 如果一个函数修改了自己范围之外的资源，那就叫做有副作用，反之，就是没有副作用。
+> 如果一个函数**修改了自己范围之外的资源，那就叫做有副作用**，反之，就是没有副作用。
 
 计算表达式得到输出结果值 The primary purpose of evaluating an expression is to yield a value.
 
@@ -282,7 +282,7 @@ block command
 
 在C和Java中，函数的主体是一条命令。如果该命令更新了全局变量或堆变量，调用该函数就会产生影响（更新变量）。 In C and Java, the body of a function is a command. If that command updates global or heap variables, calling the function has side effects.
 
-* In C and Java, assignments （commands）are in fact expressions with side effects: “V = E” stores the value of E in V as well as yielding that value.
+* In C and Java, assignments （commands）are in fact expressions with side effects: “V = E” stores the value of E in V as well as yielding that value.在 C 和 Java 中，赋值（**命令）实际上是具有副作用的表达式**：“V = E”将 E 的值存储在 V 中并产生该值。
 
 ## Example: side effects
 

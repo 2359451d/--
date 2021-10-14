@@ -59,7 +59,7 @@
 
 ## 基础块：basic-blocks
 
-:orange: **利用BB，画出每个变量的生命周期，利用非重叠部分来分配寄存器**
+:orange: **利用BB，画出每个变量的生命周期，利用【非重叠部分来分配寄存器】**
 
 基本块（BB）是一个直线型的**指令序列**。 A basic-block (BB) is a straight-line sequence of instructions:
 

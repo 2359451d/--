@@ -17,6 +17,7 @@
 * [Code selection](#code-selection)
   * [Code Template](#code-template)
   * [Fun->SVM对象码模板例子：code templates](#fun-svm对象码模板例子code-templates)
+  * [code templates vs action](#code-templates-vs-action)
 * [Handling jumps](#handling-jumps)
   * [Fun->SVM code templates](#fun-svm-code-templates)
 * [Code generation with ANTLR](#code-generation-with-antlr)
@@ -86,7 +87,7 @@
 
 :orange: variable
 
-* **每声明一个变量**，为其分配一个合适大小的地址 At each variable declaration, allocate a suitable address
+* **每声明一个变量(过程/...标识符)**，为其分配一个合适大小的地址 At each variable declaration, allocate a suitable address
   * 地址表中填入新 标识符-地址 的映射 and put the identifier and address into the address table
 * **每当变量在命令/表达式中使用**，在地址表中检索该变量对应的地址 Wherever a variable is used (e.g., in a command or expression), retrieve its address
 
@@ -112,6 +113,8 @@
 执行命令的代码模板应该包括评估任何子表达式的代码和执行任何子命令的代码，以及任何其他必要的指令。 The code template to execute a command should include code to evaluate any subexpressions and code to execute any subcommands, together with any other necessary instructions.
 
 ## Fun->SVM对象码模板例子：code templates
+
+## code templates vs action
 
 ![](/static/2021-03-21-13-27-37.png)
 
@@ -202,6 +205,8 @@ variable declaration (生成address table的新映射)
 procedure declaration
 ![](/static/2021-03-21-17-14-40.png)
 
+* 注意currentLocale控制scope
+
 # Fun 参数 代码生成
 
 formal
@@ -215,6 +220,8 @@ formal
 # Fun Compiler3阶段
 
 ![](/static/2021-03-21-17-23-15.png)
+
+* 最后生成SVM目标码
 
 # 地址表示：Representing addresses
 

@@ -21,8 +21,8 @@
   * [Example: binding and applied occurrences](#example-binding-and-applied-occurrences)
 * [静态/动态作用域：Static vs dynamic scoping](#静态动态作用域static-vs-dynamic-scoping)
   * [Example: static scoping & dynamic scoping](#example-static-scoping--dynamic-scoping)
-* [Declarations](#declarations)
-  * [Recursive Declarations](#recursive-declarations)
+* [声明命令：Declarations](#声明命令declarations)
+  * [递归声明：Recursive Declarations](#递归声明recursive-declarations)
   * [Example: Java recursive declarations](#example-java-recursive-declarations)
   * [Example: C recursive declarations](#example-c-recursive-declarations)
 
@@ -47,10 +47,11 @@
 ![](/static/2021-04-12-13-20-26.png)
 
 * 表示其environment例子 （这里关注的是program全局的环境，不是特定点，所以编译时期所有声明应可见）
+* 绑定-  标识符：实体
 
 # 作用域：Scope
 
-声明（或绑定）的作用域是指程序中它具有影响（可以产生影响）的部分 The scope of a declaration (or of a binding) is the portion of the program text over which it has effect.
+**声明（或绑定）的作用域**是指程序中它具有影响（可以产生影响）的部分 The scope of a declaration (or of a binding) is the portion of the program text over which it has effect.
 
 在一些早期的PL（如Cobol）中，每个声明的作用域是整个程序 In some early PLs (such as Cobol), the scope of every declaration was the whole program.
 
@@ -60,7 +61,7 @@
 
 # 块结构：Blocks
 
-块是一个程序结构，<font color="red">它限定了其中任何声明(绑定)的范围</font>。 A block is a program construct that delimits the scope of any declarations within it
+块是一个程序结构，<font color="red">它限定了其中任何声明(绑定)的范围(作用域)</font>。 A block is a program construct that delimits the scope of any declarations within it
 
 每个PL块结构可能不同 Each PL has its own forms of blocks:
 
@@ -83,7 +84,7 @@
 
 ![](/static/2021-04-12-13-36-35.png)
 
-有些PL（如Cobol）具有单块结构：**整个程序是一个块结构**。<font color="red">每一个声明的作用域就是整个程序</font> Some PLs (such as Cobol) have monolithic block structure: the whole program is a single block. The scope of every declaration is the whole program.
+有些PL（如Cobol）具有单块结构：**整个程序是一个块结构**。<font color="red">每一个声明(绑定)的作用域就是整个程序</font> Some PLs (such as Cobol) have monolithic block structure: the whole program is a single block. The scope of every declaration is the whole program.
 
 * every declaration as global scope (每个声明即可以应用全局，，作用域为全局)
 
@@ -91,25 +92,27 @@
 
 ![](/static/2021-04-12-13-45-14.png)
 
-Some PLs (such as Fortran) have flat block structure: the program is partitioned into blocks, **but these blocks may not contain inner blocks**. (cannot have)
+Some PLs (such as Fortran) have flat block structure: the program is partitioned into blocks, **but these blocks may not contain inner blocks**. (cannot have) 一些 PL（例如 Fortran）具有扁平块结构：程序被划分为块，**但这些块可能不包含内部块**。 （不能有）
+
+* 比如函数里不能嵌套函数？
 
 # Nested block structure
 
 ![](/static/2021-04-12-13-47-00.png)
 
-Modern PLs have nested block structure: blocks may be nested freely within other blocks
+Modern PLs have nested block structure: blocks may be nested freely within other blocks 现代 PL 具有嵌套块结构：块可以自由嵌套在其他块中
 
 ![](/static/2021-04-12-13-50-00.png)
 
 ## Example: C block structure
 
-C has flat block structure for functions, but nested block structure for variables:
+C has flat block structure for functions, but nested block structure for variables: C 函数具有扁平块结构，但变量具有嵌套块结构：
 
 ![](/static/2021-04-12-13-57-33.png)
 
 * flat block strcture - func
-  * cannot declar functions inside other functions
-  * but can access each func during the entire program
+  * cannot declar functions inside other functions 不能在其他函数中声明函数
+  * but can access each func during the entire program 但可以在整个程序中访问每个函数
 
 # 联编出现&应用性出现:Binding and applied occurrences
 
@@ -131,16 +134,16 @@ C has flat block structure for functions, but nested block structure for variabl
 
 # 静态/动态作用域：Static vs dynamic scoping
 
-:orange: **如果一个过程的主体是在过程定义的环境中执行的，那么PL就是静态作用域(或，词法作用域)的**。 A PL is statically scoped if the body of a procedure is executed in the environment of the procedure definition.
+:orange: **如果一个过程的主体是在【过程定义的环境】中执行的，那么PL就是静态作用域(或，词法作用域)的**。 A PL is statically scoped if the body of a procedure is executed in the environment of the procedure definition.
 
 * 然后我们可以在编译时决定一个标识符的联编出现对应于一个给定的应用性出现 Then we can decide at compile-time which binding occurrence of an identifier corresponds to a given applied occurrence.
   * 即，编译时期能确定所有联编->应用出现的关联
 * 编译时期，静态确定的作用域，，变量在作用域内可访问
 
-:orange: **如果存储过程的主体在存储过程调用栈的环境中执行，则PL是动态作用域的**。 A PL is dynamically scoped if the body of a procedure is executed in the environment of the procedure call site
+:orange: **如果存储过程的主体在【存储过程调用栈的环境】中执行，则PL是动态作用域的**。 A PL is dynamically scoped if the body of a procedure is executed in the environment of the procedure call site
 
 * 那么我们在**运行时才能决定**一个标识符的哪个绑定发生对应于一个给定的应用发生，因为环境可能在不同的调用栈之间变化。 Then we cannot decide until run-time which binding occurrence of an identifier corresponds to a given applied occurrence, since the environment may vary from one call site to another.
-* 如，如果有个函数f，里面调用了函数g，那么在执行g的时候，f里的所有局部变量都会被g访问到。在静态作用域的情况下，g不能访问f的变量
+* 如，如果有个函数f，里面调用了函数g，那么在执行g的时候，f里的所有局部变量都会被g访问到。<font color="deeppink">在静态作用域的情况下，g不能访问f的变量</font>
   * 动态作用域里，取变量的值时，会由内向外逐层检查函数的调用链，并打印第一次遇到的那个绑定的值
 
 ---
@@ -159,48 +162,53 @@ Only a few PLs (such as Smalltalk and Lisp) are dynamically scoped.
 
 ![](/static/2021-04-12-15-44-03.png)
 
-# Declarations
+# 声明命令：Declarations
 
 **声明**是一个程序结构，它将被计算以**产生绑定** A declaration is a program construct that will be elaborated to produce binding(s).
 
 * A declaration may also have **side effects** (such as creating a variable）
 
-<font color="red">定义是一个声明，其唯一的作用是【产生绑定】</font> A definition is a declaration whose only effect is to produce binding(s).
+<font color="red">定义是一种声明，其唯一的作用是【产生绑定】</font> A definition is a declaration whose only effect is to produce binding(s).
 
 * A definition has **no side effects**
 
-:orange: simple declarations
+:orange: simple declarations 简单声明
 
-* **type declaration**
-  * 标识符绑定至存在的类型或新类型 A type declaration binds an identifier to an existing or new type
-* **constant definition**
-  * 标识符绑定至值（计算后）binds an identifier to a value （possibly computed）
-* **variable declaration**
-  * 标识符绑定至新创建的变量 binds an identifier to a newly created variable
-* **procedure definition**
-  * 标识符绑定至过程 binds an identifier to a procedure
+* **type declaration** 类型声明
+  * 标识符**绑定至存在的类型或新类型** A type declaration binds an identifier to an existing or new type
+* **constant definition** 常量定义（赋值？）
+  * 标识符**绑定至值**（计算后）binds an identifier to a value （possibly computed）
+* **variable declaration** 变量声明
+  * 标识符**绑定至新创建的变量** binds an identifier to a newly created variable
+* **procedure definition** 过程定义
+  * 标识符**绑定至过程** binds an identifier to a procedure
 * 根据PL不同，适用于其他实体 similarly for other entities (depending on the PL)
 
-:orange: compound declarations
+:orange: compound declarations 复合声明
 
-* **sequential declaration**
-  * 结合多个子声明，满足，后续子声明可以使用前子声明产生的绑定 A sequential declaration combines several subdeclarations, such that the later sub-declarations can use bindings produced by the earlier sub-declarations. 
-* **recursive declaration**
+* **sequential declaration** 顺序声明
+  * 结合多个子声明，满足，后续子声明可以使用前子声明产生的绑定 A sequential declaration combines several subdeclarations, such that the later sub-declarations can use bindings produced by the earlier sub-declarations.
+* **recursive declaration** 递归声明
   * 使用自身产生的绑定 A recursive declaration is one that uses the bindings it produces itself
 
-## Recursive Declarations
+## 递归声明：Recursive Declarations
 
 A recursive declaration is one that uses the bindings it produces itself.
 
 在几乎所有的PL中，递归仅限于 In almost all PLs, recursion is restricted to
 
-* type or class declarations
-* procedure or method definitions
+* type or class declarations 类型或类声明
+* procedure or method definitions 程序或方法定义
 
 ## Example: Java recursive declarations
 
 ![](/static/2021-04-12-20-01-54.png)
 
+* java - 方法定义可为递归声明
+
 ## Example: C recursive declarations
 
 ![](/static/2021-04-12-20-03-48.png)
+
+* c struct类型可为递归声明
+* c函数定义可为递归类型

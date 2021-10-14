@@ -313,6 +313,7 @@ ANTLR符号规则
 * **lexer rules（at the end of the file） - uppercase**
   * 用于生成tokens？TAG & Text
   * 全部大写，放在文件末尾
+  * 由terminal symbol组成
 * **parser rules - lowercase**
   * 用于抽象出AST
   * 全部小写
@@ -467,7 +468,7 @@ com
   * colon
   * definition of the production rule
   * terminating semicolon
-* lexer rules大写，parser rules小写
+* lexer rules大写（放末尾），parser rules小写
 
 ![](/static/2021-03-07-17-14-09.png)
 ![](/static/2021-03-07-17-14-15.png)
