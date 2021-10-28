@@ -45,7 +45,14 @@
 * [The “man-optimal” property](#the-man-optimal-property)
 * [实现-Gale/Shapley algorithm：Implementation of the Gale/Shapley algorithm](#实现-galeshapley-algorithmimplementation-of-the-galeshapley-algorithm)
 * [分析-Gale/Shapley algorithm：Analysis of the Gale/Shapley algorithm](#分析-galeshapley-algorithmanalysis-of-the-galeshapley-algorithm)
-* [Lecture 8 - part 5](#lecture-8---part-5)
+* [Lecture 8 - part 5============](#lecture-8---part-5)
+* [匹配算法应用：Applications of Matching Problems/Algorithms](#匹配算法应用applications-of-matching-problemsalgorithms)
+* [Hospitals/Residents Problem (HR)](#hospitalsresidents-problem-hr)
+  * [例子](#例子-5)
+  * [Blocking Pair](#blocking-pair)
+  * [非稳定例子](#非稳定例子)
+  * [稳定例子](#稳定例子)
+* [算法和结构结果：Algorithmic and structural results](#算法和结构结果algorithmic-and-structural-results)
 
 # 图和匹配算法:Graph and matching algorithms
 
@@ -426,6 +433,42 @@ man-oriented
 
 ![](/static/2021-10-23-22-58-46.png)
 
-# Lecture 8 - part 5
+# Lecture 8 - part 5============
 
-不考，，暂时不补
+不考，，
+
+# 匹配算法应用：Applications of Matching Problems/Algorithms
+
+![](/static/2021-10-28-05-10-50.png)
+
+# Hospitals/Residents Problem (HR)
+
+匹配问题的扩展
+
+![](/static/2021-10-28-05-28-56.png)
+
+* ci - 每个医院的容量
+
+## 例子
+
+![](/static/2021-10-28-05-35-46.png)
+
+## Blocking Pair
+
+![](/static/2021-10-28-05-45-35.png)
+
+## 非稳定例子
+
+![](/static/2021-10-28-05-47-51.png)
+
+![](/static/2021-10-28-05-48-12.png)
+
+![](/static/2021-10-28-05-48-35.png)
+
+## 稳定例子
+
+![](/static/2021-10-28-05-59-21.png)
+
+# 算法和结构结果：Algorithmic and structural results
+
+![](/static/2021-10-28-07-19-42.png)
