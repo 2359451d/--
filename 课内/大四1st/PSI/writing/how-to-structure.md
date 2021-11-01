@@ -10,8 +10,15 @@
   * [example](#example)
 * [Introduction](#introduction)
 * [Paragraphs](#paragraphs)
+  * [形成论点：Forming Argument](#形成论点forming-argument)
+  * [论点结构：Laying out an argument](#论点结构laying-out-an-argument)
+  * [paragraph结构](#paragraph结构)
+  * [论据使用](#论据使用)
+  * [对比论题例子](#对比论题例子)
 * [Conclusions](#conclusions)
 * [Intro & Conclusion Example](#intro--conclusion-example)
+* [连接词，加强词](#连接词加强词)
+* [正式动词](#正式动词)
 
 # Structure
 
@@ -110,6 +117,39 @@ https://www.scribbr.com/academic-essay/essay-structure/
 
 ![](/static/2021-09-30-06-44-08.png)
 
+## 形成论点：Forming Argument
+
+![](/static/2021-10-29-07-23-54.png)
+
+## 论点结构：Laying out an argument
+
+![](/static/2021-10-29-07-25-28.png)
+
+## paragraph结构
+
+![](/static/2021-10-29-07-32-01.png)
+
+## 论据使用
+
+![](/static/2021-10-29-08-20-45.png)
+
+* point->example->explain
+
+## 对比论题例子
+
+![](/static/2021-10-29-07-27-38.png)
+![](/static/2021-10-29-07-27-50.png)
+
+![](/static/2021-10-29-07-28-28.png)
+
+intro例子
+
+![](/static/2021-10-29-07-29-55.png)
+
+中间para例子
+
+![](/static/2021-10-29-07-35-40.png)
+
 # Conclusions
 
 ![](/static/2021-09-30-06-34-52.png)
@@ -131,3 +171,11 @@ Do not
 # Intro & Conclusion Example
 
 ![](/static/2021-09-30-06-38-00.png)
+
+# 连接词，加强词
+
+![](/static/2021-10-29-07-36-53.png)
+
+# 正式动词
+
+![](/static/2021-10-29-07-38-00.png)
