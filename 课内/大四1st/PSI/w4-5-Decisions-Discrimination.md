@@ -4,7 +4,10 @@
 * [Overview](#overview)
 * [概要文件: Profiling](#概要文件-profiling)
 * [自动化决策：Automated decision-making](#自动化决策automated-decision-making)
+  * [自动化决策优点](#自动化决策优点)
+  * [自动化决策缺点/问题](#自动化决策缺点问题)
 * [数据保护影响评估：Data Protection Impact Assessment](#数据保护影响评估data-protection-impact-assessment)
+  * [个人风险级别](#个人风险级别)
   * [DPIA过程](#dpia过程)
   * [良好实践](#良好实践)
 * [反歧视：Anti-discrimination](#反歧视anti-discrimination)
@@ -93,29 +96,37 @@ Organisations can generate these profiles from a range of data sources, includin
 * Decision process without human involvement. 没有人参与的决策过程 (largely automated process)
   * 不是完全无人参与，个人可以参与数据录入(enter the data), 最后决策等(final decision)
 * Decision process can rely upon on profiles, inferences and other data. **决策过程可以依赖于概要文件、推论和其他数据。**
-* Automated decision-making could use profiling, but not always. **自动化的决策制定可以使用概要文件，但并不总是如此**。
+* Automated decision-making could use profiling, but not always. **自动化的决策过程可以使用概要文件，但并不总是如此**。
   * 可以，但也不是必要的，不一定要概要文件来reach决策
+
+## 自动化决策优点
 
 **自动化决策优点** Benefits
 
 * Automated decision-making can result in more accurate and rapid decisions. 自动化的决策可以导致更准确和快速的决策。
-  * flaws & some issues with decisions, where using automated decision-making can be more accurate & rapid
-  * major benefit to organizations & company
-* Affords rapid decisions that involves analysis of large volumes of data. 提供包含大量数据分析的快速决策。
-  * 如个人可能无法在有效时间内完成大量数据的决策时
+  * flaws & some issues with decisions, where using automated decision-making can be more accurate & rapid 一些问题，使用自动化决策可以更准确
+  * major benefit to organizations & company 对组织和公司有好处
+* Affords rapid decisions that involves analysis of large volumes of data. 提供包含**大数据分析的快速决策**。
+  * 如**个人**可能**无法在有效时间内完成大量数据的决策**时
+
+## 自动化决策缺点/问题
 
 **自动化决策问题** Problems & Concerns
 
-* The decision process is often not transparent to individuals. 决策过程对个人（决策接收者，recipient of the decision）来说通常是不透明的。
-* Lack of insight into how data is used to make decisions. 缺乏对数据如何用于决策的洞察力。
+* The decision process is often not transparent to individuals. **决策过程对个人（决策接收者，recipient of the decision）来说通常是不透明的**。
+* Lack of insight into how data is used to make decisions. **缺乏对数据如何用于决策的洞察力**。
   * 不清楚系统怎么用数据的
-* Impact from automated decisions could have a significant impact on an individual. 自动化决策的影响可能对个人产生重大影响。
+* Impact from automated decisions could have a significant impact on an individual. **自动化决策的影响可能对个人产生重大影响**。
   * 自动化决策，可能导致个人不被录用，not recruited by a job, rejected by airline recruiment, may not receive benefits...
 
 # 数据保护影响评估：Data Protection Impact Assessment
 
-* DPIA process is to support organisations in considering and determining the risks associated with data protection. DPIA 程序是支持组织考虑和确定与数据保护相关的风险。
-  * 支持组织考虑某文件/文档时，处理个人信息时其应用&责任，以及处理个人信息时的风险
+注意profiling涉及个人数据，而profiling可以应用于自动化决策。所以要考虑数据保护
+
+---
+
+* DPIA process is to support organisations in considering and determining the risks associated with data protection. DPIA 程序（评估过程）是支持组织考虑和确定与数据保护相关的风险。
+  * 支持组织**考虑某文件/文档profiling时，处理个人信息时组织的应用&责任，以及处理个人信息时的风险**
 * **DPIA程序不是每种情况下处理个人信息都要求的**，
   * DPIA must be performed for processing of personal data that represent a significant risk to individuals **但如果组织预测该类个人数据的处理可能存在高风险时，需要应用DPIA程序**
   * DPIA is required if you meet the requirements of Article 22. 如果您符合第22条的要求，则需要 DPIA。
@@ -125,7 +136,7 @@ Organisations can generate these profiles from a range of data sources, includin
 
 DPIA must consider: **DPIA 必须考虑/涉及到**:
 
-* context, scope, nature and purpose of data processing **数据处理的背景、范围、性质和目的**
+* context, scope, nature and purpose of data processing **个人数据处理的背景、范围、性质和目的**
   * context: 数据怎么收集的，在哪存储的，这些数据会怎么被使用？数据会与什么人共享？
   * scope：个人数据的性质(nature), 数据量， 数据敏感度， 收集频率 
   * nature: 个人数据的来源，组织与这些个人之间有什么关联吗？在处理数据的时候，个人有什么期望吗expectation?
@@ -137,24 +148,26 @@ DPIA must consider: **DPIA 必须考虑/涉及到**:
 
 ---
 
-* Determine the level of risk considers the severity on the individuals versus the likelihood of the event happening **确定风险级别考虑对个人的严重程度与事件发生的可能性**
+## 个人风险级别
+
+* Determine the level of risk considers the severity on the individuals versus the likelihood of the event happening **确定风险级别考虑【对个人的严重程度】与【事件发生的可能性**】
   * Determine the risks of the profiling and automated decision-making process and the mitigation to those risks. 确定分析和自动化决策过程的风险以及减少这些风险的措施。
-* Siginificant risks that can not be mitigated must be communicated to the **National Data Protection Authority** **数据处理应用DPIA时，无法减轻的重大风险必须传达给国家数据保护局**
+* Siginificant risks that can not be mitigated must be communicated to the National Data Protection Authority **数据处理应用DPIA时，无法减轻的重大风险必须传达给国家数据保护局 National Data Protection Authority**
   * The Authority can provide additional guidance and support, but ultimately may prohibit the processing. **管理局可以提供额外的指导和支持，但最终可能会禁止处理**
 
 ---
 
-Strong DPIA will demonstrate organisations have considered DPIA 将表明组织已经考虑过
+Strong DPIA will demonstrate organisations have considered **DPIA 将表明组织已经考虑过（进行过DPIA评估**）
 
-* wider data protection requirements and implications 广泛的数据保护要求和影响
-* risks involved in processing personal data 处理个人资料所涉及的风险
+* wider data protection requirements and implications **广泛的数据保护要求和影响**
+* risks involved in processing personal data **处理个人资料所涉及的风险**
 
 ## DPIA过程
 
-1. **Determine if DPIA is required**
+1. **Determine if DPIA is required** 确定是否需要 DPIA
    1. 取决于组织的规模，可以询问DPO(protection officer). 这类数据处理的操作，是否需要DPIA
    2. 或者询问ICO
-2. **Determine the description of processing （4个elements**
+2. **Determine the description of processing （4个elements** 确定处理描述
    1. 考虑scope of the processing
       1. nature of the data, sensitivity of the personal data, geographical area covered
    2. nature of the data it self
@@ -162,16 +175,16 @@ Strong DPIA will demonstrate organisations have considered DPIA 将表明组织�
    3. context
       1. 数据源，个人群体(what kind of individuals)
    4. purpose(处理这些数据的目的): intended outcome for the individual, 对社会有什么预期好处 expected benefit to the society as a whole?
-3. Consultation
+3. Consultation 咨询
    1. 与个人或个人的代表进行咨询 communicate with individuals or representative of the individuals
    2. 有些组织可能不会与个人进行商讨，这并不好 (Consultation is desirable)
-4. Necessity and proportionality
+4. Necessity and proportionality 必要性和相称性
    1. 组织采取的行动是否有必要 actions organizations performed to achieve the intended outcomes are necessary
    2. 有没有其他方式也能达成目标？这类的处理一定需要吗？合法吗？
       1. looking at the laws involved, 看看有没有legal basis for it
    3. 怎么保证数据的质量？怎么最小化数据收集的级别，minimize the level of data we are collecting (just do what's necessary to conduct a process) 怎么保证个人的隐私？
 5. **Identify and Assess Risk**
-   1. 处理数据时有哪些潜在的风险？评估对个人的风险程度 & 处理数据中事件发生的可能性
+   1. 处理数据时有哪些潜在的风险？【评估对个人的风险程度 & 处理数据中事件发生的可能性 -> 风险级别】
       1. 潜在风险：可以是物理伤害，声望损害，也可以是**歧视**， 经济损失 physical harm, reputational damage, discrimination, financial loss
 6. **Mitigation**
    1. 想想针对这些对于个人的风险有什么缓解措施
@@ -181,10 +194,10 @@ Strong DPIA will demonstrate organisations have considered DPIA 将表明组织�
 
 ## 良好实践
 
-* Publish the DPIA, but this is not required. 公布 DPIA，但这是不必要的。
+* Publish the DPIA, but this is not required. **公布 DPIA，但这是不必要的**。
   * good practice to show public, that individuals have been considered as a part of the processing
-* If you identify high risks that you can not mitigate then the DPIA must be submitted to the ICO (in the UK context). 如果你确定高风险，你不能减轻然后 DPIA 必须提交到 ICO (在英国的背景下)
-* The ICO/national data protection authority can advise of the outcome, including prohibiting the intended processing. ICO可就有关结果提供意见，包括禁止有意进行的处理（比如processing might not be medicated so it's not necessary)
+* If you identify high risks that you can not mitigate then the DPIA must be submitted to the ICO (in the UK context). **如果你确定高风险，你不能减轻然后 DPIA 必须提交到 ICO (在英国的背景下**)
+* The ICO/national data protection authority can advise of the outcome, including prohibiting the intended processing. **ICO可就有关结果提供意见，包括禁止有意进行的处理**（比如processing might not be medicated so it's not necessary)
 
 # 反歧视：Anti-discrimination
 
