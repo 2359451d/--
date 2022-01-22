@@ -503,8 +503,8 @@ Article 22 (EU) GDPR empowers individuals with the right not to be subjected to 
 Exceptions:以下情况可以豁免
 
 * adopt safeguards, including human intervention 采取保障措施，包括**人为干预**
-* contest the decision 质疑这个决定 【可以对决策进行提问
-* express concerns or view. 表达关切或观点
+* contest the decision **质疑**这个决定 【可以对决策进行提问
+* express concerns or view. **表达关切或观点**
 
 ## ======
 
