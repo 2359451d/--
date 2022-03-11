@@ -55,6 +55,7 @@
 * [Example2](#example2)
 * [Example3](#example3)
 * [Example4](#example4)
+  * [Example 5](#example-5)
 
 # Outcome1
 
@@ -752,7 +753,7 @@ C1，C3约束组合后同理，非法流
 
 * 引入隐式流分析（信息流）【pc】&路径敏感【标路径】
   * 分析是否不同路径的执行，存在问题
-  * pc：分析是否存在控制块，赋值语句依赖于tainted data
+  * pc：分析是否存在控制块，赋值语句依赖于tainted data 【给PC标，**PC是否为污点**】
   * pc1永远触发，untainted
   * pc2 `z=2`，依赖于`if(y==0)`
     * 解y相关的约束，得出y tainted.因此pc2 tainted
@@ -783,7 +784,7 @@ C1，C3约束组合后同理，非法流
     * 这个code block存在隐式非法流**implicit illegal flow**【不一定会造成过大问题，但也许想要解决】
   * 但结合前面显式流分析，并不存在显式非法流
     * ![](/static/2022-02-03-17-35-53.png)
-* Path2
+* Path2 （1，2,3,4）
   * ![](/static/2022-02-03-17-42-18.png)
 
 # Example2
@@ -861,6 +862,7 @@ C1，C3约束组合后同理，非法流
   * 因为return type delta要同时为untainted & tainted。存在隐式非法流
   * ![](/static/2022-02-04-00-25-35.png)
 * 第二个call, C8,C10不能结合
+  * C8 (bool) : untainted（bool）<=δ
   * ![](/static/2022-02-04-00-29-36.png)
 
 第二个call
@@ -868,3 +870,7 @@ C1，C3约束组合后同理，非法流
 ![](/static/2022-02-04-00-15-58.png)
 
 * 得出结论，存在隐式非法流（第一个call），但是最终不存在tainted data用于untainted data
+
+## Example 5
+
+![](/static/2022-02-09-22-32-51.png)

@@ -143,7 +143,7 @@ a ← t1 × t2
 
 # 中间表示：Intermediate representation
 
-通过使用源程序的低级中间表示（IR），简化了本地代码的生成。 Native code generation is simplified by using a low-level intermediate representation (IR) of the source program. 
+通过使用源程序的低级中间表示（IR），简化了本地代码的生成。 Native code generation is simplified by using a low-level intermediate representation (IR) of the source program.
 
 IR应该能够。The IR should be capable of:
 
