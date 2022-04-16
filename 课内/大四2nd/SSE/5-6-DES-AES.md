@@ -17,6 +17,8 @@ DES 加密理论
   * [子密钥生成：Sub Key Generation](#子密钥生成sub-key-generation)
   * [S-DES Function F](#s-des-function-f)
 * [S-DES与DES关系：Relation with DES](#s-des与des关系relation-with-des)
+  * [Reverse the Initial Permutation](#reverse-the-initial-permutation)
+* [============](#)
 * [DES-Overview](#des-overview)
 * [DES秘钥处理&生成](#des秘钥处理生成)
   * [DES-56bit密钥缩减：Key Reduction](#des-56bit密钥缩减key-reduction)
@@ -37,7 +39,7 @@ DES 加密理论
 * [TDES安全性-Overview](#tdes安全性-overview)
 * [TDES/DES兼容性：Compatibility](#tdesdes兼容性compatibility)
 * [Summary](#summary)
-* [============](#)
+* [============](#-1)
 * [AES历史:Advanced Encryption Standard](#aes历史advanced-encryption-standard)
 * [Rjindael Blocks and States](#rjindael-blocks-and-states)
 * [加密算法：Rjindael Encryption Algorithm](#加密算法rjindael-encryption-algorithm)
@@ -55,7 +57,23 @@ DES 加密理论
   * [Galois Multiplication-溢出多项式还原](#galois-multiplication-溢出多项式还原)
   * [Galois乘法验证：Is it Correct](#galois乘法验证is-it-correct)
   * [点积例子2(*)](#点积例子2)
-* [============](#-1)
+  * [点积输出相加(XOR)：Final Steps](#点积输出相加xorfinal-steps)
+* [Step 4 - 轮密钥加：AddRoundKey](#step-4---轮密钥加addroundkey)
+* [Recap](#recap)
+* [AES秘钥生成：Key Generation](#aes秘钥生成key-generation)
+* [Key Staging](#key-staging)
+* [AES子秘钥生成：Sub key Generation](#aes子秘钥生成sub-key-generation)
+* [RCON表](#rcon表)
+* [子密钥生成可视化](#子密钥生成可视化)
+* [AES解密：Decryption](#aes解密decryption)
+* [Summary](#summary-1)
+* [============](#-2)
+* [Tutorial](#tutorial)
+* [S-DES加密解密例子](#s-des加密解密例子)
+  * [加密Round1](#加密round1)
+  * [加密Round2](#加密round2)
+  * [解密Round1](#解密round1)
+  * [解密Round2](#解密round2)
 
 # Fiestel加密算法：Fiestel Ciphers
 
@@ -153,6 +171,8 @@ Fiestel密码器使用乘积加密算法。Fiestel Ciphers use product ciphers.
 
 # S-DES
 
+![](/static/2022-04-16-15-27-20.png)
+
 简化DES是Edward Schaefer在圣克拉拉大学开发的DES的简化版。•	Simplified DES is a simplification of DES developed at the University of Santa Clara by Edward Schaefer.
 
 - 它是DES的一个变种，用于学习。•	It’s a variant of DES for learning.
@@ -163,15 +183,18 @@ Fiestel密码器使用乘积加密算法。Fiestel Ciphers use product ciphers.
 下面是一些数据和一个我们将用来说明的样本密钥。•	Here is some data and a sample key we will use for illustration.
 
 * data = 01101100
-* key（初始master key） = 0110111101
+* key（初始master key,10bit） = 0110111101
 * **有两个替换轮次，每个轮次都有自己的子密钥**。There are two substitution rounds that each have its own sub-key
-  * 2轮，2个子密钥
+  * <font color="deeppink">2轮，2个子密钥K1,K2(8bit)</font>
 
 ## 初始排列：Initial Permutation
 
 ![](/static/2022-04-09-16-06-56.png)
 
 将bit标号，然后根据偏移量重排序得到**初始排列**
+
+* initial permutation - IP
+  * `15203746`
 
 ## 子密钥生成：Sub Key Generation
 
@@ -211,7 +234,7 @@ Fiestel密码器使用乘积加密算法。Fiestel Ciphers use product ciphers.
 ![](/static/2022-04-10-16-01-13.png)
 ![](/static/2022-04-10-15-57-23.png)
 
-1.	将数据块【初始排列的】的**右半部分**从4位扩展到，偏移量为30121230的bit
+1.	将数据块【**初始排列后的**】的**右半部分**从4位扩展到，偏移量为`30121230`的bit【**扩展**】
 
 * ![](/static/2022-04-10-16-05-42.png)
 
@@ -222,11 +245,16 @@ Fiestel密码器使用乘积加密算法。Fiestel Ciphers use product ciphers.
 3.	**产生的8位被视为4个独立的2bit数。 被称为row_1, col_1, row_2, col_2**
 
 * ![](/static/2022-04-11-15-13-06.png)
+* row1=偏移0,3
+* col1=1,2
+* row2=4,7
+* col2=5,6
 * The decimal values of the bit pairs are used to determine row and column values. **bit对的十进制值**被用来**确定行和列的值**
 
 4.	(row_1, col_1)和(row_2, col_2)**构成两个4X4表格的行和列索引**，称为S-boxes。【substitution boxes】
 
-* 用步骤3的bit对的十进制值，来**识别S1,S2应该有的2个十进制输出，然后转为2个二进制**
+* 用步骤3的bit对的十进制值，来**识别S1,S2应该有的2个十进制输出，然后转为2个二进制** 【查表】
+* ![](/static/2022-04-15-23-23-57.png)
 
 5.	由此产生的4位数，即**2个S-boxes的二进制输出经过另一次偏移量1320的变换**，产生**F的输出**。【最终排列 **Final Permutation**】
 
@@ -245,6 +273,15 @@ DES的结构与S-DES相同，但有更多的步骤。•	DES has the same struct
 - 在内部，它有8个S-Boxes，每个4 x 16。•	Internally it has 8 S-Boxes, each 4 x 16.
   - 每个S-Box产生一个4位数。•	Each S-Box produces a 4-bit number.
   - 这8个S-Boxes产生一个32位的值。•	The 8 S-Boxes produce a 32-bit value.
+
+## Reverse the Initial Permutation
+
+![](/static/2022-04-16-00-23-25.png)
+
+* <font color="deeppink">用一个反排列？`30246175`</font>
+  * 有的是 `41357286` 【如果把原始数据从 `1`开始索引。。。，，
+
+# ============
 
 # DES-Overview
 
@@ -734,5 +771,371 @@ The objective is to map all the bytes 𝑏i to another byte value 𝑆(𝑏i) - 
   - 交叉验证
   - ![](/static/2022-04-15-14-58-23.png)
 
+## 点积输出相加(XOR)：Final Steps
+
+![](/static/2022-04-15-15-19-04.png)
+
+![](/static/2022-04-15-16-09-58.png)
+![](/static/2022-04-15-16-10-42.png)
+![](/static/2022-04-15-16-10-15.png)
+![](/static/2022-04-15-16-10-52.png)
+
+- 一旦我们有了乘法的输出，我们要把这些值加在一起。•	Once we have our output for the multiplication, we want to add the values together.
+- 这涉及到对数据进行一系列的**xor操作**。•	This involves a series of xor operations on the data.
+- 类似的, r1=ED.1 XOR 4D.2 XOR 33.3 XOR 4D.1
+
+---
+
+![](/static/2022-04-15-15-23-37.png)
+
+- 取前两个值，XOR它们。•	Take the first two values, XOR them.
+- 拿出输出，与下一个值进行XOR。•	Take the output and XOR with the next value.
+- 拿着这个输出，与最后一个值进行XOR。•	Take that output and XOR with the final value.
+- 最后的XOR操作就是我们的最终字节。•	The final XOR operation is our final byte.
+- <font color="deeppink">可以快速观察，单列值里面有偶数个1(或者没有1)输出就是0，，反之就是1</font>
+
+---
+
+整个步骤
+
+![](/static/2022-04-15-16-11-41.png)
+![](/static/2022-04-15-16-12-54.png)
+
+# Step 4 - 轮密钥加：AddRoundKey
+
+**最后，我们将ShiftColumns部分的输出与主密钥生成的子密钥相乘**。•	We finally xor the output from the ShiftColumns section with the subkey generated form the master key. <font color="deeppink">本质还是XOR操作</font>
+
+- 这将使我们达到我们最终的数据块密码。•	This will allow us to arrive at our final data block cipher.
+  - 对于单轮...•	For the single round…
+  - 当使用128位密钥时，这个过程又重复了9次。•	The process repeats another 9 times when using 128bit keys.
+  - **注意，在最后一轮，我们不执行Shiftcolumns方法**。•	Note, on the last round, we do not perform the shiftcolumns method.
+
+# Recap
+
+![](/static/2022-04-15-16-25-28.png)
+
+1.	首先，我们获取明文块。1.	First, we take the block of plaintext.
+
+我们将其与密钥进行XOR。We XOR this with the Key.
+
+2.	我们进行SubByte操作。2.	We perform SubByte operation:
+
+使用S-Box查找表。Using S-Box lookup table.
+
+3.	我们进行行移操作。3.	We perform RowShift operation:
+
+在块中移动行。Moving the rows around in the block.
+
+4.	我们进行列移操作。4.	We perform ColumnShift operation:
+
+用有限域的乘法和加法（XOR）。With finite field multiplication and addition.
+
+5.	我们将得到的区块与钥匙再进行一次XOR。5.	We take the resulting block and XOR one more time with the key.
+
+6.	**再重复第2-5步9次，我们就得到了我们的密文**。6.	Repeat steps 2-5 another 9 times and we have our cipher.
+
+# AES秘钥生成：Key Generation
+
+![](/static/2022-04-15-16-27-35.png)
+
+- **密钥可以由一些种子信息生成**。•	The key can be generated from some seed information.
+- **一个字符串输入可以表示为十六进制字符序列**。•	A String input can be represented as a sequence of hex characters.
+- 以输入 “This is some key” 为例 •	Taking the input “This is some key”
+  - 这个字符串中的每个字符都可以被表示为一个字节。•	Every character in this String can be represented as a byte.
+  - 我们可以将其表示为一个字节序列。•	We can represent this as a sequence of bytes.
+  - **我们用这些字节来生成密钥**。•	We use the bytes to generate the key.
+
+# Key Staging
+
+形成的叫key state table
+
+![](/static/2022-04-15-16-29-25.png)
+
+- 十六进制表示法的**前四个字节构成钥匙的第一列**。•	The first four bytes from the hex representation form the first column for the key.
+  - 第二个四字节构成第二列，第三个四字节构成第三列，其余的构成最后一列。•	The second four bytes form the second column, the third four form the third column and the remaining form the final column.
+- 我们可以在这里看到从输入中得到的密钥。•	We can see here the resulting key from the input.
+  - 这就是我们的128位密钥，•	This is our 128-bit key that will be used for the lecture.
+
+# AES子秘钥生成：Sub key Generation
+
+与DES一样，AES在子密钥上进行操作，以进行加密。•	Like DES, AES operates on sub-keys in order to perform encryption.
+
+每个子密钥的生成方法如下。
+
+![](/static/2022-04-15-16-34-48.png)
+
+- 从密钥状态中**取出最后一列𝐶3**。•	Take the last column 𝐶3 from the key state.
+  - ![](/static/2022-04-15-16-35-31.png)
+- 对该**列进行旋转**。•	Perform a rotation on that column.
+- 对其进行SubByte**字节替换处理 `𝑆(𝐶3)`**•	Perform SubByte on it 𝑆(𝐶3)
+- 从**密钥状态**中**取出第一列𝐶0**。•	Take the first column 𝐶0 from the key state
+- 从**rcon表中取出第一列𝐶0**'。Take the first column 𝐶# from the rcon table (discussed in next slide)
+  - 将**三者XOR**到一起。XOR all three together.
+  - ![](/static/2022-04-15-16-32-44.png)
+  - 得到SC0，，子密钥列0
+- 然后SC0与C1进行XOR, 得到SC1 , XOR this with 𝐶1 to get 𝑆𝐶1
+- ![](/static/2022-04-15-16-34-12.png)
+  - 之后下一个子密钥都是由前一个子密钥和key state XOR得来的？？
+- `𝑺𝑪𝟎, 𝑺𝑪𝟏, 𝑺𝑪𝟐, 𝑺𝑪𝟑 = 𝒌[𝟏]`
+
+# RCON表
+
+**RCON表被用于生成子密钥**。•	RCON table is used for the generation of sub keys.
+
+![](/static/2022-04-15-17-02-57.png)
+
+- 我们从第一列开始，生成一个密钥。•	We start with the first column to generate a key.
+- 我们在后续的密钥生成回合中使用后续的列。•	We use the subsequent columns in subsequent key generation rounds.
+- 它是AES中使用的（又一个）静态表。•	It is (yet another) static table used in AES.
+
+# 子密钥生成可视化
+
+![](/static/2022-04-15-17-05-24.png)
+
+![](/static/2022-04-15-17-06-51.png)
+
+---
+
+![](/static/2022-04-15-17-09-01.png)
+
+* 生成第一个子密钥列SC0
+
+---
+
+![](/static/2022-04-15-17-10-34.png)
+
+* 生成第2个子密钥列SC1
+
+---
+
+![](/static/2022-04-15-17-11-30.png)
+
+![](/static/2022-04-15-17-12-00.png)
+
+---
+
+- **子密钥𝐾[0]将被用来生成额外的子密钥𝐾[𝑖]** 。•	The sub key 𝐾[0] will be used to generate additional sub keys 𝐾[𝑖]
+- 这里我们有𝐾[0]被用来生成𝐾[1]。•	Here we have 𝐾[0] being used to generate 𝐾[1]
+- `K[1]`又将被用作同一过程的输入，以创建更多的子密钥。•	This in turn will be used as input into the same process to create additional sub keys.
+- 一个新的子密钥是为我们之前讨论过的几轮加密创建的。•	A new sub key is created for the rounds of encryption we have discussed previously.
+- **在每一轮中，我们将使用RCON表中的不同列**。•	On each round, we will use a different column from the RCON table.
+- **我们从第一列开始生成𝐾1，然后转到第二列生成𝐾[2]**，以此类推。•	We start with the first column for the generation of 𝐾 1 , we will move onto the second column for 𝐾[2] and so on.
+- 这样一直持续到我们完成了对数据块的加密。•	This continues until we have finished encrypting the data block.
+
+# AES解密：Decryption
+
+- 反向操作是以相反的顺序进行的。•	  Inverse operations are performed in the reverse order.
+- **MixColumns、ShiftRows和SubBytes都有一个简单的反向操作，可以撤销其效果**。•		MixColumns, ShiftRows and SubBytes each have a simple inverse operation that can undo its effects.
+- **AddRoundKey是它自己的逆运算**。•	AddRoundKey is its own inverse.
+- **InverseSubBytes乘以反向8位矩阵，然后计算多项式的逆运算**。•		InverseSubBytes multiplies by the reverse 8 bit matrix, and then calculates the polynomial inverse.
+- **InverseShiftRows进行反方向移位**。•	InverseShiftRows shifts the opposite direction.
+- **InverseMixColumns反转列矩阵并进行同样的计算**。•		InverseMixColumns inverts the column matrix and performs the same calculations.
+
+# Summary
+
+- AES已取代DES成为标准。•	AES has replaced DES as the standard.
+  - **对称密码学**。•	Symmetric cryptography.
+- 多项式用于简化涉及比特乘法的计算。•	Polynomials used to simplify the calculations involving bit multiplication.
+  - **带有多项式模的有限域确保结果永远是8位**。•	Finite field with polynomial mod ensures that the result will always be 8 bits.
+- **AES是首选**，因为。•	AES is preferred because:
+  - **它是一个开放的算法（内部运作是公开的**）。•	It is an open algorithm (the inner workings are publicly known)
+  - **它可以在比DES更大的密钥空间上运行**。•	It can operate on a larger key space than DES.
 
 # ============
+
+# Tutorial
+
+![](/static/2022-04-16-15-27-00.png)
+![](/static/2022-04-16-15-28-33.png)
+
+加密解密 "Dog"
+
+每个字符Ascii码转成16进制=>2进制，手动加密解密
+
+请注意，大写字母的表示方法与小写字母不同。**这些二进制序列中的每一个都可以输入到S-DES算法中，产生一个密文**。在这个任务中，将每个单独的密文组合在一起将使我们能够产生加密的输出。在这第一个任务中，取三个字符的每个二进制序列，并对其应用S-DES算法以产生一个密文 Note that capitalised characters are represented differently than lowercase characters. Each of these binary sequences can be input into the S-DES algorithm to produce a cipher. Combining each individual cipher together will allow us in this task to produce encrypted output. For this first task, take each binary sequence for the three characters, and apply the S-DES algorithm on them to produce a cipher
+
+请注意，如果你在网上查询这些数值，特别是初始排列表和逆初始排列表，你可能会发现数值不同。具体来说，你可能会发现初始配对表的数值是26314857，而不是我们在教程或讲座中使用的数值。这是一个演示选择，**对方法的输出没有影响。同样的情况也会发生在逆向初始排列中。你可能会发现网上的数值被报告为41357286，这同样是因为偏移量从1开始，而不是我们在讲座中使用的0**。 Do note that if you are looking up these values online, especially for the Initial Permutation and the Inverse Initial Permutation tables, you may find the values are different. Specifically, you may find that the Initial Permutation is noted as 26314857 as opposed to what we used in the tutorial or lectures. This is a presentation choice and has no impact on the output of the method. The same can happen with the Inverse Initial Permutation. You may find the value online is reported as 41357286, again, this is because the offset is starting at 1, rather than 0 which is how we used it in the lecture.
+
+# S-DES加密解密例子
+
+![](/static/2022-04-15-23-07-21.png)
+
+* 加密用的子密钥顺序 K1, K2
+* 解密用的子密钥顺序 K2, K1
+
+## 加密Round1
+
+1. **根据主密钥生成子密钥**
+  
+* 根据Offset重排列master key
+  * `2416390875`
+  * ![](/static/2022-04-15-23-04-32.png)
+* 对半分，左5bit,右5bit，，进行左旋1bit **1 bit left rotation**
+  * ![](/static/2022-04-15-23-09-54.png)
+* **第一个8位的子密钥形成以下的偏移量52637498** 【`K1`】
+  * 从10bit输出中提8bit
+  * ![](/static/2022-04-15-23-11-15.png)
+* **第二步的左5位和右5位都向左旋转2位(已经进行了左移1bit的**) --- **2 bit left rotation**
+  * ![](/static/2022-04-15-23-13-30.png)
+* **第2个8位的子密钥形成以下的偏移量52637498** 【`K2`】
+  * ![](/static/2022-04-15-23-14-35.png)
+
+2. 加密字符`D` （hex=`44`, binary=`0100 0100`） 【**子密钥&数据右半部分的F function步骤**】
+
+* ![](/static/2022-04-15-23-34-26.png)
+* **先对原data进行初始排列 initial permutation**
+  * `15203746`
+  * ![](/static/2022-04-15-23-35-21.png)
+* **数据扩展**
+  * 将数据块【**初始排列后的**】的**右半部分**从4位扩展到，偏移量为`30121230`的bit【**扩展**】
+  * ![](/static/2022-04-15-23-37-15.png)
+* **8bit数据跟8bit子密钥K1进行XOR**
+  * ![](/static/2022-04-15-23-38-34.png)
+* **XOR后8bit输出中，提取row1,col1,row2,col2**
+  * The decimal values of the bit pairs are used to determine row and column values. **bit对的十进制值**被用来**确定行和列的值**
+  * row1=偏移0,3
+  * col1=1,2
+  * row2=4,7
+  * col2=5,6
+  * ![](/static/2022-04-15-23-41-26.png)
+    * <font color="deeppink">记得二进制转十进制确定行列值</font>
+* 用row1,col1,row2,col2查两个表
+  * ![](/static/2022-04-15-23-42-19.png)
+* **查表后的值【十进制】转成二进制，再次重排列**
+  * `1320`
+  * ![](/static/2022-04-15-23-43-42.png)
+
+3. **利用上面F function的输出，与数据左半块【初始排列后的】进行XOR**
+   1. ![](/static/2022-04-15-23-46-14.png)
+
+4. 上面就完成了数据左半部分的加密，，然后合并上原来初始排列后的右半部分
+   1. ![](/static/2022-04-15-23-48-20.png)
+   2. ![](/static/2022-04-15-23-48-42.png)
+   3. 本轮临时输出`1011 0000`
+
+5. 最后将数据左右半互换，完成本轮加密
+   1. 最终输出 `0000 1011`
+
+## 加密Round2
+
+![](/static/2022-04-15-23-51-42.png)
+
+前一轮输出 `0000 1011`做数据输入，，进行相同步骤，不过子密钥使用 `K2`
+
+* <font color="deeppink">注意，，这里开始不要做初始排列，，属于for循环体里面的步骤了</font>
+* <font color="blue">并且，，最后一轮Li 和Ri合并之后，，不要交换，，直接做reverse initial permutation</font>
+
+下面是K2&本轮数据右半块进F fucntion的步骤
+
+* 将数据块【**初始排列后的**】的**右半部分**从4位扩展到，偏移量为`30121230`的bit【**扩展**】
+  * ![](/static/2022-04-15-23-53-21.png)
+* **8bit数据跟8bit子密钥`K2`进行XOR**
+  * ![](/static/2022-04-15-23-53-56.png)
+* **XOR后8bit输出中，提取row1,col1,row2,col2**
+  * The decimal values of the bit pairs are used to determine row and column values. **bit对的十进制值**被用来**确定行和列的值**
+  * row1=偏移0,3
+  * col1=1,2
+  * row2=4,7
+  * col2=5,6
+  * ![](/static/2022-04-15-23-54-46.png)
+    * <font color="deeppink">记得二进制转十进制确定行列值</font>
+* 用row1,col1,row2,col2查两个表
+  * ![](/static/2022-04-15-23-55-33.png)
+* **查表后的值【十进制】转成二进制，再次重排列**
+  * `1320`
+  * ![](/static/2022-04-15-23-56-13.png)
+
+然后完成了F function输出，，
+
+* F function输出与本轮原L半块进行XOR
+  * ![](/static/2022-04-16-00-21-37.png)
+  * ![](/static/2022-04-16-00-21-50.png)
+  * 得到临时左半块输出 `0011`
+
+最后，左右合并，然后初始排列进行**反排列**，，得到**最后字符`D`的密文** `10111010`
+
+* ![](/static/2022-04-16-00-26-53.png)
+* `30246175`
+* ![](/static/2022-04-16-00-25-33.png)
+
+## 解密Round1
+
+解密密文`10111010`，，进行类似步骤，不过子密钥要反着用
+
+* **先对原data进行初始排列 initial permutation**
+  * `15203746`
+  * ![](/static/2022-04-16-15-02-20.png)
+* **数据扩展**
+  * 将数据块【**初始排列后的**】的**右半部分**从4位扩展到，偏移量为`30121230`的bit【**扩展**】
+  * ![](/static/2022-04-16-15-03-00.png)
+* **8bit数据跟8bit子密钥K2进行XOR**
+  * 注意子密钥顺序
+  * ![](/static/2022-04-16-15-03-55.png)
+* **XOR后8bit输出中，提取row1,col1,row2,col2**
+  * The decimal values of the bit pairs are used to determine row and column values. **bit对的十进制值**被用来**确定行和列的值**
+  * row1=偏移0,3
+  * col1=1,2
+  * row2=4,7
+  * col2=5,6
+  * ![](/static/2022-04-16-15-04-35.png)
+    * <font color="deeppink">记得二进制转十进制确定行列值</font>
+* 用row1,col1,row2,col2查两个表
+  * ![](/static/2022-04-16-15-05-22.png)
+* **查表后的值【十进制】转成二进制，再次重排列**【最终结果是F function 输出
+  * `1320`
+  * ![](/static/2022-04-16-15-05-48.png)
+
+3. **利用上面F function的输出，与数据左半块【初始排列后的】进行XOR**
+   1. ![](/static/2022-04-16-15-06-42.png)
+
+4. 上面就完成了数据左半部分的加密，，然后合并上原来初始排列后的右半部分
+   1. ![](/static/2022-04-15-23-48-20.png)
+   2. ![](/static/2022-04-16-15-07-21.png)
+   3. 本轮临时输出`0000 1011`
+
+5. 最后将数据左右半互换，完成本轮加密
+   1. 最终输出 `1011 0000`
+
+## 解密Round2
+
+![](/static/2022-04-15-23-51-42.png)
+
+前一轮输出 `1011 0000`做数据输入，，进行相同步骤，不过子密钥使用 `K1`
+
+* <font color="deeppink">注意，，这里开始不要做初始排列，，属于for循环体里面的步骤了</font>
+* <font color="blue">并且，，最后一轮Li 和Ri合并之后，，不要交换，，直接做reverse initial permutation</font>
+
+下面是K1&本轮数据右半块进F fucntion的步骤
+
+* 将数据块【**初始排列后的**】的**右半部分**从4位扩展到，偏移量为`30121230`的bit【**扩展**】
+  * ![](/static/2022-04-16-15-09-05.png)
+* **8bit数据跟8bit子密钥`K1`进行XOR**
+  * 注意密钥顺序
+  * ![](/static/2022-04-16-15-09-33.png)
+* **XOR后8bit输出中，提取row1,col1,row2,col2**
+  * The decimal values of the bit pairs are used to determine row and column values. **bit对的十进制值**被用来**确定行和列的值**
+  * row1=偏移0,3
+  * col1=1,2
+  * row2=4,7
+  * col2=5,6
+  * ![](/static/2022-04-16-15-10-30.png)
+    * <font color="deeppink">记得二进制转十进制确定行列值</font>
+* 用row1,col1,row2,col2查两个表
+  * ![](/static/2022-04-16-15-10-57.png)
+  * ![](/static/2022-04-16-15-11-21.png)
+* **查表后的值【十进制】转成二进制，再次重排列**
+  * `1320`
+  * ![](/static/2022-04-16-15-11-53.png)
+
+然后完成了F function输出，，`0111`
+
+* F function输出与本轮原L半块进行XOR
+  * ![](/static/2022-04-16-00-21-50.png)
+  * ![](/static/2022-04-16-15-12-43.png)
+  * 得到临时左半块输出 `1100`
+
+最后，左右合并得到`1100 0000`，然后初始排列进行**反排列**，，得到**最后字符`D`的明文** `0100 0100`
+
+* ![](/static/2022-04-16-00-26-53.png)
+* `30246175`
+* ![](/static/2022-04-16-15-14-56.png)
