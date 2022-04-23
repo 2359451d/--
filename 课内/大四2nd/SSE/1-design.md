@@ -199,9 +199,11 @@ as discussed in Privacy by Design in Law Policy and Practice (Ann Cavoukian)
 
 当您从事软件工作时，您所处理的需求可能会有些独特。在某种意义上，**如果我们个别的项目在某种意义上是唯一可以描述的**，并且由于这个原因我们说设计的方法不一定是自然界中确定性的东西。when you work on software, the chances are that the requirements that you are working with are going to be somewhat unique. In a sense, if we individual project is uniquely characterizable in a sense and for that reason we state that the method of design is not necessarily something that is deterministic in nature.
 
+设计过程通常被描述为。•	Design process is often described as:
+
 * **Non-Deterministic: 非决定性的**
   * A deterministic process is one that produces the same output given the same input. Design is non-deterministic. No two designers or design processes will likely produce the same output. 确定性的过程是指在相同的输入下产生相同的输出。**设计是非确定性的。没有两个设计师或设计过程会产生相同的输出**
-  * 确定性过程是产生相同输出的过程。给定相同的输入，但是当您为客户机设计某种类型的软件系统时，**这并不一定成立，不同的项目可能有相似之处。然后可能在技术上有相似之处，项目本身的基础结构上也有相似之处，但是对于你所从事的每一个项目来说，都有一些方面是独一无二的**。Deterministic process is one that produces the same output. Given the same input, but that doesn't necessarily hold true when you are designing some kind of software system for a client, there may be similarities in different projects. Then maybe similarities in the technologies, the underlying Structure of the project itself, but there will be aspects that are unique for every single project that you work on.
+  * 确定性过程是产生相同输出的过程。给定相同的输入，但是当您为客户机设计某种类型的软件系统时，**这并不一定成立，不同的项目可能有相似之处。然后可能在技术上有相似之处，项目本身的基础结构上也有相似之处，但是对于你所从事的【每一个项目来说，都有一些方面是独一无二的**】。Deterministic process is one that produces the same output. Given the same input, but that doesn't necessarily hold true when you are designing some kind of software system for a client, there may be similarities in different projects. Then maybe similarities in the technologies, the underlying Structure of the project itself, but there will be aspects that are unique for every single project that you work on.
 * **Heuristic: 启发式**
   * Because design is non-deterministic, design techniques rely on heuristics and rules of thumb rather than repeatable processes. **因为设计是非确定性的，所以设计技术依赖于启发式方法和经验法则而不是可重复的过程**
   * 我们认为设计是一个启发式的过程。因为**设计是不确定的，所以技术依赖于启发式和经验法则**，而不是可重复的公式化过程。这又回到了不同设计原则的概念上。 We state that design is a heuristic process. Since it's nondeterministic, a technique rely on heuristics and rules of thumb, rather than repeatable, formulaic processes. And this sort of comes back to the notion of different by design principles.
@@ -225,6 +227,15 @@ Design is difficult because you are trying to abstract a solution which does not
   * 你可以擅长编码，但是如果你不能与其他人交流你在做什么，那么你对开发团队就没有多大用处。 You can be fantastic at code, but if you cannot communicate what it is you're doing with other people, then you're not really of much use to a development team.
   * 同样，你也可以成为一个出色的沟通者。但是，如果你不理解代码，如果你不理解你需要使用哪些技术来促进项目，那么你对于项目开发公司来说同样没有用处， Likewise, you can be a fantastic communicator. But if you don't understand the code, if you don't understand the technologies that you need to use in order to facilitate the project, then you're equally useless to a project development house
   * **所以理解客户需求是至关重要的，理解你用来解决这些问题的技术对于彼此来说也同样重要** so understanding the client requirements are vitally important, and understanding the technologies that you use in order to address them are equally important to one another.
+
+---
+
+找到一个好的设计是不容易的。•	Finding a good design is not easy:
+
+- 充分利用经验和对问题的理解。•	Leverages off experience and understanding of the problem.
+- 迭代过程。•	Iterative process.
+  - 客户需求变更 & 环境限制
+- 工业界的大多数敏捷方法都希望在设计中有所改变。•	Most agile approaches in industry expect change in the design.
 
 # 为什么设计：Why Design?
 

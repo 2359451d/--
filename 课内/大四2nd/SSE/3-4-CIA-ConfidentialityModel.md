@@ -13,7 +13,7 @@
 * [3政策与机制：Policy And Mechanism](#3政策与机制policy-and-mechanism)
 * [安全策略，系统状态：Policies and Computer Systems](#安全策略系统状态policies-and-computer-systems)
 * [有限状态表示：Finite State Representation](#有限状态表示finite-state-representation)
-* [政策重要性:Importance of Policies](#政策重要性importance-of-policies)
+* [政策重要性&CIA框架:Importance of Policies](#政策重要性cia框架importance-of-policies)
 * [什么决定政策：What Informs Policy](#什么决定政策what-informs-policy)
 * [机密性-安全性质：Confidentiality - Security Properties](#机密性-安全性质confidentiality---security-properties)
   * [目标：Objectives of Confidentiality](#目标objectives-of-confidentiality)
@@ -28,13 +28,13 @@
 * [===================](#-1)
 * [威胁：Threats (Briefly)](#威胁threats-briefly)
 * [政策满足：Policy Satisfaction](#政策满足policy-satisfaction)
-* [可信机制满足: Trusting mechanisms](#可信机制满足-trusting-mechanisms)
+* [可信任的机制应满足(要求): Trusting mechanisms](#可信任的机制应满足要求-trusting-mechanisms)
 * [访问控制机制：Access Control Mechanisms](#访问控制机制access-control-mechanisms)
 * [状态，机制&政策：Protection Software](#状态机制政策protection-software)
-* [访问控制矩阵：Access Control Matrix](#访问控制矩阵access-control-matrix)
+* [ACM访问控制矩阵：Access Control Matrix](#acm访问控制矩阵access-control-matrix)
   * [例子1](#例子1)
   * [例子2](#例子2)
-* [局限性-访问控制矩阵模型: Problems with ACM](#局限性-访问控制矩阵模型-problems-with-acm)
+* [ACM局限性-访问控制矩阵模型: Problems with ACM](#acm局限性-访问控制矩阵模型-problems-with-acm)
 * [代理问题:The Deputising Problem](#代理问题the-deputising-problem)
 * [Summary](#summary-2)
 * [=====================](#-2)
@@ -48,9 +48,9 @@
 * [写入规则：Writing Information](#写入规则writing-information)
 * [读写规则：Reading Writing Information](#读写规则reading-writing-information)
 * [保护原则: Principles of Protection](#保护原则-principles-of-protection)
-* [类别：Categories](#类别categories)
+* [类别(集)：Categories](#类别集categories)
 * [网格层次结构:The Lattice Hierarchy](#网格层次结构the-lattice-hierarchy)
-* [BLP分类：BLP Categories](#blp分类blp-categories)
+* [BLP安全级别=许可+类别集：BLP Categories](#blp安全级别许可类别集blp-categories)
 * [Dominate (dom) Relationship](#dominate-dom-relationship)
   * [例子](#例子)
 * [读取(BLP)：Reading Information](#读取blpreading-information)
@@ -65,7 +65,7 @@
 * [完整性定义&目标：Integrity](#完整性定义目标integrity)
 * [商业完整性政策：Requirements of Commercial Integrity Policies (Lipner)](#商业完整性政策requirements-of-commercial-integrity-policies-lipner)
 * [操作原则-完整策略：Integrity Policy - Principles of Opeartion](#操作原则-完整策略integrity-policy---principles-of-opeartion)
-* [完整性级别：Integrity Levels](#完整性级别integrity-levels)
+* [Biba完整性级别=分类+类别集：Integrity Levels](#biba完整性级别分类类别集integrity-levels)
 * [完整性分类：Classification of Integrity](#完整性分类classification-of-integrity)
 * [类别集：Set Categories](#类别集set-categories)
 * [完整性级别：Integrity Level](#完整性级别integrity-level)
@@ -114,13 +114,23 @@
 * 一个安全的系统，从任意一个状态开始（通常从一个授权的状态）都不可能进入未授权状态
 * 但不一定是坏事，很难达到100%安全
 
-# 政策重要性:Importance of Policies
+# 政策重要性&CIA框架:Importance of Policies
 
-- 主要是为了**确保CIA的安全属性**。Mainly to ensure CIA security properties:
-  - **保密性**：信息的隐蔽性。Confidentiality: the concealment of information.
-  - **完整性**：信息的可信度。Integrity: the trustworthiness of information.
-  - **可用性**：使用或获取信息的能力。Availability: the capacity to use, or acquire information.
+- 主要是为了**确保CIA的安全属性(high level**)。Mainly to ensure CIA security properties:
+  - CIA框架涵盖三个概念。
+    - **保密性**：信息的隐蔽性。Confidentiality: the concealment of information.
+    - **完整性**：信息的可信度。Integrity: the trustworthiness of information.
+    - **可用性**：使用或获取信息的能力。Availability: the capacity to use, or acquire information.
 - 这些是**安全软件的3个主要成分**。These are the 3 main ingredients of secured software.
+  - 即，- 这些概念共同构成了一个 "安全 "系统。•	These concepts together make up a ‘secure’ system.
+
+---
+
+如何实现上面特定的一个CIA概念(属性)？
+
+- 用**政策规定**。•	Specified with policies.
+- 用**机制实现**。•	Implemented with mechanisms.
+  - 注意要机制本身要正确实现，不然系统仍存在缺陷
 
 # 什么决定政策：What Informs Policy
 
@@ -306,7 +316,7 @@ Definition. Let 𝑈 be a set of entities and let 𝜓 be some information. Then
 
 ---
 
-# 可信机制满足: Trusting mechanisms
+# 可信任的机制应满足(要求): Trusting mechanisms
 
 - **可信机制的工作需要一些假设**。Trusting that mechanisms work requires some assumptions:
   - **每个机制都是为了实现安全策略的一个或多个部分**。Each mechanism is designed to implement one or more parts of the security policy.
@@ -320,10 +330,11 @@ Definition. Let 𝑈 be a set of entities and let 𝜓 be some information. Then
 "旨在检测和拒绝未经授权的访问，并允许对信息系统的授权访问"。“Aims to detect and deny unauthorized access and permit authorized access to an information system”.
 
 - **有两种基本的访问控制方式**。There are two fundamental flavours of access control:
-    1.	**自由裁量**。Discretionary:
+    - 1.	**自由裁量**。Discretionary:
       - 个人用户控制ACL以允许或拒绝对某物的访问。Individual users control ACLs to permit or deny access to something.
       - **信息的拥有者可以决定如何控制它**。Owners of information are left to decide how to control it.
-    2.	**强制性的**。Mandatory:
+      - DAC
+    - 2.	**强制性的**。Mandatory:
       - 通常在操作系统中讨论。**系统控制谁**可以访问数据。Commonly discussed in operating systems. System controls who has access to data.
       - 对象访问的规则**不是由用户控制**的。Rules for object access are not controlled by users.
 - **有许多访问控制的变体，其中大多数都以某种方式与自由裁量或强制方法有关**。There are numerous variants of access control, most of them relate to either discretionary or mandatory approaches in one way or another.
@@ -338,7 +349,7 @@ Definition. Let 𝑈 be a set of entities and let 𝜓 be some information. Then
 - **机制试图阻止系统进入𝑃 - 𝑄的状态**。Mechanisms try to prevent the system from entering a state in 𝑃 − 𝑄
   - ACM机制
 
-# 访问控制矩阵：Access Control Matrix
+# ACM访问控制矩阵：Access Control Matrix
 
 - **访问控制矩阵模型是一个用于描述保护状态的精确模型**。The access control matrix model is a precise model used to describe a protection state.
   - 它**描述了每个主体的权利**。It characterises the rights of each subject.
@@ -373,7 +384,7 @@ Definition. Let 𝑈 be a set of entities and let 𝜓 be some information. Then
 
 ![](/static/2022-03-09-22-01-49.png)
 
-# 局限性-访问控制矩阵模型: Problems with ACM
+# ACM局限性-访问控制矩阵模型: Problems with ACM
 
 1.**信息禁锢问题**。Information Confinement Problem:
 
@@ -408,7 +419,7 @@ Definition. Let 𝑈 be a set of entities and let 𝜓 be some information. Then
   - 保密性。
   - 完整性。
   - 可用性。
-- 酌定访问控制和强制访问控制是访问控制的两种主要形式。Discretionary access control and mandatory access control are the two main forms of access control.
+- 自由裁量访问控制DAC和强制访问控制是访问控制的两种主要形式。Discretionary access control and mandatory access control are the two main forms of access control.
 - **访问控制矩阵是一种基于DAC的基本访问控制机制**。Access control matrix is a basic access control mechanism based on DAC.
 
 # =====================
@@ -444,14 +455,19 @@ Definition. Let 𝑈 be a set of entities and let 𝜓 be some information. Then
 # （BLP）Bell-LaPadula Model
 
 - 一种信息保密模型。An information confidentiality model.
-- 结合了**强制性（安全级别）和自由决定访问控制（需要许可**）。Combines mandatory (security levels) and discretionary (permission required)
+- 结合了**强制性（安全级别）和DAC自由决定访问控制（需要许可**）。Combines mandatory (security levels) and discretionary (permission required)
 - 开发于20世纪70年代 Developed in the 1970s
 
 ---
 
-1. Arrange security levels in linear order. 按线性顺序排列安全级别
+1. Arrange **security levels** in linear order. 按线性顺序排列**安全级别**
 
 ![](/static/2022-03-09-23-58-43.png)
+
+- 安全级别用于区分以下内容。•	Security levels are used to distinguish the following:
+  - 文件上的重要程度。•	Levels of importance on a document.
+  - 一个用户（被称为主体）所拥有的访问级别。•	Levels of access held by a user (referred to as a subject).
+    - 我们可以使用安全级别本身来确定一个主体是否可以访问一个文档。•	We can use security levels on their own to determine whether a subject can access a document or not.
 
 2. 具体说明哪些主体有什么**安全许可𝐿**(𝑠) Specify which subjects have what security clearance 𝐿(𝑠)
 3. 明确哪些对象有什么**安全分类** 𝐿(𝑜) Specify which objects have what security classification 𝐿(𝑜)
@@ -537,7 +553,7 @@ Strong Star Property (Strong *property)
   - **主体应该只能够访问那些目前需要完成其工作的对象**。Subjects should only be able to access those objects that are currently required to complete their jobs.
 - 这两个原则都可以用**类别**来实现。Both principles can be implemented using categories.
 
-# 类别：Categories
+# 类别(集)：Categories
 
 - 也被称为**隔间**。Also known as compartments.
 - 典型的军事安全类别。Typical military security categories:
@@ -553,23 +569,27 @@ Strong Star Property (Strong *property)
 - None
   - low level, might have access to initial documents
 
-# BLP分类：BLP Categories
+# BLP安全级别=许可+类别集：BLP Categories
 
-top secret level情况下，还需要考虑catrgories (what category applicable to an object or a document)
+secret level情况下，还需要考虑catrgories (what category applicable to an object or a document)
 
-- **扩大安全级别的概念，为每个安全分类增加类别**。Expand notion of **security level** to add categories to each security classification.
+- **扩大安全级别的概念，为每个安全分类增加类别**。Expand notion of **security level** to add **categories** to each security classification.
+  - 安全级别用于区分以下内容。•	Security levels are used to distinguish the following:
+    - 文件上的重要程度。•	Levels of importance on a document.
+    - 一个用户（被称为主体）所拥有的访问级别。•	Levels of access held by a user (referred to as a subject).
+      - 我们可以使用安全级别本身来确定一个主体是否可以访问一个文档。•	We can use security levels on their own to determine whether a subject can access a document or not.
 - 鉴于NUC、EUR、US的类别。Given categories NUC, EUR, US:
   - 基于 "需要知道 "的原则，人们可以接触到其中的任何内容。Based on “need to know” principle one can have access to any of these:
   - None, {NUC}, {EUR}, {US}, {NUC, EUR} … {NUC, EUR, US}
-- 安全级别是（审查，类别集）。**Security level** is (**clearance<level of privilege**>, **category set<what aspects of business do they belong to**>) (结合这两个概念)
-  - 最高机密，{NUC, EUR, ASI}。Top Secret, {NUC, EUR, ASI}
-  - 机密，{EUR, ASI}。Confidential, {EUR, ASI}
-  - 秘密，{NUC，ASI}。Secret, {NUC, ASI}
+- 安全级别是（许可，类别集）。**Security level** is (**clearance<level of privilege**>, **category set<what aspects of business do they belong to**>) (结合这两个概念，，感觉就是标签+类别集= =，，<font color="deeppink">L=(C, S)，C是clearance/classification(也就是机密性标签,下面3个), S是set of categories</font>。。后面那个Biba一样的就是概念用的名字可以不一样,Biba-C是classification指完整性分类)
+  - 最高机密，{NUC, EUR, ASI}。`Top Secret, {NUC, EUR, ASI}`
+  - 机密，{EUR, ASI}。`Confidential, {EUR, ASI}`
+  - 秘密，{NUC，ASI}。`Secret, {NUC, ASI}`
   - 根据这种notion，可以表示出domination relationship
 
 # Dominate (dom) Relationship
 
-- 捕获安全分类和类别集的组合。Captures the combination of **security classification and category set**.
+- 捕获**安全分类(许可)和类别集**的组合。Captures the combination of **security classification and category set**.
   - 消除combination of sensitivity levels & category sets. 然后根据一系列操作，决定who is access to what and in what capacity
 
 ![](/static/2022-03-10-15-01-52.png)
@@ -614,8 +634,8 @@ confinement 问题--假设保罗被批准进入安全级别(Secret, {EUR, US, NU
 
 # Summary
 
-- 安全级别允许我们表明一个主体有什么特权，或者对一个对象需要什么级别的访问。Security levels allow us to indicate what privilege a subject has, or level of access is required for an object.
-- 类别集允许我们根据类别集的成员资格来表明谁应该访问什么。Category sets allow us to indicate who should have access to what depending on membership of category sets
+- **安全级别**允许我们表明一个主体有什么特权，或者对一个对象需要什么级别的访问。Security levels allow us to indicate what privilege a subject has, or level of access is required for an object.
+- **类别集**允许我们根据类别集的成员资格来表明谁应该访问什么。Category sets allow us to indicate who should have access to what depending on membership of category sets
   - 与安全级别无关。Irrespective of security levels.
 - **支配权是我们整合安全级别和类别集的一种方式，以检查一个主体对一个对象的访问权，基于两个一般规则**。Dominance is a way for us to consolidate security levels and category sets to check the access right a subject has with an object based on two general rules:
   - 如果一个主体支配着一个对象，它就可以阅读它。If a subject dominates an object, it can read it.
@@ -695,9 +715,9 @@ Identify all possible ways that users can interact with objects to maintain conf
 * 函数分离。Separation of function:
   - **不要在开发系统上处理生产数据**。Do not process production data on a development system.
 
-# 完整性级别：Integrity Levels
+# Biba完整性级别=分类+类别集：Integrity Levels
 
-- 完整性等级由标签定义，由两部分组成。Integrity levels are defined by labels, consisting of two parts:
+- **完整性等级**由标签定义，由两部分组成。Integrity levels are defined by labels, consisting of two parts:
   - 一个**分类**。A classification.
   - 一组**类别集**。A set of categories.
 - 完整性等级被赋予系统中的主体和对象。Integrity levels are given to the subjects and objects in the systems.
@@ -707,9 +727,9 @@ Identify all possible ways that users can interact with objects to maintain conf
 
 - 一个**分类**是一个**分层元素集的元素**。A classification is an element of hierarchical set of elements.
 - 它由三个要素组成。It consists of three elements: （不是硬性的定义，只是通用标签）
-  - 关键的 Crucial
-  - 非常重要 Very important
-  - 重要的 Important
+  - **关键的** Crucial
+  - **非常重要** Very important
+  - **重要的** Important
 - 元素的关系如下。The relationship of elements is as follows:
   - C > VI > I
 
@@ -725,11 +745,11 @@ Identify all possible ways that users can interact with objects to maintain conf
 ![](/static/2022-03-11-12-17-30.png)
 
 - 在这种情况下，X≥Y（X dom Y），因为Y是X的一个子集。In this case X ≥ Y (X dominates Y), because Y is a subset of X.
-- 如果有一个包含{Detroit, Chicago, Miami}的第三个区间Z。在这种情况下，隔间Z和X是不可比的，因为集合的第三个元素是不同的。If there were to be a third compartment Z containing {}. Compartment Z and X in this case are non-comparable because the third element of the set is different.
+- 如果有一个包含`{Detroit, Chicago, Miami}`的第三个区间Z。在这种情况下，隔间Z和X是不可比的，因为集合的第三个元素是不同的。If there were to be a third compartment Z containing {}. Compartment Z and X in this case are non-comparable because the third element of the set is different.
 
 # 完整性级别：Integrity Level
 
-- 完整性等级由标签定义，由两部分组成。Integrity levels are defined by labels, consisting of two parts:
+- 完整性等级由**标签定义**，由两部分组成。Integrity levels are defined by labels, consisting of two parts:
   - 一个**分类**。A classification.
   - 一组**类别集**。A set of categories.
 - 完整性等级被赋予系统中的主体和对象。Integrity levels are given to the subjects and objects in the systems.
@@ -738,9 +758,9 @@ Identify all possible ways that users can interact with objects to maintain conf
 ---
 
 - 每个**完整性等级将被表示为𝐿=（𝐶，𝑆**），其中。Each integrity level will be represented as 𝐿 = (𝐶, 𝑆) where:
-  * 𝐿是完整性等级。𝐿 is the integrity level.
-  * 𝐶是分类。𝐶 is the classification.
-  * 𝑆是类别集合。𝑆 is the set of categories.
+  * 𝐿是完整性等级(标签。𝐿 is the integrity level.
+  * **𝐶是分类**。𝐶 is the classification.
+  * **𝑆是类别集**。𝑆 is the set of categories.
 - 然后，**完整性级别形成支配关系**。The integrity of levels then form a dominance relationship.
   - ![](/static/2022-03-11-12-21-11.png)
 
@@ -962,7 +982,7 @@ D能写所有对象因为BLP模型只关注机密性不关注完整性
 
 # 3
 
-填表 (注意本例有分类集category set)
+填表 (注意本例有类别集category set)
 
 * 注意用dom关系来推Access right
 * 分析confidentiality的时候不关注integrity反之亦然
