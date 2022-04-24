@@ -11,7 +11,7 @@ DES 加密理论
 * [2轮加密&解密可视化：Visualization of 2 Round Fiestel Encryption](#2轮加密解密可视化visualization-of-2-round-fiestel-encryption)
 * [函数F设计：Function Design](#函数f设计function-design)
 * [DES加密：Data Encryption Standard](#des加密data-encryption-standard)
-  * [起源：Origins](#起源origins)
+* [DES起源：Origins](#des起源origins)
 * [S-DES](#s-des)
   * [初始排列：Initial Permutation](#初始排列initial-permutation)
   * [子密钥生成：Sub Key Generation](#子密钥生成sub-key-generation)
@@ -31,8 +31,8 @@ DES 加密理论
 * [DES-Final Permutation](#des-final-permutation)
 * [DES-Summary](#des-summary)
 * [16轮DES输出评估：混淆性, 扩散性 - Results from applying 16 steps in DES](#16轮des输出评估混淆性-扩散性---results-from-applying-16-steps-in-des)
-* [S-Boxes设计：Designing the S-Boxes](#s-boxes设计designing-the-s-boxes)
-* [DES破解：Breaking DES Encryption](#des破解breaking-des-encryption)
+* [DES优点&S-Boxes设计公开：Designing the S-Boxes](#des优点s-boxes设计公开designing-the-s-boxes)
+* [DES缺点-破解：Breaking DES Encryption](#des缺点-破解breaking-des-encryption)
 * [DES改进-双重DES：DES Advancements - Double DES](#des改进-双重desdes-advancements---double-des)
 * [DES改进-三重DES：DES Advancements - Triple DES](#des改进-三重desdes-advancements---triple-des)
   * [解密: Decryption with Triple DES](#解密-decryption-with-triple-des)
@@ -43,7 +43,7 @@ DES 加密理论
 * [AES历史:Advanced Encryption Standard](#aes历史advanced-encryption-standard)
 * [Rjindael Blocks and States](#rjindael-blocks-and-states)
 * [加密算法：Rjindael Encryption Algorithm](#加密算法rjindael-encryption-algorithm)
-* [0-轮前转换：Pre-Round Transform](#0-轮前转换pre-round-transform)
+* [0-轮前转换：Pre-Round Transform/AddRoundKey](#0-轮前转换pre-round-transformaddroundkey)
 * [每轮步骤：Rounds](#每轮步骤rounds)
 * [1-字节替换：SubBytes](#1-字节替换subbytes)
 * [例子](#例子)
@@ -61,7 +61,7 @@ DES 加密理论
 * [Step 4 - 轮密钥加：AddRoundKey](#step-4---轮密钥加addroundkey)
 * [Recap](#recap)
 * [AES秘钥生成：Key Generation](#aes秘钥生成key-generation)
-* [Key Staging](#key-staging)
+* [Key Staging【主密钥生成】](#key-staging主密钥生成)
 * [AES子秘钥生成：Sub key Generation](#aes子秘钥生成sub-key-generation)
 * [RCON表](#rcon表)
 * [子密钥生成可视化](#子密钥生成可视化)
@@ -79,9 +79,11 @@ DES 加密理论
 
 - Fiestel密码器是一个块状密码器系列。Fiestel Ciphers are a family of block ciphers.
 - **一些加密标准，如数据加密标准（DES）是基于Fiestel算法的**。Several encryption standards, such as the Data Encryption Standard (DES) are based on Fiestel algorithms.
-- Fiestel密码是一种【**区块】密码技术**。Fiestel Ciphers are a block cipher technique.
+- Fiestel加密是一种【**区块】密码技术**。Fiestel Ciphers are a block cipher technique.
   - 涉及到对**比特块的【多轮】加密**。Involves multiple rounds of encryption on blocks of bits.
 - 所有的**加密/解密**都是用一把**秘钥**的操作。All encryption/decryption operates with a single key.
+  - 密码的强度取决于正在使用的密钥。•	The strength of a cipher depends on the key that is being used.
+    - DES密钥更短，更容易被破解
 - 在**64位或128位的块大小上操作**。Operates on 64-bit or 128-bit block sizes.
 
 ---
@@ -104,10 +106,11 @@ DES 加密理论
 - 原理是，你**做的转换越多，输出就越安全**。The principle is, the more transformations you make, the more secure the output will be.
 - 理论上，你可以**实现任意多的变换**。在**时间复杂性和密码的安全性之间进行权衡**。In theory you can implement as many transforms as you wish. Trade off between time complexity and security of the cipher.
 
-Fiestel密码器使用乘积加密算法。Fiestel Ciphers use product ciphers.
+Fiestel加密使用乘积加密算法。Fiestel Ciphers use product ciphers.
 
 - **交替进行比特置换和转置**。Alternating bit substitutions and transpositions.
   - **每一次置换都使用一个从【主密钥】生成的子密钥**。Each substitution uses a sub-key generated from the master key.
+    - 每个子密钥通常用于不同的轮次，以最大限度地提高比特的混乱程度。•	Each sub key is often used in different rounds to maximize confusion of bits
   - 转置相对置换简单，因为一般不会涉及密钥的使用
   - 问题：如何从一个主密钥生成多个子密钥？
 
@@ -165,7 +168,9 @@ Fiestel密码器使用乘积加密算法。Fiestel Ciphers use product ciphers.
 - 依靠Fiestel方法。•	Leverages on Fiestel method.
 - **使用64位数据块和56位密钥**。•	Uses 64-bit data blocks and 56-bit keys.
 
-## 起源：Origins
+# DES起源：Origins
+
+秘密开发，，被怀疑有backdoors, 后面公开了S box设计
 
 ![](/static/2022-04-08-15-40-16.png)
 
@@ -287,6 +292,11 @@ DES的结构与S-DES相同，但有更多的步骤。•	DES has the same struct
 
 ![](/static/2022-04-11-15-32-56.png)
 
+- 所有这些都发生在单轮加密中。•	All of this occurs in a single round of encryption.
+- 所产生的密码（左、右区块的组合）将再次被输入到这个过程中。•	The cipher produced (the combined left and right blocks) will be input into the process once more.
+- 这将发生多次，直到产生最终的密码。•	This occurs multiple times, until the final cipher is produced.
+- 因此，为什么DES被认为是一个区块加密。•	Hence why DES is considered a block cipher.
+
 # DES秘钥处理&生成
 
 ## DES-56bit密钥缩减：Key Reduction
@@ -297,6 +307,7 @@ DES的结构与S-DES相同，但有更多的步骤。•	DES has the same struct
 
 - 这是为**生成密钥表示法**提供的信息。•	This is the information provided to generate the key representation.
 - 由于56位是用于密钥的。**我们丢弃密钥的每一个第8位**。•	Since 56 bits are used for the key. We discard each 8th bit of the key.
+  - 这样做主要是为了**帮助提高执行速度**。•	This was done primarily to help with the speed of execution.
 - 下表指出了64位密钥中被丢弃的那些位。•	The table below indicates those bits that are dropped in a 64-bit key.
   - 64里面丢8个
 
@@ -326,7 +337,7 @@ DES的结构与S-DES相同，但有更多的步骤。•	DES has the same struct
 
 ![](/static/2022-04-12-19-13-34.png)
 
-- 这些代表了我们用来从56位中选择48位的偏移量。•	These represent offsets that we use to select 48 bits from the 56 bits.
+- 这些代表了我们用来从56位（主密钥）中选择48位的偏移量。•	These represent offsets that we use to select 48 bits from the 56 bits.
 - 输出将是**该轮的48位子密钥**。•	The output will be a 48-bit sub-key for that round.
   - 用于每轮F函数
 
@@ -355,7 +366,13 @@ DES的结构与S-DES相同，但有更多的步骤。•	DES has the same struct
   - **4位区块的第1位映射到前一个6位区块的最后一位**。•	The first bit of the 4-bit block maps to the last bit of the previous 6-bit block.
     - **如果它是第一个4位块，它将映射到扩展位序列中的最后一位**。•	If it is the first 4-bit block, it will map to the final bit in the expanded bit sequence.
 
-最终right halve data从32bit扩展到48bit【扩展的目的就是和48bit的子密钥进行XOR
+最终right halve data从32bit扩展到48bit【**扩展的目的就是和48bit的子密钥进行XOR**
+
+---
+
+简化例子
+
+![](/static/2022-04-23-22-01-55.png)
 
 # DES-XOR & S-Boxes
 
@@ -372,9 +389,9 @@ DES的结构与S-DES相同，但有更多的步骤。•	DES has the same struct
 ![](/static/2022-04-13-15-16-06.png)
 ![](/static/2022-04-13-15-33-38.png)
 
-* 第一个和最后一个bit合并起来用于形成row offset
+* 第一个和最后一个bit合并起来用于形成row offset 【即，**每个6bit块的，0,5偏移量用来索引row**】
   * 可能的 row offset: 0 1 2 3
-* 其余的bit合并起来用于column offset
+* 其余的bit合并起来用于column offset【即，**每个6bit块的，1~4偏移量用来索引column**】
   * 最大15
 * 最终指向的十进制值都可以用一个4 bit二进制表示
   * **一共8个S boxes，8个 6bit输入最后产生8*4 bit S boxes输出**
@@ -414,16 +431,28 @@ final steps in the round
 
 * 4轮效果已经很好了，但是16轮是为了差分密码分析的概念
 
-# S-Boxes设计：Designing the S-Boxes
+# DES优点&S-Boxes设计公开：Designing the S-Boxes
 
-该设计原则于1992年公布，以解决后门问题。•	The design principles were published in 1992 to address the concerns of backdoors.
+DES的最大优势是它的速度。•	The biggest advantage of DES was its speed.
+
+- 它的速度很快，可以很容易地在硬件上实现特定的DES芯片。•	It was fast and could easily be implemented on specific DES chips on hardware.
+
+---
+
+SBox该设计原则于1992年公布，以**解决后门问题**。•	The design principles were published in 1992 to address the concerns of backdoors.
 
 - 该设计**使DES对差分密码分析具有抵抗力**。•	The design made DES resistant to differential cryptanalysis.
   - **差分密码分析【使用两个非常相似的选择的明文信息来确定加密算法的细节**】。•	Differential Cryptanalysis uses two very similar chosen plaintext messages to determine details on the encryption algorithm.
 - **线性密码分析**是另一种攻击，它**依赖于两个提前知道的类似明文信息**。•	Linear cryptanalysis is another attack that relies on two similar plaintext messages that are known ahead of time.
 - **DES对这两种攻击都有抵抗力**。•	DES is resistant to both attacks.
 
-# DES破解：Breaking DES Encryption
+# DES缺点-破解：Breaking DES Encryption
+
+DES的密钥长度小是DES的最大缺点。•	The small key length for DES is the biggest drawback to DES.
+
+- 现代系统会轻易地破解DES密码。它们不应该再被使用•	Modern systems will break DES ciphers with ease. They should not be used anymore.
+
+---
 
 ![](/static/2022-04-13-16-33-26.png)
 
@@ -434,11 +463,22 @@ final steps in the round
 - 现在，DES的整个密钥空间只需几天时间就可以被搜索到。识别正确的密钥并击败加密所需的时间会少得多。
   - 更复杂的攻击可以在几分钟内破解DES，记录是大约20秒。
 
+---
+
+:orange: 然而，有两个主要举措来保护DES（看后面）。•	There were however two major initiatives to preserve DES.
+
+- 双重DES
+  - 把最后的密码输出用第二个密钥再次加密。•	Take the final cipher output and encrypt it again with a second key.
+- 三重DES
+  - 采取第一种密码，解密它，并采取该解密并加密它。•	Take the first cipher, decrypt it and take that decipher and encrypt it.
+  - (通常用三个不同的密钥)•	(typically with three distinct keys)
+
 # DES改进-双重DES：DES Advancements - Double DES
 
-**双重DES使用两个不同的密钥进行两次加密**。•	Double DES uses two different keys to encrypt twice.
+**双重DES使用两个不同的密钥进行两次加密(32轮**。•	Double DES uses two different keys to encrypt twice.
 
 ![](/static/2022-04-13-16-40-48.png)
+![](/static/2022-04-23-22-26-33.png)
 
 - `𝐶 = 𝐸𝐾2(𝐸𝐾1(𝑃))`
 - 它提供了一些比单一加密DES更多的保护。•	It provides some additional protection to that of single encryption DES.
@@ -446,6 +486,20 @@ final steps in the round
 - 大约需要两倍的时间来破解加密。•	Approximately takes twice as long to break encryption.
 
 # DES改进-三重DES：DES Advancements - Triple DES
+
+16*3轮
+
+三重DES的设计使其向后兼容DES的实现。•	The design of triple DES makes it backwards compatible with DES implementations.
+
+![](/static/2022-04-23-22-29-22.png)
+
+- 如果三个密钥都是相同的，它就会进行加密、解密和再次加密。•	If all three keys are the same, it will encrypt, decrypt and encrypt again.
+- 因此，**产生的密码将具有与单DES相同的安全性**。•	Therefore, the cipher produced will have the same security as single DES.
+- **如果密钥是不同的**，那么作为输出的密码就会有**三层加密**。•	If the keys are distinct, there will be three layers of encryption on the cipher as output.
+ - **这使得DES机制在最终退役前有一段时间对攻击有弹性**。•	This made the mechanism DES resilient to attacks for a while before it was eventually retired.
+  - 此后，DES被AES取代。•	DES has since been replaced with AES.
+
+---
 
 ![](/static/2022-04-13-20-46-03.png)
 
@@ -461,15 +515,17 @@ final steps in the round
 
 ## 解密: Decryption with Triple DES
 
-**解密步骤使TDES向后兼容DES的应用**。•	The decryption step makes TDES backwards compatible with DES applications.
+**解密步骤使TDES向后兼容DES的应用**。•	The decryption step makes TDES backwards compatible with DES applications. 【这也是**TDES最大优点**
 
 - **如果𝐾1 = 𝐾2 = 𝐾3，那么结果将与单钥加密相同**。•	If 𝐾1 = 𝐾2 = 𝐾3 then the outcome will be the same as single key encryption.
   - 这是因为我们加密、解密和再次加密。•	This is because we encrypt, decrypt and encrypt again.
 - **如果𝐾1、𝐾2和𝐾3是不同的，那么我们就会获得三重加密的好处**。•	If 𝐾1, 𝐾2 and 𝐾3 are distinct, then we reap the benefit of triple encryption.
   - **用不同的密钥进行'解密'，在功能上等同于加密**。•	‘Decryption’ with a different key is functionally equivalent to encryption.
   - **注意这里解密后，输出不是明文，，因为用的是不同的key解密，，所以输出并不是明文**
+    - <font color="deeppink">即，K1加密，K2解密就是相当于加密了</font>
 
 # TDES安全性-Overview
+
 
 ![](/static/2022-04-13-20-58-45.png)
 
@@ -480,6 +536,9 @@ final steps in the round
 
 # TDES/DES兼容性：Compatibility
 
+TDES最大优点（为什么TDES广泛的使用，，因为能兼容使用DES的legacy system，，使用相同master key能向后兼容DES。。<font color="deeppink">但之后由于Moore's law 和TDES也能被破解和加密分析(cryptanalysis)的因素，被废弃</font>
+
+![](/static/2022-04-23-22-29-22.png)
 ![](/static/2022-04-13-21-03-19.png)
 
 - 3个回合，加密、解密、加密。•	3 rounds, Encryption, Decryption, Encryption.
@@ -493,7 +552,8 @@ final steps in the round
   - **然而，有一些遗留的软件/硬件系统需要使用它**。•	However, there are legacy software/hardware systems that need to use it.
 - **双重和三重DES试图通过执行更多的步骤来加强DES，而无需重新设计它**。•	Double and Triple DES were attempts to strengthen DES by performing more steps without redesigning it.
   - 然而，这些已经被破解，并被其他标准所取代，如HIST或AES。•	These however have been cracked and have been superseded by other standards such as HIST or AES.
-- **然而，三重DES仍然被一些现代应用所使用**。•	However, Triple DES is still used by some modern applications.
+- **然而，三重DES仍然被一些现代应用所使用(因为向后兼容**。•	However, Triple DES is still used by some modern applications.
+  - <font color="deeppink">但之后由于Moore's law 和TDES也能被破解和加密分析(cryptanalysis)的因素，被废弃</font>
   - SSL库支持TDES。•	SSL libraries support TDES.
   - 火狐在2021年才放弃对TDES的支持!•	Firefox only dropped support for TDES in 2021!
 
@@ -504,12 +564,19 @@ final steps in the round
 ![](/static/2022-04-13-21-40-05.png)
 
 - 由于DES的缺陷变得明显，NIST（美国国家标准与技术研究所）开始寻找其替代品。•	The NIST (US National Institute for Standards and Technology) began a search for a replacement for DES as its deficiencies became apparent.
-- AES的设计是公开进行的，不像DES是秘密设计的。•	The design of AES was performed publicly, unlike DES which was designed in secret.
-- 世界各地的参赛者都被邀请参加。•	Entries were invited from around the world.
-- 算法和分析是公开的。•	The algorithms and analysis were made public.
-- 任何组织都可以提出意见。•	Comments were invited from any organization.
+- **AES的设计是公开进行的，不像DES是秘密设计的**。•	The design of AES was performed publicly, unlike DES which was designed in secret.
+  - 世界各地的参赛者都被邀请参加。•	Entries were invited from around the world.
+  - 算法和分析是公开的。•	The algorithms and analysis were made public.
+  - 任何组织都可以提出意见。•	Comments were invited from any organization.
+  - **所以比DES有更多可信度,公众参与更多方式的分析**
+- **128和256位的密钥大小使AES比DES更难被破解**。•	Key sizes of 128 and 256 bits makes AES much more difficult to brute force than DES.
+  - <font color="deeppink">注意任何加密算法都能被暴力破解，不过现实除了攻击者的动机，还取决于时间成本（值不值得</font>
 
 # Rjindael Blocks and States
+
+通常被称为Rjindael算法•	Often referred to as the Rjindael algorithm.
+
+- 以设计它的比利时学者的名字命名。•	Named after the Belgium academics who designed it.
 
 ![](/static/2022-04-13-21-41-17.png)
 
@@ -517,9 +584,12 @@ final steps in the round
 * 同样适用于密钥（它们的长度可以是128、192或256比特）。< 
 * 我们将只解开**128，128的方法（数据，密钥长度**）.< 
 * 唯一真正的区别是，**更多的比特意味着更多的轮次。**
+  - **三种变体的方法都是一样的，唯一的区别是轮数**。•	The method is the same for all three variants, the only difference is the number of rounds.
 * **所有操作都发生在数据块上**（我们将表示为`S`）<
 
 # 加密算法：Rjindael Encryption Algorithm
+
+一共10轮
 
 数据块`S`
 
@@ -537,14 +607,14 @@ for (int round = 1; round <= 10; round++)
 }
 ```
 
-# 0-轮前转换：Pre-Round Transform
+# 0-轮前转换：Pre-Round Transform/AddRoundKey
 
 轮密钥加方法里面的
 
 * ![](/static/2022-04-13-21-53-48.png)
 * ![](/static/2022-04-13-21-54-00.png)
 
-**这涉及到取一个128位的区块和一个128位的密钥，并对两者进行XOR**。•	This involves taking a 128-bit block and a 128-bit key and performing an XOR on both.
+**这涉及到取一个128位的区块和一个128位的密钥（子密钥`K0`），并对两者进行XOR**。•	This involves taking a 128-bit block and a 128-bit key and performing an XOR on both.
 
 ![](/static/2022-04-13-21-51-14.png)
 ![](/static/2022-04-13-21-53-10.png)
@@ -594,7 +664,7 @@ The objective is to map all the bytes 𝑏i to another byte value 𝑆(𝑏i) - 
 
 # 映射：Rjindael S-Box (字节替换SubBytes)
 
-用先前矩阵`M`的16进制表示，来索引查表
+用先前`S`数据块的矩阵`M`的16进制表示，来索引查表
 
 ![](/static/2022-04-14-17-27-46.png)
 
@@ -630,7 +700,8 @@ The objective is to map all the bytes 𝑏i to another byte value 𝑆(𝑏i) - 
 
 ![](/static/2022-04-14-19-28-29.png)
 
-- 这是一个简单的操作。•	This is a simple operation.
+这是一个简单的操作。•	This is a simple operation.
+
 - **我们要将𝑆内的每个字节块向左移动**。•	We want to move each byte block within 𝑆 to the left.
 - 我们**移动空格数量随行数增加**。•	How many spaces we move increases for each row.
 - 第1行，我们不移动。•	Row 1, we don’t move.
@@ -640,25 +711,18 @@ The objective is to map all the bytes 𝑏i to another byte value 𝑆(𝑏i) - 
 
 # 3-列位移(列混淆)：Step 3 - Shift Columns
 
-**步骤2的输出(行位移后输出)中的每一列都可以表示为一个矢量**。•	Each column in the output of Step 2 can be represented as a vector.
+**步骤2的数据库输出(行位移后输出)中的每一列都可以表示为一个矢量**。•	Each column in the output of Step 2 can be represented as a vector.
 
 ![](/static/2022-04-14-19-34-42.png)
 ![](/static/2022-04-14-19-35-27.png)
 
 - 在这一步骤中，我们要将**每个向量与一个静态矩阵相乘**。•	In this step we want to multiply each vector by a static matrix.
+  - 有4个矢量乘法操作来产生一个输出数据块 •	Therefore there are 4 vector multiplication operations to yield an output data block.
+  - 当𝑐i与矩阵中的一个值相乘时，我们采取**点积**的方式。•	When multiplying 𝑐i with a value from the matrix, we take the dot product.
+    - 溢出时，用多项式还原法进行还原
+  - 当相加数值时，我们采取**xor**操作。•	When adding values, we take an xor operation.
 - **产生一个新的向量**。•	Produces a new vector.
 - **替换掉数据块中的旧列**。•	Replaces the old column from the data block.
-
----
-
-- 在这一步骤中进行的所有操作据说都发生在一个Rinjdael Galois场或一个有限场内。•	All actions that are taken in this step are said to occur within a Rinjdael Galois field or a finite field.
-- 这意味着，**所有的操作都应该产生符合某种映射的结果状态空间的结果**。•	This means that all operations should produce results that fit within some mapped statespace of outcomes.
-- 之前看到的**乘法步骤涉及二进制序列的乘法和加法**。•	The multiplication steps seen previously involve the multiplication and addition of binary sequences.
-- 在Rinjdael Galois场中的二进制序列上进行算术，意味着我们<font color="deeppink">不应该在二进制输出中观察到溢出或下溢。</font>	Performing arithmetic on a binary sequence in a Galois field means we should never observe overflow or underflow in our binary output.
-  - 二进制field/space， 必须保证输出在这个范围内
-    - max `1111 1111`
-    - min `0000 0000`
-- 因此，**将两个8位序列相乘/相加/相逆应该会产生另一个8位序列**。•	Therefore, multiplying/adding/inversing two 8-bit sequences together should create another 8-bit sequence.
 
 ---
 
@@ -668,6 +732,19 @@ The objective is to map all the bytes 𝑏i to another byte value 𝑆(𝑏i) - 
 - **当相加数值时，我们采取xor操作**。•	When adding values, we take an xor operation.
 - **在取点积时出现溢出的情况下**。•	In the event of overflow when taking the dot product.
   - 我们用<font color="deeppink">多项式还原法</font>进行还原。•	We reduce using polynomial reduction.
+
+---
+
+在这一步骤中进行的所有操作据说都发生在一个Rinjdael Galois场或一个有限场内。•	All actions that are taken in this step are said to occur within a Rinjdael Galois field or a finite field.
+
+- 其他意义？:<font color="deeppink">后面整个过程都想对8bit位进行bit操作，（finite field确保了8bit乘另一个8bit值，输出8bit，，如果溢出就转换成8bit）科学计算器可能不允许溢出现象？</font>
+- 这意味着，**所有的操作都应该产生符合某种映射的结果状态空间的结果**。•	This means that all operations should produce results that fit within some mapped statespace of outcomes.
+- 之前看到的**乘法步骤涉及二进制序列的乘法和加法**。•	The multiplication steps seen previously involve the multiplication and addition of binary sequences.
+- 在Rinjdael Galois场中的二进制序列上进行算术，意味着我们<font color="deeppink">不应该在二进制输出中观察到溢出或下溢。</font>	Performing arithmetic on a binary sequence in a Galois field means we should never observe overflow or underflow in our binary output.
+  - 二进制field/space， 必须保证输出在这个范围内
+    - max `1111 1111`
+    - min `0000 0000`
+- 因此，**将两个8位序列相乘/相加/相逆应该会产生另一个8位序列**。•	Therefore, multiplying/adding/inversing two 8-bit sequences together should create another 8-bit sequence.
 
 ## 点积：Dot Product Process
 
@@ -683,7 +760,9 @@ The objective is to map all the bytes 𝑏i to another byte value 𝑆(𝑏i) - 
 
 ---
 
-- **矩阵中的值**和**要乘的字节值**可以用多项式来表示。•	The value in the matrix and the byte value to be multiplied can be represented as polynomials.
+:orange: 整个点积过程依赖多项式表示
+
+- **矩阵中的值**和**要乘的数值**可以用多项式来表示。•	The value in the matrix and the byte value to be multiplied can be represented as polynomials.
   - 列向量的值和矩阵的值都要转成多项式= =
 
 ![](/static/2022-04-14-19-56-37.png)
@@ -696,8 +775,9 @@ The objective is to map all the bytes 𝑏i to another byte value 𝑆(𝑏i) - 
   - 然后我们将表中的指数相加。•	We then add the exponents on the table.
   - ![](/static/2022-04-14-20-02-08.png)
 - 但我们可以看到这里**有溢出**。•	But we can see we have overflow here.
-  - 这个多项式将不止8位。•	This polynomial will not fit into 8 bits.
+  - 这个多项式将**不止8位**。•	This polynomial will not fit into 8 bits.
   - 这是因为我们在第8个偏移位上有一个bit。•	This is because we have a bit in the 8th offset.
+  - 乘法必须尊重8位的有限域•	Because the multiplication must respect the finite field of 8-bits.
   - 因此要进行多项式还原 polynomial reduction确保输出能在field中
 
 ## 点积溢出：多项式还原-Polynomial Mod
@@ -803,12 +883,15 @@ The objective is to map all the bytes 𝑏i to another byte value 𝑆(𝑏i) - 
 
 # Step 4 - 轮密钥加：AddRoundKey
 
+![](/static/2022-04-15-16-25-28.png)
+
 **最后，我们将ShiftColumns部分的输出与主密钥生成的子密钥相乘**。•	We finally xor the output from the ShiftColumns section with the subkey generated form the master key. <font color="deeppink">本质还是XOR操作</font>
 
 - 这将使我们达到我们最终的数据块密码。•	This will allow us to arrive at our final data block cipher.
   - 对于单轮...•	For the single round…
   - 当使用128位密钥时，这个过程又重复了9次。•	The process repeats another 9 times when using 128bit keys.
-  - **注意，在最后一轮，我们不执行Shiftcolumns方法**。•	Note, on the last round, we do not perform the shiftcolumns method.
+    - 一共10轮
+- **注意，在最后一轮，我们不执行Shiftcolumns列混淆方法**。•	Note, on the last round, we do not perform the shiftcolumns method.
 
 # Recap
 
@@ -840,12 +923,29 @@ The objective is to map all the bytes 𝑏i to another byte value 𝑆(𝑏i) - 
 
 - **密钥可以由一些种子信息生成**。•	The key can be generated from some seed information.
 - **一个字符串输入可以表示为十六进制字符序列**。•	A String input can be represented as a sequence of hex characters.
-- 以输入 “This is some key” 为例 •	Taking the input “This is some key”
+- 以输入 “This is some key(**16个字符，，这里讲的是128bit的主密钥**” 为例 •	Taking the input “This is some key”
   - 这个字符串中的每个字符都可以被表示为一个字节。•	Every character in this String can be represented as a byte.
   - 我们可以将其表示为一个字节序列。•	We can represent this as a sequence of bytes.
   - **我们用这些字节来生成密钥**。•	We use the bytes to generate the key.
 
-# Key Staging
+---
+
+:orange: 简单概括
+
+- 第一步涉及到**密钥staging【生成主密钥】，一些输入（也许是一个随机值）被用来生成4列，其中每一列是32位(这里主密钥128bit，4*4，每个格子8 bit)**。•	First step involves key staging, where some input (perhaps a random value) is used to generate 4 columns where each column is 32-bits.
+- 下面是子密钥生成
+- ![](/static/2022-04-24-00-14-02.png)
+  - 我们取最后一列，进行**旋转**操作，然后进行**子字节替换**操作。•	We take the last column and perform a rotate operation, then a subbyte operation.
+- 然后将其**与第一列和rcon表的第一列进行Xored**。•	This is then Xored with the first column, and the first column of the rcon table.
+  - ![](/static/2022-04-24-00-15-23.png)
+- 这个过程的输出再与后面的列进行Xored。•	The output of this process is then Xored with the subsequent column.
+  - ![](/static/2022-04-24-00-16-42.png)
+  - ![](/static/2022-04-24-00-16-57.png)
+  - ![](/static/2022-04-24-00-17-08.png)
+  - 得到K0
+- 后续每轮子密钥由前一轮子密钥得来，，比如拿上面的K0作为原始输入，然后重复步骤生成K1
+
+# Key Staging【主密钥生成】
 
 形成的叫key state table
 
@@ -854,7 +954,7 @@ The objective is to map all the bytes 𝑏i to another byte value 𝑆(𝑏i) - 
 - 十六进制表示法的**前四个字节构成钥匙的第一列**。•	The first four bytes from the hex representation form the first column for the key.
   - 第二个四字节构成第二列，第三个四字节构成第三列，其余的构成最后一列。•	The second four bytes form the second column, the third four form the third column and the remaining form the final column.
 - 我们可以在这里看到从输入中得到的密钥。•	We can see here the resulting key from the input.
-  - 这就是我们的128位密钥，•	This is our 128-bit key that will be used for the lecture.
+  - 这就是我们的**128位密钥**，•	This is our 128-bit key that will be used for the lecture.
 
 # AES子秘钥生成：Sub key Generation
 

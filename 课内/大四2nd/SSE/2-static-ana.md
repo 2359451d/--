@@ -21,10 +21,13 @@
 * [Outcome2](#outcome2)
 * [软件安全分析-确定程序安全性（攻击面）, 污点分析：Intro](#软件安全分析-确定程序安全性攻击面-污点分析intro)
 * [两种流-污点流分析：Tainted Flow Analysis](#两种流-污点流分析tainted-flow-analysis)
-  * [数据/控制流例子](#数据控制流例子)
+* [数据/控制流例子](#数据控制流例子)
 * [定义-污点流分析](#定义-污点流分析)
+* [发现污点后措施？](#发现污点后措施)
 * [Tax计算器例子：Tax Calculator Example](#tax计算器例子tax-calculator-example)
 * [类型限定符-使用类型的信任规范:Trust Specification using Types](#类型限定符-使用类型的信任规范trust-specification-using-types)
+* [约束生成：Generate Constraints](#约束生成generate-constraints)
+* [解约束：Solve Constraints](#解约束solve-constraints)
 * [流分析要点&合法流/非法流：The point of Flow Analysis](#流分析要点合法流非法流the-point-of-flow-analysis)
 * [Sound Analysis-合法流:健全性分析](#sound-analysis-合法流健全性分析)
 * [网格模型表示法：Lattice Model Representation](#网格模型表示法lattice-model-representation)
@@ -37,9 +40,14 @@
   * [例子2](#例子2)
 * [Summary](#summary-2)
 * [==================](#-2)
+* [添加复杂度(流敏感度)：adding Complexity](#添加复杂度流敏感度adding-complexity)
+* [路径分析：Pathing](#路径分析pathing)
+* [方法调用：Method Calls](#方法调用method-calls)
+* [隐式流分析：Implicit Analysis](#隐式流分析implicit-analysis)
+* [==================](#-3)
 * [添加路径敏感: Adding Sensitivity](#添加路径敏感-adding-sensitivity)
 * [增加分析健全性-流敏感度：Flow Sensitivity](#增加分析健全性-流敏感度flow-sensitivity)
-* [添加敏感度后例子](#添加敏感度后例子)
+* [添加流敏感度后例子](#添加流敏感度后例子)
 * [路径敏感度：Path Sensitivity](#路径敏感度path-sensitivity)
 * [多控制条件例子：Multiple Conditionals](#多控制条件例子multiple-conditionals)
 * [流/路径敏感分析问题：Challenges of Flow/Path Sensitivity](#流路径敏感分析问题challenges-of-flowpath-sensitivity)
@@ -50,7 +58,7 @@
 * [信息流（隐式流）分析：Information Flow Analysis](#信息流隐式流分析information-flow-analysis)
 * [信息流分析例子](#信息流分析例子)
 * [Summary](#summary-3)
-* [==================](#-3)
+* [==================](#-4)
 * [Example1](#example1)
 * [Example2](#example2)
 * [Example3](#example3)
@@ -96,6 +104,27 @@ A key element of security conscious software development process is performing c
 # Static Analysis
 
 ![](/static/2022-01-31-21-17-48.png)
+
+- 简而言之，**发现代码库的问题，而不需要运行它**。•	In a nutshell, discover problems with a codebase without ever running it.
+- **与其让人去分析代码，不如让软件去分析它**。•	Instead of humans analyzing code, have software analyze it.
+- 试图通过**应用多种规则来编纂人类的直觉，从而在代码中形成一个复杂的模式分析**。•	Try and codify human intuition by applying multiple rules that come together to formulate a complex pattern analysis in code.
+- <font color="red">静态分析通常与人工分析相结合，提供一种分析指导，如关注点在哪。在大型复杂系统下尤为重要，因为人工分析涉及大量时间，并且容易犯错。而静态分析能缩减要分析的范围</font>
+
+:orange: 静态分析优点
+
+- 代码覆盖率。•	Code coverage.
+- 分析的速度。•	Speed of analysis.
+
+:orange: 静态分析缺点。
+
+- 报告的准确性。•	Accuracy of reporting.
+- 报告的复杂性。•	Complexity of reporting.
+
+:orange: 静态分析可以**帮助你作为一个开发者了解在分析一个大的代码库时，你可能要把注意力集中在哪里。像专家系统一样，它应该只为开发者提供信息**。•	Static analysis helps you as a developer understand where you may want to focus your attention when analyzing a large codebase. Like an expert system, it should only serve to inform the developer.
+
+* 你决定是否要对静态分析器的报告采取行动。You decide on whether you want to act on what the static analyzer reports on.
+
+---
 
 这就是静态分析发挥作用的地方。**静态分析背后的整个想法是，我们希望分析某种类型的代码，而不必运行它。这个程序应该使用一系列的规则，整个想法是我们得到一个程序来分析一个程序，以告诉我们问题在哪里**。因为如果你仔细想想。源代码本质上是一个文本文件。例如 Java，Python，c，c + + 。所有这些高级语言。这些都是文字。所以**静态分析工具是专门用来分析**。编程语言，反过来是分析某种类型的文本文件，所以您可能有某种类型的 Java 分析程序。您可能拥有某种 C 静态分析器，它了解这些不同语言的语法，并将**遵循一系列规则来理解或识别该代码中的模式以及获得计算机、程序和算法的最大优势**。so this is where static analysis comes into play. Now the whole idea behind static analysis is that we want to analyze some kind of code without necessarily running it. There are a series of rules that the program should use, and the whole idea is that we're getting a program to analyze a program in order to tell us where the problems are. Because if you think about it. Source code is essentially a text file. Java, Python, C, C++, for example. All these high level languages. It's all text at the end of the day. So static analysis tools that are designed specifically to analyze some kind of. Programming language, in turn are analyzing some kind of text file, so you may have some kind of Java analyzer. You may have some kind of C static analyzer that understands the syntax of these different languages and will follow a series of rules in order to understand or identify patterns within that code And the biggest advantage with getting a computer, a program and algorithm.
 
@@ -156,8 +185,11 @@ A key element of security conscious software development process is performing c
 
 - 健全性。Soundness
   - 如果分析报告了一个漏洞，那么就存在一个漏洞。If an analysis reports a vulnerability then there is a vulnerability.
+  - accuracy
 - 完整性。Completeness.
   - 如果有漏洞可寻，那么分析就会发现它。If there is a vulnerability to find then the analysis will find it.
+  - coverage
+- <font color="red">如果希望一个系统即健全又完整，可能需要很长时间来完成。而完美的静态分析器不存在，在大规模code base情况下，时间成本不够</font>
 
 ---
 
@@ -237,22 +269,46 @@ A key element of security conscious software development process is performing c
 * 现在我们也有所谓的**隐式流/信息流**，这**涉及到控制流所产生的分配**。所以我们在这里可以看到，比如说我们像以前一样有a=0，但是如果我们想进行某种条件检查，我们想检查一下a是否是3，如果他是3，B被估值为5，否则，B被估值为7。Now we also have what is known as implicit flow or information flow, and this concerns the allocation resulting from control flow. So we can see here that let's say for instance we have a = 0 as before, but if we wanted to perform some kind of conditional check, we wanted to check to see if a is 3. If he is 3, B is valuated to be 5 otherwise, B is valuated to be 7.
   * 在这里的例子中，B的值取决于A的值，由于存在依赖关系，**B的值由控制流结构控制**。这是分析中隐含或信息流的一个例子。In this example here, the value of B is dependent on the value of A and because there is a dependency, the valuation of B is controlled by the control flow structure. This is an example of implicit or information flow within the analysis, 
 
-## 数据/控制流例子
+# 数据/控制流例子
 
 ![](/static/2022-02-01-15-36-50.png)
 
 因此，例子一。这里我们有数据流和信息流的实例。当我们在内存中创建我们的整数时，我们有数据流，当我们评估输出作为条件检查的结果与秘密的值时，我们有信息流。与明智的做法不同，我们在这里得到的是同样的东西。So example one. Here we have both instances of data flow and information flow. We have data flow when we are creating our integers in memory and we have information flow when we are evaluating output as a result of the conditional checks with the value of secret. Unlike wise, we get the same thing here. 
 
-在例子二中，我们在评估secret和output时有数据流发生。因为我们正在内存中获取secret和output的值，我们把它们加在一起，然后这个版本的结果将从适当的寄存器转移到新形成的内存偏移量，这个偏移量正在为变量的估值而创建。这就是y这个产量作为数据流例子的原因，然后当然我们有信息流发生在事后，据此我们正在检查Y的变量状态，如果它是10，我们分配。数据到输出。With example two, we have data flow occurring when we are evaluating secret and output. y is an example of dataflow. Because we are taking the values of secret and output in memory, we are adding them together and then the result of that edition will be transferred from the appropriate registers to the newly formed memory offset that is being created for the valuation of the variable. that is the reason y This yield as an example of data flow, and then of course we have information flow that occurs after the fact whereby we are checking the the variable state of Y, and if it's ten we allocate. Data to output. 
+在例子二中，我们在评估secret和output时有数据流发生。因为我们正在内存中获取secret和output的值，我们把它们加在一起，然后这个版本的结果将从适当的寄存器转移到新形成的内存偏移量，这个偏移量正在为变量的估值而创建。这就是y这个产量作为数据流例子的原因，然后当然我们有信息流发生在事后，据此我们正在检查Y的变量状态，如果它是10，我们分配。数据到输出。With example two, we have data flow occurring when we are evaluating secret and output. y is an example of dataflow. Because we are taking the values of secret and output in memory, we are adding them together and then the result of that edition will be transferred from the appropriate registers to the newly formed memory offset that is being created for the valuation of the variable. that is the reason y This yield as an example of data flow, and then of course we have information flow that occurs after the fact whereby we are checking the the variable state of Y, and if it's ten we allocate. Data to output.
 
 # 定义-污点流分析
 
-Flow analysis tracks how values might ‘flow’ between the different memory relocations in a program. 流分析追踪数值如何在程序中的不同内存重定位之间 "流动"
+Flow analysis tracks how values might ‘flow’ between the different memory relocations in a program. 流分析追踪数值如何在程序中的不同内存重定位之间 "流动"【一种静态分析方法
 
+- <font color="red">静态分析通常与人工分析相结合，提供一种分析指导，如关注点在哪。在大型复杂系统下尤为重要，因为人工分析涉及大量时间，并且容易犯错。而静态分析能缩减要分析的范围</font>
+- 其原理是**确定一个有污点的数据源，并通过程序的逻辑执行跟踪该数据**。•	The principle is to identify a tainted source of data and follow that data through the logical execution of a program.
+  - 代码中的污点流分析使你作为一个开发人员能够识别代码中的关注区域。Taint flow analysis in code allows you as a developer to identify areas of concern in the code.
+  - **确定该数据在程序中的最终位置**。•	To identify where the data will end up in the program.
+  - <font color="red">我们想知道污点数据位置，并且可信与不可信数据在哪里交汇，比如SQL注入，我们信任了某些不可信数据来进行SQL查询，，我们能用污点流识别，并想出缓解措施（或者至少是进行报告</font>
+- 污点流分析的目的是试图**让污点数据远离未受污染的数据**。•	The objective of taint flow analysis is to try and keep the tainted data away from untainted data.
+  - 具体来说，我们**不希望未受污染的变量被创建或受到污染数据的影响**。•	Specifically, we don’t want untainted variables being created or influenced with tainted data.
+  - 如果不能做到这一点，那么我们就会**报告这是一个潜在的安全漏洞**。•	If this is not possible, then we report this as being a potential security vulnerability.
+  - **命令注入攻击**的发生是由于受信任的变量（如数据库命令）被不受信任的数据（可能是恶意输入）所评价。•	Command injection attacks occur because of trusted variables (e.g. database commands) being valuated by untrusted data (which may be malicious input).
 * Can help us identify vulnerabilities in software that are caused by trusting input that is not validated.**可以帮助我们识别软件中的漏洞，这些漏洞是由于【信任未经验证的输入】而造成的**
 * Data that is not trusted is known as tainted. **不信任的数据被称为 "污点"**
-* Data that is trusted is known as untainted. 信任的数据被称为未被污染的
+  * 有污点的数据或参数被认为是不被信任的。•	Tainted data or parameters are assumed to be untrusted.
+  - 我们不控制它们。•	We do not control them.
+* Data that is trusted is known as untainted. **信任的数据被称为未被污染的**
+  - 未受污染的数据、参数被认为是可信的。•	Untainted data, parameters are assumed to be trusted.
+  - 我们明确地控制它们。•	We control them explicitly.
 * Various operations in programs will expect to operate on trusted data, but when tainted data is used where untainted data is expected, we may have a security problem. 程序中的各种操作都**希望对受信任的数据进行操作，但当污点数据被使用**于预期未受污染的数据时，我们**可能会有安全问题**
+
+---
+
+# 发现污点后措施？
+
+- 要么接受代码的现状，要么...•	Either accept the code as is or…
+- 在代码中创建某种缓解措施。•	Create some sort of mitigation in the code.
+  - 消毒器通常是确保代码安全的解决方案，这些代码已经被确定为污点流分析的问题。•	Sanitizers are often the solution to securing code that has been identified as being a problem with taint flow analysis.
+  - 在数据进入时进行擦洗，如果它不是某个哨兵值，就忽略它。Scrub data as it comes in, ignore it if it is not some sentinel value etc.
+  - 这超出了本课程的范围，但**重点是发现问题，而不是立即解决它们**。This is beyond the scope of the course, but the point is to identify problems, not immediately solve them.
+  - 你如何解决静态分析器所发现的问题，往往是针对你正在进行的项目的。How you solve the problems identified by a static analyzer is often specific to the project you’re working on.
 
 ---
 
@@ -280,10 +336,19 @@ type qualifier
 
 ![](/static/2022-02-01-16-03-04.png)
 
+限定符是在代码中分配给变量的类型。Qualifiers are types assigned to variables in the code.
+
+- 我们不关心变量的类型是什么（bool, double, float, int等）。•	We don’t care about what the variable type is (bool, double, float, int etc.)
+- 我们所关心的是我们如何限定它。•	All we care about is how we qualify it.
 - 根据**对象的计算来源**，指定对其的信任。Specifying trust on objects based on the origin of their valuation.
-- **信任的程度被指定为一个类型限定符**。The level of trust is specified as a type qualifier.
-  - 污染的意味着信息可能被攻击者控制。Tainted means info may be controlled by an attacker.
-  - 无污点意味着信息被认为不会被攻击者控制。Untainted means info that is assumed not to be controlled by an attacker.
+  - **信任的程度被指定为一个类型限定符**。The level of trust is specified as a type qualifier.
+- 也就是说，它是有污点的、无污点的还是未知的？•	i.e. is it tainted, untainted or unknown?
+  - 污点代表不受信任的数据。•	`Tainted` represents untrusted data.
+    - 污染的意味着信息可能被攻击者控制。Tainted means info may be controlled by an attacker.
+  - 未被污染的代表受信任的数据。•	`Untainted` represents trusted data.
+    - 无污点意味着信息被认为不会被攻击者控制。Untainted means info that is assumed not to be controlled by an attacker.
+  - 希腊符号代表未知的限定词。•	Greek symbols represent unknown qualifiers:
+- 约束求解的重点是确定这些未知数在某个时候会变成污点还是未被污染。•	The point of constraint solving is to determine whether these unknowns will become tainted or untainted at some point.
 
 ---
 
@@ -299,6 +364,64 @@ type qualifier
 
 因此，这里的想法是，**我们正试图阻止不受信任的数据与受信任的数据进行互动，而这个例子在这里失败了，因为当我们对税收进行估价时，受污染的数据和未受污染的数据彼此相遇**。So the idea here is that we are trying to keep the untrusted data from interacting with the trusted data and this example here fails because the tainted and the untainted data meet one another when we are valuating tax. 
 
+# 约束生成：Generate Constraints
+
+约束的想法是理解代码执行的后果。•	The idea with constraints is to understand the consequence of the execution of the code.
+
+- **如果一个有污点的变量被用于某些计算，或者被用来给另一个变量估值，那么这个变量本身就会成为污点**。•	If a tainted variable is used in some calculation, or used to valuate another variable, then that variable will itself become tainted…
+
+```python
+# method assumed untrusted
+𝛼 y = getUntrustedData()
+# parameter assumed trusted 
+sinkMethod(y)
+
+'''
+𝑪𝟏 = 𝒕𝒂𝒊𝒏𝒕𝒆𝒅 ≤ 𝑎
+𝑪𝟐 = 𝑎	≤ 𝒖𝒏𝒕𝒂𝒊𝒏𝒕𝒆𝒅
+'''
+```
+
+* C1来自于用方法的输出对y进行估值，我们假设该方法返回有污点的数据。C1 comes from the valuation of y with the output of the method which we assume returns tainted data.
+* C2来自于将y传递给汇方法的输入参数。C2 comes from the passing of y into the input parameter for the sink method.
+
+# 解约束：Solve Constraints
+
+取出约束条件{𝐶1 ... 𝐶𝑛}，并将其合并。•	Take the constraints {𝐶1 … 𝐶𝑛} and combine them.
+
+- 我们想**确定一个约束中确定的限定词是否会在其他约束中传播**。•	We want to identify whether the qualifiers identified in one constraint propagate within other constraints.
+- 前面的例子产生了以下两个约束。•	The previous example yielded the following two constraints:
+  - 𝑪𝟏 = 𝒕𝒂𝒊𝒏𝒕𝒆𝒅 ≤ 𝑎
+  - 𝑪𝟐 = 𝑎 ≤ 𝒖𝒏𝒕𝒂𝒊𝒏𝒕𝒆𝒅
+- 解决制约因素需要将它们结合起来。•	Solving the constraints involves combining them.
+  - `C1+C2 = 𝒕𝒂𝒊𝒏𝒕𝒆𝒅 ≤ 𝜶 ≤ 𝒖𝒏𝒕𝒂𝒊𝒏𝒕𝒆𝒅`
+- 这告诉我们，有污点的数据又被用来评估𝜶，而𝜶又被用来评估一些没有污点的数据（也许是一个方法参数）。This tells us that the tainted data is in turn used to valuate alpha which in turn is then used to valuate some untainted data (perhaps a method parameter).
+- 因为**假定未受污染的方法参数被𝜶估值，而𝜶将成为污点，这是一个非法流**。Because the method parameter that is assumed untainted is being valuated by alpha which will become tainted, this is an illegal flow.
+
+---
+
+- 这个想法是为了在你创建约束条件时确定的 "链 "上 "传播 "限定词的污损/未污损的性质。•	The idea is to ‘propagate’ the tainted/untainted nature of a qualifier across a ‘chain’ you identified when creating the constraints.
+- 当你解决约束条件时，必须意识到你所使用的链是否有意义。•	It is important when you solve constraints to be conscious of whether the chain you are working with makes sense.
+- 你不希望在分析中**盲目地结合**所有的约束。•	You do not want to blindly combine all constraints in your analysis.
+
+```python
+'''
+C1 = 𝑡𝑎𝑖𝑛𝑡𝑒𝑑 ≤ 𝛼 
+C2 = 𝑢𝑛𝑡𝑎𝑖𝑛𝑡𝑒𝑑 ≤ 𝛽
+C3 = 𝛽 ≤ 𝑢𝑛𝑡𝑎𝑖𝑛𝑡𝑒𝑑
+
+solve - analysis solution is good (as no meeting of tainted & untainted)
+•	𝑡𝑎𝑖𝑛𝑡𝑒𝑑 ≤ 𝛼
+•	𝑢𝑛𝑡𝑎𝑖𝑛𝑡𝑒𝑑 ≤ 𝛽 ≤ 𝑢𝑛𝑡𝑎𝑖𝑛𝑡𝑒𝑑
+'''
+# Method assumed untrusted 
+𝛼 y = getUntrustedData()
+𝛽 z = 'this is z'
+
+# Parameter assumed trusted 
+sinkMethod(z)
+```
+
 # 流分析要点&合法流/非法流：The point of Flow Analysis
 
 ![](/static/2022-02-01-16-28-57.png)
@@ -310,6 +433,12 @@ type qualifier
 而我们在讨论污点分析时，有两个术语是我们倾向于谈论的。那就是，**一个流是否合法，因此是允许的，或者是非法的，因此是不允许的**。So for all possible inputs, we want to try and prove the tainted data will never be used where untainted data is expected. So we want to try and ensure that we have that level of sandboxing. So when we are looking for solutions in the code, we are wanting to try and infer how flow within that code. How data flows into variables specifically, and what this essentially means is do we have any kind of untrusted data that will eventually, as it is being reassigned to different variables, or is influencing different variables? Will this untrusted data eventually evaluate some kind of input that we want to monitor in static analysis? And we there are two terms that we tend to talk about when discussing tainted analysis. That is, whether or not a flow is legal and thus permissible or is illegal and therefore not permissible.
 
 # Sound Analysis-合法流:健全性分析
+
+- **如果一个分析能正确识别非法流动（显性/隐性），那么它就是健全的**。•	An analysis is sound if it correctly identifies illegal flows (explicit/implicit).
+- 如果**未受污染的数据和受污染的数据在其中一个约束解决方案中接触到**，就会出现**非法流**动。•	An illegal flow occurs if untainted and tainted data come into contact in one of the constraint solutions.
+- 如果没有非法的解决方案，那么这个分析就是好的。•	If there are no illegal solutions, then the analysis is good.
+
+---
 
 - 如果分析发现**没有非法流，而且确实没有，那么分析就是合理的**。换句话说，该分析是正确的。If the analysis finds no illegal flows and there are indeed none, then the analysis is sound. In other words, the analysis is correct.
 
@@ -551,7 +680,87 @@ response.getWriter().println(e);
 - 未知数据被标记为𝛼，𝛽等。Unknown data is labelled 𝛼, 𝛽 etc.
   - 我们希望程序能够确定使用未知数据的后果。We want the program to determine the consequence of using unknown data.
 
+# 添加复杂度(流敏感度)：adding Complexity
+
+非常基本的静态分析通常被称为 "不敏感"。•	A very basic static analysis is often called ‘insensitive’
+
+- 不知道如何处理**条件式、方法块、重新分配**等。•	Doesn’t know how to handle conditionals, method blocks, reassignments etc.
+- 处理**重新赋值**涉及到。•	Handling reassignments involves:
+  - 静态单一赋值表示法•	Static Single Assignment Representation
+  - **只用一个限定词来表示一个变量的信任状态一次**。•	Only use a qualifier to represent the trust state of a variable once.
+  - 如果它**被重新赋值，就改变限定词**。•	If it is reassigned, change the qualifier.
+
+```python
+'''
+- 使用alpha_1和alpha_2限定词
+ 
+意味着我们捕获了x的动态 "信任状态"。means that we capture the dynamic ‘trusted state’ of x.
+这种重新分配又会在解决约束条件时产生不同的链。Such reassignments will in turn generate different chains when solving constraints.
+'''
+
+
+alpha_1 x = 'I am trustworthy' 
+alpha_2 x = getUntrustedData()
+sinkMethod(x)
+```
+
+# 路径分析：Pathing
+
+静态分析中的**路径分析**包括确定所有**可以在控制流中执行的逻辑路径**。•	Pathing in static analysis involves identifying all logical paths that can be executed in control flow.【**增加了分析的健全性，但是同时引入了复杂度**
+
+- 然后，这些路径被映射到适用于它们的约束条件上。•	These paths are then mapped to constraints that are applicable to them.
+- (手工操作时可能很繁琐)。•	(Can be tedious when done by hand).
+- 可行的路径在代码的逻辑执行中是可能的。•	Paths that are feasible are possible in the logical execution of the code.
+- 不可行的路径是不可能发生的。•	Infeasible paths are impossible to occur.
+- 例如，在一个 "if else "块中的所有代码都是不可行的。•	Eg. all code in an ‘if else’ block firing is not feasible.
+- 方法如下。•	Method is as follows:
+- 识别约束条件，识别可行的路径，**将约束条件映射到可行的路径，解决所有唯一的可行路径**。•	Identify constraints, identify feasible paths, map constraints to feasible paths, solve all unique feasible paths.
+- 代码块中的一个**可行路径很可能是一个非法流**/解决方案。•	Very possible for one feasible path in the code block to be an illegal flow/solution.
+
+# 方法调用：Method Calls
+
+**增加了分析的健全性，但是同时引入了复杂度**
+
+- 静态分析中的方法调用涉及到对**方法的调用和返回**进行匹配。•	Method calls in static analysis involves matching up calls and returns to methods.
+- 当你分析辅助函数时，记住要考虑**输入、输出**和该**块内的所有代码**活动•	Remember when you analyze helper functions to consider the input, output and all code activity within the block!
+
+```python
+''' helper function
+
+函数'getSomeData'必须有 一个【输入变量】'input_data'的限定符。
+还必须考虑将未被污染的信息分配给【变量'data'】。
+
+最后，应该考虑返回未被污染的值。我们把方法调用的【返回类型】作为一个未知的限定符来捕获。
+ '''
+def getSomeData(input_data):
+   data = 'hello world!' 
+   return data
+ 
+if name == " main ":
+  x = getSomeData('a String!') 
+  sinkMethod(x)
+```
+
+# 隐式流分析：Implicit Analysis
+
+隐式分析**涉及程序计数器**的使用。•	Implicit analysis concerns the use of program counters.
+
+- 我们想了解**条件块内的数据**（受信任或其他）的分配**是否受到不受信任数据的影响**。•	We want to understand whether the assignment of data (trusted or otherwise) within a conditional block is influenced by untrusted data.
+- 这种分析更多的是**了解污点数据如何影响代码的【控制流**】。•	This analysis is more about understanding how tainted data can impact the control flow of code.
+  - 并不总是告诉我们代码有问题。•	Does not always tell us that there are problems with the code.
+  - (很像一般的静态分析)•	(much like static analysis in general)
+- 程序计数器在以下公式中使用。•	Program counters are used in the following formula:
+  - `𝑄𝑣 ≤ 𝑃𝐶i`
+  - `Qv`是控制块内的限定符，，值被评估进PC。具体分析`Qv`是否被污点数据影响
+- **程序计数器约束与 "普通 "约束结合使用**，使静态分析器能够利用解决约束的语义来报告问题。•	Program counter constraints are used in conjunction with ‘ordinary’ constraints to allow the static analyzer to report on problems by leveraging on the semantics of solving constraints.
+  - <font color="red">隐式分析可能报告false positives,但取决于具体项目</font>
+  - 这实质上是一个'唯一规则'•	This is essentially one ‘unique rule’
+
+# ==================
+
 # 添加路径敏感: Adding Sensitivity
+
+![](/static/2022-04-24-17-10-43.png)
 
 C1和C2约束无法组合，因为α既要是untainted也要是tainted，因此分析中产生问题（分析器不知道具体α的值）
 
@@ -584,7 +793,7 @@ C1，C3约束组合后同理，非法流
 - 我们希望**增加更多**的**复杂性，讨论条件式** We want to add more complexity and discuss conditionals
 - 关注**嵌套的控制流**，以及我们如何缓解那里产生的问题。Focus on nested control flow and how we mitigate the problems incurred there.
 
-# 添加敏感度后例子
+# 添加流敏感度后例子
 
 ![](/static/2022-02-02-14-28-13.png)
 

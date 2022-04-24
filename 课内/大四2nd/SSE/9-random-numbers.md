@@ -47,12 +47,14 @@
 1.	**硬件随机数生成器 HRNGs** 1.	Hardware Random Number Generators HRNGs
 
 * 必须以某种数据结构 & 算法来生成，，计算机需要某种指导来生成，**所以通过计算机来生成true random  numbers是具有挑战的**
+  * <font color="red">因为计算机设备缺少人类直觉的抽象思维，很难提供真正随机数字，必须依赖硬件【通过软件是不可行的】，比如使用物理传感器来识别环境的随机属性（通常是难以被预测的。比如(后面例子)计算机时钟，连续按键间隔，噪音，光标位置，温度压力等，结合其他的一些测量来生成真随机数</font> use physical sensors to identify random properties of the environment.
 * 一般提及true random number generator或real random number generator就是指HRNG
 - **如果再次运行生成器，一个真正的随机数序列是不能重复的**。•	A real random number sequence cannot be repeated if the generator is run again.
   - 所以可以用来生成OTP(one time pass, one time keys)
 
 2.	**伪随机数生成器PRNGs** 2.	Pseudorandom Number Generators PRNGs
 
+* 使用算法来生成看似随机但实际上并不随机的数字序列。use algorithms to generate numerical sequences that appear random but are not.
 * 软件层次，决定性的determinisitic，
 * 一般都需要提供一个seed数据，然后生成器负责根据种子生成随机digits。
 * 生成过程是可重复的repeatable,所以**输入相同，输出相同**（seed不变的情况下？?。。**输出会某种层面看起来是随机的（因为实质是一系列可重复过程的执行结果**）
@@ -60,6 +62,7 @@
 
 3.	**加密安全的随机数生成器 CSPRNGs** 3.	Cryptographically Secure (Pseudorandom) Random Number Generators CSPRNGs
 
+* 使用算法生成难以预测的数字序列。同样，输出看起来是随机的，但不是。use algorithms to generate numerical sequences that are difficult to predict. Again, the output appears random but is not.
 * 决定性的determinisitic，类似上面的，唯一区别就是逆向工程的难度
 * 取决
   * 推测随机数由什么生成而来的难度

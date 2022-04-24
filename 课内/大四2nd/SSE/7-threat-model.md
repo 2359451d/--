@@ -12,6 +12,8 @@
   - 一种树形结构，提供攻击如何实现的思路
 - 了解创建一个有效的攻击树的步骤。
 
+---
+
 * [Content](#content)
 * [威胁建模定义：What is Threat Modelling](#威胁建模定义what-is-threat-modelling)
 * [威胁模型优点：Advantages](#威胁模型优点advantages)
@@ -20,7 +22,7 @@
 * [如何威胁建模？How to Threat Model](#如何威胁建模how-to-threat-model)
 * [1-(白板)图-理解/建模系统架构：What Are you building](#1-白板图-理解建模系统架构what-are-you-building)
 * [图-信任边界：Trust Boundaries](#图-信任边界trust-boundaries)
-* [2-识别威胁：What can go wrong](#2-识别威胁what-can-go-wrong)
+* [2-识别威胁(STRIDE)：What can go wrong](#2-识别威胁stridewhat-can-go-wrong)
 * [TIPS to Identify Threats](#tips-to-identify-threats)
 * [3-解决威胁：What are we going to do about it](#3-解决威胁what-are-we-going-to-do-about-it)
 * [例子-解决威胁](#例子-解决威胁)
@@ -76,7 +78,7 @@
 
 # 威胁建模定义：What is Threat Modelling
 
-- 简而言之，**威胁建模是使用抽象概念来帮助你考虑风险**。•	In a nutshell, threat modelling is the use of abstractions to help you consider risks.
+- 简而言之，**威胁建模是使用【抽象概念】来帮助你考虑风险**。•	In a nutshell, threat modelling is the use of abstractions to help you consider risks.
 - 涉及到**对产品或服务架构和可能发生的问题的共同理解**。•	Involves developing a shared understanding of a product or service architecture and the problems that could happen.
 
 **当你为威胁建模时，你通常使用两种类型的模型之一**。•	When you model threats, you typically use one of two types of model.
@@ -86,13 +88,22 @@
 
 # 威胁模型优点：Advantages
 
-- 因为你从架构层面开始，你可以**把工作重点放在最重要的系统上，而不是应对渗透测试或合规性的 "随机 "问题**。•	Because you’re starting at the architectural level, you can focus your work on the systems that are most important, rather than responding to “random” issues from penetration testing or compliance.
-  - 渗透测试能发现特定问题，，但不意味着能发现系统本身的设计/软件组件/外部依赖存在问题（低层次的
+威胁建模使用抽象概念来理解风险 •	Use abstractions to understand risk.
 
-- 因为**威胁建模使用模型**，你可以在软件开发和运营中**应用相同的整体方法**，从而导致更有效的沟通和协作。•	Because threat modelling uses models, you can apply the same overall approach across software development and operations, leading to more effective communication and collaboration.
+- <font color="red">不管怎么样，，代码层面的安全检测 & 系统概念层面的分析都很重要。使用合适方法能更有效进行安全分析，并且与stakeholders交流系统威胁。要考虑到每个层面沟通的人经验背景不同，而这些人都有可能参与决策过程</font>
+- **静态分析=代码层面**的风险评估。•	Static analysis = risk assessment at the code level.
+- **STRIDE/Attack Trees = 概念层面**的风险评估。•	STRIDE/Attack Trees = risk assessment at the conceptual level.
+- 一个<font color="deeppink">比静态分析更全面的分析。</font>•	A more holistic analysis than static analysis.
+  - 利用**人类的直觉**来理解什么会出错【而不是计算场景下什么威胁存在。•	Leverage on human intuition to understand what can go wrong.
+    - 某物如何被攻击？•	How can something be attacked?
+    - 它可能会受到什么样的极端影响？•	What kind of extremes can it be subject to?
+  - 因为你从架构层面开始，你可以**把工作重点放在最重要的系统上，而不是应对渗透测试或合规性的 "随机 "问题**。•	Because you’re starting at the architectural level, you can focus your work on the systems that are most important, rather than responding to “random” issues from penetration testing or compliance.
+  - 渗透测试能发现特定问题，，但不意味着能发现系统本身的设计/软件组件/外部依赖存在问题（低层次的
+- 因为**威胁建模使用模型**，你可以在软件开发和运营中**应用相同的整体方法**，从而导致**更有效的沟通和协作**。•	Because threat modelling uses models, you can apply the same overall approach across software development and operations, leading to more effective communication and collaboration.
   - 一套可重复进行的步骤，能发现威胁的位置等。
-  - 最重要的是stakeholders，开发者等能以一种universal language进行问题的沟通
-    - STRIDE，攻击树
+  - <font color="red">最重要的是stakeholders，开发者等能以一种universal language进行问题的沟通</font>
+    - STRIDE，攻击树。【**这些方法指导你对一个软件模型的分析**。 These approaches guide your analysis of a software model.
+    - 尤其是攻击树提供可视化的树状结构，促进交流
 
 # 为什么进行威胁建模：Reasons to Threat Model
 
@@ -121,12 +132,20 @@
 
 1.	你**在建造什么**？1.	What are you building? 【理解架构
 
+- 建立系统模型。•	Model the system.
+- 识别**信任边界**。•	Identify trust boundaries.
+  - 用于与stakeholder交流，组件之间通信的信任状态可能在哪改变(where the trust state of communications between components can change)
+- 这些是分析的先导。•	These spearhead the analysis.
 * 理解各个组件之间如何通信的
-* 通信频率，通信特性（内部/外部，受控/不受控
-* 不管采取什么开发策略（敏捷，瀑布流），架构一开始可能是不够清晰的。重要的是coding之前有一定的简单架构概念，，威胁建模不需要特别具体的架构解释（简单表示就够了 【架构简单表示，复杂表示都不重要，STRIDE步骤都能应用】
+  * 通信频率，通信特性（内部/外部，受控/不受控
+* 不管采取什么开发策略（敏捷，瀑布流），架构一开始可能是不够清晰的。重要的是**coding之前有一定的架构概念**，，威胁建模不需要特别具体的架构解释（简单表示就够了 【架构简单表示，复杂表示都不重要，STRIDE步骤都能应用】
 
 2.	它**可能出什么问题**？2.	What can go wrong with it?
 
+- 使用**STRIDE**
+  - 这玩意除了威胁建模，还能用于评估一个系统风险，，做的够不够好，，可以检查软件架构图。但是源码级别的安全一般进行静态分析【**反正理解软件系统的威胁，要在不同层面分析。不同层面使用的工具，框架不同**
+  - 把STRIDE方法应用于模型上的每一个实体和关系，步骤1的图。）•	Apply this to every entity and relation on the model from 1)
+- **在考虑内部威胁之前，从外部关系开始总是好的**。•	Always good to start with the external relations, before thinking about internal threats.
 * 考虑功能性&非功能型需求
   * 逆实现需求会发生什么
     * 如果链接断开，如果数据库泄露/损坏会怎么样
@@ -134,12 +153,20 @@
 
 3.	我们**要怎么做**？3.	What are we going to do about it?
 
+* 缓解、转移、消除、接受。•	Mitigation, Transference, Elimination, Acceptance.
+  * 看后面，不同应对方法有不同影响
+  * 比如**消除威胁**一般要牺牲某些特性，如果真牺牲了某些特性，需要和stakeholders进行阐述，确保他们理解，并阐述决策原因
+  * **接受威胁**，要么成本问题。要么不得不接受某些组件的威胁，比如消息摘要的哈希碰撞风险，不可能完全消除，，如果风险可能性足够低，那么也是能接受的。
 * 针对威胁，可能采取的缓解措施mitigation
 
 4.	我们的工作做得好吗？4.	Did we do a good job?
 
-* 向自己,他人解释是否有效的缓解，或消除了威胁
-  * 除了要能识别威胁，还需要能够缓解 & 有效的证明确实缓解了（以某种测试或其他方式）
+- 评估处理威胁方法的有效性。•	Evaluate the effectiveness of the threat handling approach.
+- 通常是对成本/费用/开发时间与预期收益的预测。•	Often a projection of cost/effort/development time vs perceived benefit.
+* **向自己,他人解释**是否有效的缓解，或消除了威胁
+  * 除了要能识别威胁，还需要能够缓解 & 有效的证明确实缓解了（以**某种测试或其他方式**）
+
+---
 
 :orange: 先以高层次表示找出威胁位置 & 可能对高层次进行分解，再次考虑可能存在的威胁
 
@@ -164,8 +191,10 @@
 * 比如busIness logic & offsite db之间可能存在问题，我们能以这两个实体间为起点。
 * 建立信任边界的目的就是识别潜在问题可能在哪存在。实体间通信性质如何改变
 * 可以考虑给实体间交互关系进行标记，以便与他人沟通交流分析问题存在位置时候没那么模糊
+  * 用于与stakeholder交流，组件之间通信的信任状态可能在哪改变(where the trust state of communications between components can change)
+  * 在哪点会引入威胁，在哪点更容易受到攻击
 
-# 2-识别威胁：What can go wrong
+# 2-识别威胁(STRIDE)：What can go wrong
 
 - **给出一个简单的图(添加信任边界），我们就可以开始思考可能出错的地方**。例子。•	Given a simple diagram, we can start thinking about what can go wrong. Example:
   - ![](/static/2022-04-17-16-40-26.png)
@@ -236,11 +265,12 @@
 3.	转移它。Transfer it.
 
 * 信任转交给**外部实体**来解决威胁
-  * 如果外部云服务，解决DOS攻击等
+  * 如外部云服务，解决DOS攻击等
 * **这是指让别人或其他东西来处理风险**。•	This is about letting someone or something else handle the risk.
   - 你可以把认证威胁传递给操作系统。•	You could pass authentication threats to the operating system.
   - 你可以把信任边界的执行交给一个防火墙产品。•	You could pass trust boundary enforcement to a firewall product.
   - 有一个**固有的风险**，即你**相信其他实体能充分处理威胁**。•	There is an inherit risk that you are trusting that other entity to adequately handle the threat.
+  - <font color="deeppink">因为投入大量信任，一般都需要在合约下进行</font>
 
 4.	接受它。Accept it.
 
@@ -321,16 +351,19 @@
 
 ![](/static/2022-04-17-21-35-46.png)
 
-树形结构表示威胁
+树形结构表示威胁 - **可视化和组织与一个给定模型相关的威胁**。Visualize and organize threats associated with a given model.
 
 * 威胁高级表示，然后分解威胁
+  - 高层次分析的表示，不关系具体涉及的方法，工具，框架。所以无相关背景的人也能理解，有效沟通
 * 其他人(hight level)通过什么步骤能达到威胁目标(root node)
   * 其他节点 - 潜在issues
 * **以树状结构表示对一个系统的攻击，目标是根节点，实现该目标的不同方式是叶节点**。 A representation of attacks against a system in a tree structure, with the goal as the root node and different ways of achieving that goal as leaf nodes.
 * STRIDE的一个替代方案（补充）。•	An alternative to STRIDE.
   - **你可以使用攻击树作为寻找威胁的方式，或者作为组织威胁的方式**。•	You can use attack trees as a way to find threats, or as a way to organize threats.
   - **攻击树作为四步框架中的威胁枚举的构建块，效果很好**。•	Attack trees work well as a building block for threat enumeration in the four- step framework.
-    * 比如一起使用，攻击树来识别路径&各个节点-并且与stakeholders进行阐述的可视化表示，，，STRIDE来考虑特定节点level是否还能继续分解
+    * 比如一起使用，攻击树来识别路径&各个节点-**并且与stakeholders进行阐述的可视化表示**，，，STRIDE来考虑特定节点level是否还能继续分解
+* **这个想法是要像软件系统的攻击者或防御者那样思考**。•	The idea is to think like either an attacker or defender of a software system.
+  - 你要从提议者的角度来建立攻击树的模型。•	You want to model the attack tree from the perspective of the proponent.
 
 # 攻击树例子
 
@@ -591,23 +624,33 @@ Depth and rigor of the evaluation.
 - 在黑暗时代的社交网络服务中普遍使用...•	Commonly used in social network services in the dark ages…
   - (2006年之前，真的)
   - 必须把证书交给SNS，以便它执行某种功能。(典型的是联系搜刮达到企业的扩充)•	Would have to hand over credentials to SNS for it to perform some kind of function. (typically contact scraping)
-    - 非常不安全，因为在现代trust place存在问题。所以就算交给第三方也必须以一种安全方式（**身份委托，使用令牌机制，而不是用户认证信息**
+    - **非常不安全，因为在现代trust place存在问题**。所以就算交给第三方也必须以一种安全方式（**身份委托，使用令牌机制，而不是用户认证信息**
+    - 用户**无法控制第三方使用交出去的credentials做什么** 【<font color="red">用委托模型解决这一问题</font>
 
 第三方如果想代表你访问你拥有的资源，如何才能在不共享凭证的情况下做到这一点？•	How can a third party, who wants to access a resource you own on your behalf, do so without the sharing of credentials?
 
-- 两种授权模式。•	Two delegation models:
+- 两种授权模型。•	Two delegation models:
   - 直接委托。•	Direct delegation.
   - 中介委托。•	Brokered delegation. (间接委托)
+- <font color="red">除了解决信任问题和令牌认证灵活性等，，唯一缺陷就是第三方需要与认证服务器有合同，能够识别使用令牌，，如果不支持这一特性就没办法</font>
 
 # 身份委托模型：Identity-Delegation Model
 
 任何身份-委托模型都有四个主要角色。•	Any identity-delegation model has four main roles:
 
-- **委托人拥有资源，也被称为资源所有者**。•	The **delegator** owns the resource and is also known as the resource owner.
+- **委托人拥有资源，也被称为【资源所有者**】。•	The **delegator** owns the resource and is also known as the resource owner.
+  - 资源所有者通常是终端用户，他创建或以其他方式拥有一些被客户端访问的数据。•	A resource owner is typically the end user, who creates or otherwise possesses some data which is being accessed by the client.
 - 被委托人希望代表委托人访问一项服务。**委托人将一组有限的权限委托给【被委托人】，以访问该服务，也称为【客户端**】。•	The **delegate** wants to access a service on behalf of the delegator. The delegator delegates a limited set of privileges to the delegate to access the service, also known as the client.
+  - 客户端通常是一个希望访问某些数据的第三方应用程序。•	A client is often a third-party application looking to access some data.
+- **资源监护人**通常是（但不总是）一些外部服务，负责一些数据的策划或永久存储。•	A resource custodian is typically (but not always) some external service that is responsible for the curation or permanent storage of some data.
+  - 可能是数据，这取决于他们如何管理自己的信息。•	Could be the data, depending on how they manage their information.
 - **资源服务器--提供访问所需信息的服务提供者**。•	The **resource server** – the service provider that provides access to the information requested.
+  - 资源服务器是一些提供一些数据的服务。•	A resource server is some service that provides some data. 
+  - 相当多的时候，这些被认为是托管人/保管人，很多模型不做区分（取决于模型的复杂性）。Quite often these are considered custodians/curators and a lot of models do not make the distinction (depending on the complexity of the model)
 - **授权服务器是验证资源所有者的凭证并执行授权检查的服务。这通常与资源服务器相同**。•	The **authorization server** is the service that verifies the resource owner’s credentials and performs the authorization checks. This is often the same as the resource server.
   - 确认client是否有权限访问server服务
+  - 授权服务器是一个守门人，用于验证用户的凭证，以向客户提供访问令牌。•	An authorization server is a gatekeeper that is used to authenticate user credentials to provide an access token to the client.
+    - 通常知道资源所有者。•	Typically knows the resource owner.
 
 # 直接委托：Direct Delegation
 
@@ -650,58 +693,91 @@ Depth and rigor of the evaluation.
 
 # OAuth
 
-你如何授权第三方代表你进行操作而**不向他们暴露你的凭证（因为信任问题，，不能暴露凭证**？•	How do you authorize third parties to carry out actions on your behalf without exposing your credentials to them?
+你如何**授权第三方代表你进行操作**而**不向他们暴露你的凭证（因为信任问题，，不能暴露凭证**？•	How do you authorize third parties to carry out actions on your behalf without exposing your credentials to them?
 
 - **OAuth通过提供一种替代机制来解决这个问题，通过这种机制，我们可以授权特定的行动，并且只授权这些行动，而不提供无限制的或永久性的访问**。•	OAuth addresses this by providing an alternative mechanism through which we can authorize specific actions, and only those actions without providing unrestricted or permanent access.
+  - 一个协议，它允许你代表你的应用程序访问一些资源，而不向他们提供你的证书。Open authentication is a protocol that allows you to provide an application access to some resource on your behalf without providing them with your credentials.
+  - <font color="deeppink">这作为一种安全机制是非常可取的，因为向不需要你的证书的应用程序提供你的证书通常是一个非常糟糕的主意。•</font> This is very much preferred as a security mechanism as providing your credentials to applications that do not need them is generally a very bad idea.
 - OAuth是一个用于**建立跨服务的身份管理标准的协议，为共享用户名和密码提供了一个替代方案**。•	OAuth, is a protocol for establishing identity management standards across services, providing an alternative to sharing usernames and passwords.
 - token通过认证服务器生成
 
 # 访问令牌 & 认证码：Accesss Token & Authentication code
 
-- **访问令牌：授权服务器创建的一块数据，让客户请求访问资源服务器。这是【客户端将使用的授权凭证】，以取代资源所有者自己的凭证**。•	Access token: a piece of data the authorization server creates that lets the client request access form the resource server. This is the authorization credential the client will use in place of the resource owner’s own credentials.
-- **认证码。授权服务器可以检查的一段数据，以验证客户的身份，通常在访问令牌分发之前**。•	Authentication code: A piece of data that the authorization server can check to verify the identity of a client, typically before access tokens are distributed.
-  - 用来给client生成token
+**访问令牌：授权服务器创建的一块数据，让客户请求访问资源服务器。这是【客户端将使用的授权凭证】，以取代资源所有者自己的凭证**。•	Access token: a piece of data the authorization server creates that lets the client request access form the resource server. This is the authorization credential the client will use in place of the resource owner’s own credentials.
+
+- 访问令牌是提供给应用程序的，允许它们在授权/资源服务器上识别和验证自己，而不需要你提供你的用户名和密码。•	Access tokens are provided to applications that allow them to identify and authenticate themselves with an authorization/resource server without you providing them your username and password.
+- 这**允许不同的服务代表终端用户进行通信和执行功能**。•	This allows different services to communicate and perform functionality on the behalf of end users.
+  - 作为对终端用户的一种方便。•	As a convenience to the end user.
+- 访问令牌包含一系列数据，如：。•	Access tokens contain a series of data such as:
+  - **范围**是指授予某些应用程序的**一系列权限**。•	Scope is the series of permissions that are granted to some application.
+    - 这些通常是CRUD操作，而且往往是细粒度的。•	These are often CRUD operations and are often granular in nature.
+    - 应用程序在特定资源上**拥有的权限**（CRUD操作）•	Permissions the application has on a specific resource (CRUD operations)
+  - 权限的**到期时间**。•	The expiration of the permissions.
+  - 应用程序是否有权进一步委托访问（甚至请求访问）。•	Whether the application has the right to further delegate access (or even request access)
+    - 令牌可以在任何时间被revoke，，用户有更多的控制，而不用给认证凭证，且没有信任问题
+    - <font color="red">给第三方，除了信任问题，，唯一阻止第三方使用凭证的方式就是修改凭证。如果只是给令牌，不需要修改凭证就能撤销令牌，使认证失效</font>
+
+---
+
+**认证码。授权服务器可以检查的一段数据，以验证客户的身份，通常在访问令牌分发之前**。•	Authentication code: A piece of data that the authorization server can check to verify the identity of a client, typically before access tokens are distributed.
+
+- **客户端期望从授权服务器得到的响应类型**。•	Response type is the response type the client expects from the authorization sever.
+- 授权码是一串数据，用于**唯一地识别客户的授权服务器**。•	An authorization code is a string of data that uniquely identifies a client to an authorization server.
+  - OAuth1.0应用，，因为授权服务器要识别client，再提供令牌
+- 用来给client生成token
+  - 这通常**被传递给授权服务器以换取一个访问令牌**。•	This is often passed to the authorization server in exchange for an access token.
+  - 一个访问令牌是包含应用程序的权限和时间限制的对象。•	An access token is the object that contains the permissions and time restrictions for an application.
 
 # OAuth原理：How it works
+
+:orange:相当于OAuth2.0的Authorization Code授权流
 
 1. **资源所有者（用户）向客户（第三方应用）要求提供服务**。Resource owner (user) requests a service from a client.
 
 * ![](/static/2022-04-18-17-26-49.png)
-* 比如Client上某些服务选项(LucidChart，export to Google drive)
+* 用户将首先**从第三方选择一个选项**。1.	The user will first select an option from the third party.
+  * 比如Client上某些服务选项(LucidChart，export to Google drive)
 
 2. **客户端将用户代理（UA）重定向到授权服务器** Client redirects user agent (UA) to the authorization server.
 
 * ![](/static/2022-04-18-17-28-28.png)
-* client响应用户请求，要求进行认证 （user agent重定向到认证服务器）
+* **客户端将生成他们所需要的权限的颗粒列表，并将浏览器重定向到认证服务器**。2.	The client will generate the granule list of permissions they need and redirect the browser to the auth server.
+  * client响应用户请求，要求进行认证 （user agent重定向到认证服务器）
 
 3. **授权服务器对资源所有者进行认证**。Authorization Server authenticates resource owner.
 
 * ![](/static/2022-04-18-17-29-31.png)
-* 认证服务器响应user agent(浏览器)，然后prompt用户
-  * ，google drive要求提供凭证
+* **认证服务器将提示用户确认他们是否希望向客户端授予权限**。3.	The auth server will prompt the user to confirm if they wish to grant permissions to the client.
+  * 认证服务器响应user agent(浏览器)，然后prompt用户
+    * ，google drive要求提供凭证
 
 4. **用户接受/批准授权请求** User accepts/approves authorization request
 
 * ![](/static/2022-04-18-17-36-24.png)
-* 用户提供凭证，，请求发给认证服务器
+* **如果用户选择 "是"，他们会被提示进行认证**。4.	If user selects yes, they are prompted to authenticate.
+  * 用户提供凭证，，请求发给认证服务器
 
 5. **授权服务器将UA重定向到客户端，并包括授权代码**。Authorization server redirects UA back to the client, and includes the authorization code.
 
 * ![](/static/2022-04-18-17-38-05.png)
-* 用于唯一标识client，<font color="deeppink">注意client和认证服务器之间没有直接交互</font>
+* **在登录时，会产生一个授权代码并传递给浏览器。浏览器将此代码传递给客户端**。On login, an authorization code is generated and passed to the browser. The browser passes this code to the client.
+  * 用于唯一标识client，<font color="deeppink">注意client和认证服务器之间没有直接交互</font>
 
 6. **客户端使用授权码向授权服务器请求访问（授权）令牌** Client uses authorization code to request access (authorization) token from authorization server.
 
 * ![](/static/2022-04-18-17-41-49.png)
+* **客户端将授权代码提交给认证服务器**。The client presents the code to the auth server.
 
 7. **授权服务器对客户进行认证，验证授权码，并返回访问令牌**。Authorization server authenticates client, validates authorization code, and returns access token.
 
 * ![](/static/2022-04-18-17-43-36.png)
 * 认证服务器检查client的认证码，如果有效就发放令牌。。之后client可以使用这个令牌来访问资源服务器
+  * 认证服务器向客户端提供一个访问令牌。The auth server provides an access token to the client.
 
 8. **客户端使用访问令牌来访问资源服务器，并代表用户执行CRUD服务**。Client uses the access token to access the resource server and performs CRUD services on users' behalf.
 
 * ![](/static/2022-04-18-17-44-23.png)
+* 客户端从现在起将向资源服务器出示该令牌以访问数据 The client from now on will present the token to the resource server to access data.
 * <font color="deeppink">注意用户可以随时撤销令牌revoke token</font>
 
 
@@ -709,21 +785,29 @@ Depth and rigor of the evaluation.
 
 # OAuth2.0
 
-- **专注于客户端开发人员的简单性，同时为网络应用、桌面应用、移动电话和物联网设备提供特定的授权流程**。•	Focuses on client developer simplicity while providing specific authorization flows for web applications, desktop applications, mobile phones, and IoT devices.
-- **该规范及其扩展正在IETF OAuth工作组内开发**。•	The specification and its extensions are being developed within the IETF OAuth Working Group.
-
-规范定义了**4种类型的授权流**。Specification defines 4 types of authorization flows:
-
-- **授权代码**。Authorization Code.
-- **资源所有者密码凭证** Resource Owner Password Credentials
-- **隐域模型** Implicit
-- **客户端凭证** Client Credentials
+- OAuth的最初变体是为**基于网络的应用程序开发的**，用于委托访问资源。•	The initial variant of OAuth was developed for web-based applications to delegate access to resources.
+  - 然而，传统的系统使用1.0•	However legacy systems will implement 1.0
+  - 现代系统使用2.0•	Modern systems work with 2.0
+    - 不是直接向后兼容的
+- 该规范在OAuth 2.0中被取代。•	This specification is superseded in OAuth 2.0
+  - **2.0专注于客户端开发人员的简单性，同时为网络应用、桌面应用、移动电话和物联网设备提供特定的授权流程**。•	Focuses on client developer simplicity while providing specific authorization flows for web applications, desktop applications, mobile phones, and IoT devices.
+  - **该规范及其扩展正在IETF OAuth工作组内开发**。•	The specification and its extensions are being developed within the IETF OAuth Working Group.
+- OAuth 2.0是一个**授权流系列**。•	OAuth 2.0 is a family of authorization flows.
+  - 每个**授权流**都是一个**协议**，可以在应用程序之间进行授权。•	Each authorization flow is a protocol that can be followed for the purpose of delegation between applications.
+  - **使用哪种协议取决于开发者的目标和项目的目标**。•	Which protocol to use depends on the objectives of the developers and the goals of the project.
+  - <font color="red">一些授权流提供了更大的安全保证，而另一些则侧重于实施的速度（即用户体验）</font>。•	Some authorization flows offer greater security assurances whilst others focus on speed of implementation (i.e. user experience)
+    - 要平衡
+  * 2.0规范定义了**4种类型的授权流**。Specification defines 4 types of authorization flows:
+    - **授权代码**。Authorization Code.
+    - **资源所有者密码凭证** Resource Owner Password Credentials
+    - **隐域模型** Implicit
+    - **客户端凭证** Client Credentials
 
 # 认证流：Authorization FLows
 
 ## 资源所有者密码凭证 Resource Owner Password Credentials
 
-- **客户端必须是高度可信的，因为它直接处理用户凭证**。在大多数情况下，客户端应该是一个**第一方应用程序**。Client must be highly trusted, as it directly handles user credentials. In most cases, the client should be a first party app.
+- **客户端必须是高度可信的，因为它【直接处理用户凭证**】。在大多数情况下，客户端应该是一个**第一方应用程序**。Client must be highly trusted, as it directly handles user credentials. In most cases, the client should be a first party app.
   - 凭证直接给client，，开发移动应用 & 测试委托引擎协议时有用
 - ![](/static/2022-04-18-17-50-13.png)
   - 1.**用户输入凭证**。User enters credentials.
@@ -731,6 +815,8 @@ Depth and rigor of the evaluation.
   - 3.**客户端使用访问令牌来访问资源服务器上的资源** Client uses access token to access resources on the resource server.
 
 ## 认证码：Authorization Code
+
+相当于1.0流程
 
 - **客户端必须能够与环境中的UA互动**。Client must be able to interact with a user agent in the environment.
 - 用户不会直接把凭证给client
@@ -747,7 +833,12 @@ Depth and rigor of the evaluation.
 ## 隐域模型：Implicit
 
 - **客户端必须能够与环境中的UA互动**。Client must be able to interact with a user agent in the environment.
-- 要权衡便利性&速度 和 安全性
+- 要**权衡便利性&速度 和 安全性**
+  - 与授权代码流类似，只是步骤较少。•	Similar to authorization code, except there are fewer steps.
+  - 这是为了速度和便于执行。•	This is for speed and ease of implementation.
+  - **授权代码不会被生成并传递给客户端**。•	The authorization code is not generated and passed to the client.
+    - <font color="red">所以在客户端和授权服务器之间有Implicit信任，，要确保获取到访问令牌的客户端就是实际操作的客户端【安全性牺牲，，需要考虑</font>
+  - 因此，与客户端的授权比之前的流程更隐蔽。•	Therefore the authorization with the client is more implicit than the previous flow.
 
 ![](/static/2022-04-18-22-08-41.png)
 

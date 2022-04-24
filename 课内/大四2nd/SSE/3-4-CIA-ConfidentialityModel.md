@@ -44,6 +44,7 @@
 * [Summary](#summary-3)
 * [=====================](#-3)
 * [场景](#场景)
+* [下面BLP原则后续要参考dom](#下面blp原则后续要参考dom)
 * [读取规则：Reading Information](#读取规则reading-information)
 * [写入规则：Writing Information](#写入规则writing-information)
 * [读写规则：Reading Writing Information](#读写规则reading-writing-information)
@@ -53,8 +54,8 @@
 * [BLP安全级别=许可+类别集：BLP Categories](#blp安全级别许可类别集blp-categories)
 * [Dominate (dom) Relationship](#dominate-dom-relationship)
   * [例子](#例子)
-* [读取(BLP)：Reading Information](#读取blpreading-information)
-* [写入(BLP)：Writing Information](#写入blpwriting-information)
+* [simple-读取(BLP)：Reading Information](#simple-读取blpreading-information)
+* [star-写入(BLP)：Writing Information](#star-写入blpwriting-information)
 * [Summary](#summary-4)
 * [=====================](#-4)
 * [Exercise 1](#exercise-1)
@@ -357,6 +358,7 @@ Definition. Let 𝑈 be a set of entities and let 𝜓 be some information. Then
   - **决定了一个主体对其他对象有什么权利**。Determines what rights a subject has with other objects.
     - 一个对象可以是任何东西，一个资源，基本上是一个实体。An object can be anything, a resource, an entity essentially.
   - 一种**自由裁量的访问控制的形式**。A form of discretionary access control.
+    - DAC
 
 ---
 
@@ -508,6 +510,8 @@ general representation
 
 不清楚该软件的context
 
+# 下面BLP原则后续要参考dom
+
 # 读取规则：Reading Information
 
 “read ups" are not allowed, "read downs" are allowed 不允许“向上读”，允许“向下读” ( **模型是基于mandatory access control mechanisms，主体基于discretionary mechanisms** ）
@@ -589,6 +593,8 @@ secret level情况下，还需要考虑catrgories (what category applicable to a
 
 # Dominate (dom) Relationship
 
+支配性检查是一种逻辑规则，它结合了安全和类别检查来确定访问权。解决了ACM所带来的问题•	Dominance checking is a logical rule that incorporates both security and category checks to determine access rights.
+
 - 捕获**安全分类(许可)和类别集**的组合。Captures the combination of **security classification and category set**.
   - 消除combination of sensitivity levels & category sets. 然后根据一系列操作，决定who is access to what and in what capacity
 
@@ -600,7 +606,7 @@ secret level情况下，还需要考虑catrgories (what category applicable to a
 
 ![](/static/2022-03-10-15-09-06.png)
 
-# 读取(BLP)：Reading Information
+# simple-读取(BLP)：Reading Information
 
 ![](/static/2022-03-10-15-51-30.png)
 
@@ -619,7 +625,7 @@ confinement 问题--假设保罗被批准进入安全级别(Secret, {EUR, US, NU
 
 * BLP禁止write down，防止其他人read up (what should not able to)
 
-# 写入(BLP)：Writing Information
+# star-写入(BLP)：Writing Information
 
 ![](/static/2022-03-10-16-06-16.png)
 
@@ -639,8 +645,10 @@ confinement 问题--假设保罗被批准进入安全级别(Secret, {EUR, US, NU
   - 与安全级别无关。Irrespective of security levels.
 - **支配权是我们整合安全级别和类别集的一种方式，以检查一个主体对一个对象的访问权，基于两个一般规则**。Dominance is a way for us to consolidate security levels and category sets to check the access right a subject has with an object based on two general rules:
   - 如果一个主体支配着一个对象，它就可以阅读它。If a subject dominates an object, it can read it.
+    - BLP simple property
   - 如果一个主体被一个对象所支配，它就可以对其进行写入。If a subject is dominated by an object, it can write to it.
-- 这就解决了ACM的限制性和敏感性问题。This solves the confinement and sensitivity problems of ACMs
+    - BLP star property
+- 这就**解决了ACM的限制性和敏感性问题**。This solves the confinement and sensitivity problems of ACMs
 
 # =====================
 
@@ -656,9 +664,9 @@ Identify all possible ways that users can interact with objects to maintain conf
 
 - BLP模式使我们能够解决信息禁锢和信息敏感性的表达问题。BLP model allows us to address the issue of information confinement and the expression of information sensitivity.
 - BLP在3个原则上运作。BLP operates on 3 principles.
-  - 简单安全原则，这涉及到阅读权限。Simple, which concerns read permissions.
-  - `*`，涉及写权限。* which concerns write permissions.
-  - 强*，涉及读和写的权限。`Strong *` which concerns read and write permissions.
+  - **简单安全原则**，这涉及到阅读权限。Simple, which concerns read permissions.
+  - **`*`**，涉及写权限。* which concerns write permissions.
+  - **强***，涉及读和写的权限。`Strong *` which concerns read and write permissions.
 - 保密性政策通常不关心完整性。Confidentiality policies typically do not care about integrity.
   - 强*是一个例外。The strong * is an exception to this.
 - **分类和类别**通常被用来确定用户对哪些对象有什么权限。Classifications(security clearance) and categories are typically used to determine what permissions users have with what objects.
@@ -968,8 +976,8 @@ ACM中每行指明了subject的权限，每列是access control lists that appli
   * strong star
 * 先看前两个，决定read,write访问权
   * ![](/static/2022-03-11-13-48-03.png)
-    * 注意根据dom关系来推
-  * 没有给category set就不用考虑
+    * 注意根据**dom关系**来推,,,也就是额外考虑类别集包含问题
+      * 没有给category set就不用考虑
 
 D能写所有对象因为BLP模型只关注机密性不关注完整性
 
@@ -984,7 +992,7 @@ D能写所有对象因为BLP模型只关注机密性不关注完整性
 
 填表 (注意本例有类别集category set)
 
-* 注意用dom关系来推Access right
+* 注意用dom关系(额外考虑类别集包含问题)来推Access right
 * 分析confidentiality的时候不关注integrity反之亦然
 * 最终表格output要结合两个模型 **与ACM交叉验证**
   * 比如confidentiality - r，integrity -r ，最后就是r（只要其中一个模型有权利r,loose model中）

@@ -7,7 +7,7 @@
 * [散列函数2个关键性质：2 Key Properties of Hash Functions](#散列函数2个关键性质2-key-properties-of-hash-functions)
 * [性质1-简易实现：Ease of Calculation](#性质1-简易实现ease-of-calculation)
 * [性质2-不可逆：Non Reversable](#性质2-不可逆non-reversable)
-* [伪随机：Pseudo Randomness](#伪随机pseudo-randomness)
+* [伪随机(决定性的)：Pseudo Randomness](#伪随机决定性的pseudo-randomness)
 * [散列函数例子：Hash Function Example](#散列函数例子hash-function-example)
 * [消息摘要局限性：Challenges with Digests](#消息摘要局限性challenges-with-digests)
 * [哈希碰撞：Collisions](#哈希碰撞collisions)
@@ -37,7 +37,9 @@
 
 # 消息摘要意义：Motivation
 
+- 消息摘要是一段数据的数学表示法•	A message digest is a mathematical representation of a piece of data
 - **消息摘要消除了对来自任何外部来源的文件的完整性的任何必要或暗示的信任**。•	Message digests eliminate any required or implied trust in the integrity of a file from any external source.
+  - 主要用于**确保在不安全的网络中发送的数据的完整性**。•	Used primarily to ensure the integrity of data sent across unsecure networks.
   - 通过**不安全的通信渠道**发送的文件可以被截获或修改。•	Documents sent over insecure communication channels can be intercepted or modified.
   - **重定向**也可以被用来提供一个完全不同的文件。•	Redirects can also be used to provide a completely different file.
   - 如果你**下载**一个.exe文件并运行它。•	If you download an .exe and run it.
@@ -46,6 +48,7 @@
   - 确保审判中（数字）证据的完整性。•	Ensure the integrity of (digital) evidence in trials.
   - 确保视频等档案材料不被篡改。•	Ensure archival material such as video is not altered.
   - 它们也可以证明软件的作者身份。•	They can also prove authorship of software.
+    - 生成的摘要可以用秘钥加密，并解密以证明作者。Generated digests can be encrypted with secret keys and decrypted to prove authorship.
   - 它们可以用来存储和检查密码。•	They can be used to store and check passwords.
 
 :orange:避免存储明文
@@ -108,13 +111,14 @@
   - 例如，如果信息只有64比特长，那么就可以使用**暴力攻击**。•	If the message were only 64 bits long, for example, then a brute force attack could be used.
     - 试试所有可能的64位信息，看看哪个能产生所需的摘要。•	Try all possible 64 bit messages, seeing which produces the required digest.
 
-# 伪随机：Pseudo Randomness
+# 伪随机(决定性的)：Pseudo Randomness
 
 哈希函数通过一系列的操作来提供一个经常被讨论为 "伪随机 "(**看起来像是随机，但实际是一系列可重复操作的结果**)的函数•	Hash functions operate on a series of operations to provide a function that is often discussed as ‘pseudo random’
 
 - 这意味着**与输入二进制序列相关的输出二进制序列看起来是随机的**。•	This means the output binary sequence associated with an input binary sequence appears to be random.
 - 然而，它是**一系列可重复过程的结果**。•	It is, however, the result of a series of repeatable processes.
 - 将**相同的二进制序列送入哈希函数将产生相同的结果**。•	Feeding the same binary sequence into a hash function will produce the same result.
+  - 散列函数是决定性的，例如，相同的输入将产生完全相同的输出。They are deterministic, such that the same input will yield the exact same output.
 - 哈希函数被设计为**对输入的微小变化高度敏感**。•	Hash functions are designed to be highly sensitive to small changes in the input.
   - avoid others to gain insight
 
@@ -174,8 +178,6 @@
 
 ---
 
-
-
 # 碰撞攻击取决于概率：Collision Attacks Depend on Statistics
 
 - 一个房间里要有多少人，才有可能有一个人与我同一天生日，这概率大于平均值？•	How many people must be in a room before there is a greater than even probability that one of them shares a birthday with me?
@@ -191,6 +193,16 @@
 
 1.	原像攻击。 1.	Preimage attacks.
 2.	碰撞攻击(生日攻击)。2.	Collision attacks(birthday attacks).
+
+---
+
+破解摘要的方法是利用统计。•	Breaking digests comes down to exploiting statistics.
+
+- 对**目标文件做一些小的改动**，得到一个与目标文件具有相同哈希值的伪造文件(原像攻击)•	Make small changes to a target document, to get a forgery that has the same hash digest as the target (preimage)
+- 对**目标文件和伪造文件进行小的改动**，以获得其中一个的匹配（碰撞，，生日攻击）。•	Make small changes to both the target and forgery to get a match between one of them (collision)
+- 这使得攻击者可以把一个假的文件，或文件，或程序当作真品。•	This allows an attacker to pass off a fake document, or file, or program as the genuine article.
+  - 任何想检查摘要的人都会看到摘要被检查出来了!•	Anyone looking to check the digest will see the digest checks out!
+  - 将它们与公钥加密结合使用，以证明作者身份。•	Use them in combination with public key encryption to prove authorship.
 
 # 原像攻击原理：How it Relates
 
@@ -311,6 +323,17 @@
   - 到目前为止是安全的。•	Secure so far.
 - SHA-3公开竞赛，于2012年采用 •	SHA-3 public competition with adoption in 2012
 
+---
+
+它们的操作原理都是一样的。They all however operate on the same principle.
+
+- 初始化一系列的**内部寄存器**。•	Initialize a series of internal registers.
+- 将输入的**数据分成一系列的数据块**。•	Chop up the input data into a series of data blocks.
+- 在一系列的回合中**使用每个数据块来更新寄存器**。•	Use each block to update the registers over a series of rounds.
+- 数据处理**结束时的寄存器就是摘要**。•	The registers at the end of data processing is the digest.
+- 这意味着**任何大小的输入，总是会产生相同大小的输出**。•	This means any size of input, will always produce the same sized output.
+  - 输入大小不重要，因为总会要处理，，并且最终输出是取决于固定的寄存器数量
+
 # MD5 Overview
 
 1. **补位padding**（如果原数据块不是512的倍数
@@ -330,7 +353,7 @@
 ![](/static/2022-04-20-20-21-25.png)
 ![](/static/2022-04-20-20-21-32.png)
 
-* 并且每个512bit块用于更新内部寄存器的状态 internal registers （initial vectors）
+* 并且每个512bit块用于更新内部寄存器的状态【一系列的XOR和旋转操作】 internal registers （initial vectors）
   * <font color="deeppink">寄存器数量取决于在使用的散列函数</font>
   * 以MD5为例，ABCD拼接后128bit输出
 
@@ -355,7 +378,7 @@ MD5在512位块上操作。•	MD5 operates on 512-bit blocks.
 - **每一轮由16个单独的步骤组成**。•	Each round consists of 16 individual steps.
 - 每一步都涉及到一系列的操作来修改**4个32位的初始化向量（寄存器**）。•	Each step involves a series of operations to modify 4 32-bit initialization vectors.
   - A B C和D
-  - 注意ABCD有初始值
+  - 注意**ABCD有初始值**
 - **512位块被分割成16个32位块**。•	The 512-bit block is split into 16 32-bit chunks.
   - 每个32位块的偏移量为𝑀i。•	Each 32-bit chunk is offset as 𝑀*
 - **一组类似的数据，被称为常数，也被分割成32x64块（64个32bit块**）。•	A similar set of data, known as a constant is also split into 32x64 chunks.
