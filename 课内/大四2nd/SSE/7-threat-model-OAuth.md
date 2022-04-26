@@ -194,6 +194,7 @@
   * 用于与stakeholder交流，组件之间通信的信任状态可能在哪改变(where the trust state of communications between components can change)
   * 在哪点会引入威胁，在哪点更容易受到攻击
 * **spearhead the analysis of threats.**
+* 了解**数据的可信性在哪里发生变化**。To understand where the trusted nature of data changes.,
 
 # 2-识别威胁(STRIDE)：What can go wrong
 
@@ -394,6 +395,7 @@
   - 攻击激发的任务是**迭代树中的每个节点，并考虑该问题（或该问题的变体）是否影响你的系统**。•	The attack elicitation task is to iterate over each node in the tree and consider if that issue (or a variant of the issue) impacts your system.
     - **考虑不同路径，路径可行度或成本，什么威胁更可能发生**
     - 针对更可能的，，在成本有限的情况下考虑应该要采取的缓解措施，优先级
+- <font color="red">攻击树更多的是为了视觉交流的利益，制作一棵有太多信息的树可能是一个决定性的因素。</font> Attack trees as more for the benefit of visual communication, and producing a tree with too much information can be a determinent.
 
 ---
 
@@ -814,6 +816,9 @@ Depth and rigor of the evaluation.
   - 1.**用户输入凭证**。User enters credentials.
   - 2.**客户端向授权服务器传递凭证和其身份信息。 授权服务器验证这些信息并返回一个访问令牌** Client passes credentials and its identification to authorization server. Authorization server validates the information and returns an access token.
   - 3.**客户端使用访问令牌来访问资源服务器上的资源** Client uses access token to access resources on the resource server.
+
+:orange: **软件将快速进行认证，因为资源所有者密码凭证流不需要重定向**。
+ software will be quick with the authentication as the Resource Owner Password Credentials flow does not require redirects.
 
 ## 认证码：Authorization Code
 

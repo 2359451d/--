@@ -3,21 +3,21 @@
 * [Content](#content)
 * [Outcome1](#outcome1)
 * [Introduction](#introduction)
-* [软件质量保证实践：Current Practice in Software Assurance](#软件质量保证实践current-practice-in-software-assurance)
-  * [Testing（工具协助下）](#testing工具协助下)
-  * [人工代码审计: Manual Code Audits](#人工代码审计-manual-code-audits)
-  * [功能性测试：Feature Testing](#功能性测试feature-testing)
+* [现有的软件质量保证实践：Current Practice in Software Assurance](#现有的软件质量保证实践current-practice-in-software-assurance)
+* [功能测试程序：Testing（工具协助下）](#功能测试程序testing工具协助下)
+* [人工代码审计: Manual Code Audits](#人工代码审计-manual-code-audits)
 * [Static Analysis](#static-analysis)
 * [静态分析工具：Examples of Static Analysis Tools](#静态分析工具examples-of-static-analysis-tools)
+* [==================](#)
 * [静态分析如何有效？What does Static Analysis do](#静态分析如何有效what-does-static-analysis-do)
-  * [Halting Problem](#halting-problem)
-  * [静态分析原理](#静态分析原理)
+* [停顿问题：Halting Problem](#停顿问题halting-problem)
+* [静态分析原理](#静态分析原理)
 * [静态分析局限性&存在的问题：Challenges & issues](#静态分析局限性存在的问题challenges--issues)
 * [静态分析健全性，完整性权衡：Balancing Act of Static Analysis](#静态分析健全性完整性权衡balancing-act-of-static-analysis)
   * [理想静态分析器 perfect analysis](#理想静态分析器-perfect-analysis)
   * [权衡](#权衡)
 * [Summary](#summary)
-* [==================](#)
+* [==================](#-1)
 * [Outcome2](#outcome2)
 * [软件安全分析-确定程序安全性（攻击面）, 污点分析：Intro](#软件安全分析-确定程序安全性攻击面-污点分析intro)
 * [两种流-污点流分析：Tainted Flow Analysis](#两种流-污点流分析tainted-flow-analysis)
@@ -33,18 +33,18 @@
 * [网格模型表示法：Lattice Model Representation](#网格模型表示法lattice-model-representation)
 * [源&汇：Sources, sinks](#源汇sources-sinks)
 * [Summary](#summary-1)
-* [==================](#-1)
+* [==================](#-2)
 * [静态分析步骤：Static Analysis Approach](#静态分析步骤static-analysis-approach)
   * [例子](#例子)
 * [分析例子：Example Analysis](#分析例子example-analysis)
   * [例子2](#例子2)
 * [Summary](#summary-2)
-* [==================](#-2)
+* [==================](#-3)
 * [添加复杂度(流敏感度)：adding Complexity](#添加复杂度流敏感度adding-complexity)
 * [路径分析：Pathing](#路径分析pathing)
 * [方法调用：Method Calls](#方法调用method-calls)
 * [隐式流分析：Implicit Analysis](#隐式流分析implicit-analysis)
-* [==================](#-3)
+* [==================](#-4)
 * [添加路径敏感: Adding Sensitivity](#添加路径敏感-adding-sensitivity)
 * [增加分析健全性-流敏感度：Flow Sensitivity](#增加分析健全性-流敏感度flow-sensitivity)
 * [添加流敏感度后例子](#添加流敏感度后例子)
@@ -58,7 +58,7 @@
 * [信息流（隐式流）分析：Information Flow Analysis](#信息流隐式流分析information-flow-analysis)
 * [信息流分析例子](#信息流分析例子)
 * [Summary](#summary-3)
-* [==================](#-4)
+* [==================](#-5)
 * [Example1](#example1)
 * [Example2](#example2)
 * [Example3](#example3)
@@ -77,29 +77,40 @@
 
 A key element of security conscious software development process is performing code review with the assistance of tools… 有安全意识的软件开发过程的一个关键因素是**在工具的协助下进行代码审查**
 
-# 软件质量保证实践：Current Practice in Software Assurance
+# 现有的软件质量保证实践：Current Practice in Software Assurance
 
-## Testing（工具协助下）
+# 功能测试程序：Testing（工具协助下）
+
+> 功能测试是很好的，**它提供了验证你的软件在某些输入下的行为方式是预期的。然而，作为安全分析师，它并不能为你提供任何有意义的洞察力，让你了解软件在可能的利用中是多么的安全**。Feature testing is good to provide validation that your software is behaving the way it is expected to with some input. However, it does not provide you as a security analyst any meaningful insight into how secure the software is from possible exploitation.
+> **虽然说功能测试不提供任何保证，但它允许我们建立某种开发程序的【有效性**】。我们要确保功能是有效的。我们要确保你为什么会在那里冒出来。我们要确保这些功能是有效的。我们要确保我们放在一起的软件是正常工作的。因为当然，如果功能要求没有得到满足，将客户委托的任何种类的软件或系统放在一起都没有意义。它根本不可能工作。因此，你可以把一系列的测试放在一起，有几个**测试框架**可以使用，以便提供保证。**行为验证保证**是一个Junit，但还有许多存在于不同的执行环境中。不同的语言，你可以而且可能会在你的职业生涯中使用。但是，软件的问题假定了行为测试的问题。**验证的问题是，它不一定为你提供安全保证，那么还有什么可以做的呢？所以这就是静态分析发挥作用的地方**。Though speaking feature testing doesn't offer any guarantees, it allows us to establish the validity of some kind of developed program. We want to ensure that the features are working. We want to ensure why have you popped up there. We want to ensure that the features are working. We want to ensure that the software we have put together is working correctly. Because of course there's no point in putting together any kind of software or system that has been commissioned by a client if the functional requirements aren't met. It's simply not going to work. So you can put together a series of tests and there are several testing frameworks that you can use in order to provide assurances. Behavioral validation assurance is a Junit I believe is one of the testing frameworks that the university teaches you in Level 2, I believe, but there are many more that exist for different execution environments. Different languages that you can and probably will use in your professional career. But the problem with software assumes the problem with behavioral testing. The problem with validation is that it doesn't necessarily provide you with security assurances, So what else can be done? So this is where static analysis comes into play.
 
 ![](/static/2022-01-31-16-21-35.png)
 
+功能测试并不提供保证。•	Feature testing doesn’t offer guarantees:
+
+* Ensure that the program runs correctly on a set of inputs. **确保程序在一组输入上正确运行**
+  - 测试用例可以**帮助确保软件正确工作**。•	Test cases can help ensure software works correctly.
+* •	Allows for the identification of issues, but can be expensive and difficult to code all code paths. There are also no guarantees! 允许识别问题，但**对所有代码路径进行编码可能是昂贵和困难的**。也**没有保证**!
+  - **不提供安全保证**。•	Doesn’t provide security assurances.
+
 因此，当你在开发某种软件时，就像我说的，代码审查是会经常发生的事情。**安全委员会软件开发过程的一个关键因素是在工具的协助下进行代码审查。现在，这样做的全部意义其实是为了提供某种保证**。就像你在开发软件时。有一些功能，你正在把它们放在一起，你想从本质上测试这些功能，你知道。是的，你正在**对代码进行审查，以确保某些功能现在是有效的。这个想法是，我们会希望有某种程序。我们把它放到某种程序中，然后我们得到某种输出。我们确定它是否正确，这个过程背后的想法是要找出问题所在**。 So when you are developing some kind of software, like I said, code review is something that will happen frequently. A key element of Security Council software development process is performing code review with the assistance of tools. Now the whole point of doing this is really to provide some sort of assurance. Is like when you're developing software. There are features that you're putting together and you want to essentially test these features and you know. Yes, you are performing a review on code to make sure certain features are working now. The idea is that we would want to have some kind of program. We put it into some kind of process and then we get some kind of output. We determine whether or not it is correct and the idea behind this process is to identify where the problems are.
 
-现在，当涉及到开发软件时，**测试是一种基本做法**，而且有整个。围绕着测试的概念发展的开发方法论。例如，**测试驱动开发**是你在职业生涯中很可能遇到的东西。当你在编写软件时。**但测试的问题是，它只允许你识别代码中的错误。它不一定能告诉你代码中不存在bug，因为你的能力是在测试时了解bug在哪里。当涉及到使用单元测试时，它真正归结于你作为一个程序员的经验。编写测试用例的人本身的经验。你可以有一个相当广泛的套件，但是。现实地讲，你受制于你的同行所知道的东西，【仅通过单元测试的功能测试来提供安全保证是非常困难的**】。 Now testing is a fundamental practice when it comes to developing software and there are entire. Development methodologies developed around the notion of testing. For example, test driven development is something that you may very well come across in your professional career. When you are writing software. But the issue with testing is that it only allows you to identify bugs in the code. It doesn't necessarily tell you that bugs don't exist in the code, because your ability to understand where the bugs are when it comes to testing. When it comes to using unit tests, it really comes down to your experience as a programmer. The experience of the individual that is writing the test cases themselves. You can have a pretty extensive suite, but. Realistically speaking, you are constrained by what it is you know by what your peers know, and it's very difficult really to provide security assurances through unit testing through feature testing alone,
+现在，当涉及到开发软件时，**测试是一种基本做法**，而且有整个。围绕着测试的概念发展的开发方法论。例如，**测试驱动开发**是你在职业生涯中很可能遇到的东西。当你在编写软件时。**但测试的问题是，它只允许你识别代码中的错误。它不一定能告诉你代码中不存在bug，因为你的能力是在测试时了解bug在哪里。当涉及到使用单元测试时，它真正归结于你作为一个程序员的经验。编写测试用例的人本身的经验。你可以有一个相当广泛的套件，但是。现实地讲，你受制于你的同行所知道的东西，【<font color="deeppink">仅通过单元测试的功能测试来提供安全保证是非常困难的</font>**】。 Now testing is a fundamental practice when it comes to developing software and there are entire. Development methodologies developed around the notion of testing. For example, test driven development is something that you may very well come across in your professional career. When you are writing software. But the issue with testing is that it only allows you to identify bugs in the code. It doesn't necessarily tell you that bugs don't exist in the code, because your ability to understand where the bugs are when it comes to testing. When it comes to using unit tests, it really comes down to your experience as a programmer. The experience of the individual that is writing the test cases themselves. You can have a pretty extensive suite, but. Realistically speaking, you are constrained by what it is you know by what your peers know, and it's very difficult really to provide security assurances through unit testing through feature testing alone,
 
-## 人工代码审计: Manual Code Audits
+# 人工代码审计: Manual Code Audits
 
 ![](/static/2022-01-31-20-53-34.png)
+
+* •	Code is peer reviewed with your team members deciding if your code is correct. 代码由你的团队成员进行同行评审，决定你的代码是否正确
+* •	Allows us to leverage on human intuition in determining program faults. **允许我们利用人类的直觉来确定程序的错误**
+  * 人类的直觉可以捕捉到结构化测试无法捕捉的问题。•	Human intuition can catch problems that structured tests cannot.
+  - 但是很耗时，而且容易出错 •	But is time consuming and error-prone.
+* •	But humans cost money, can be slow in their decision making, don’t always make correct decisions. 但是，人类要花钱，他们的**决策可能很慢，不一定能做出正确的决定**
+* No guarantees. 没有保证
 
 手动代码审核是在某种开发中经常发生的事情。这个想法是，你想让人审查你自己的代码，或者你可能与其他人一起审查代码，对结对编程作为一种实践，经常发生在开发公司内部。就像我说的，这背后的整个想法是为了向客户提供保证，向某种技术领导提供保证案例。现在负责监督项目的人。**使用人类来尝试和识别错误的好处是，你可以利用人类的直觉来识别问题所在。你可以让人们理解或抽象出代码会遇到的那种使用环境，以便思考，以引出某种可能不一定很明显的问题，但同样，你在利用人类的经验。你在利用人类的理解力来应用这种直觉**。manual code auditing is something that will happen frequently in some kind of development house. The idea is that you want to have people looking at code you want to have people reviewing code that you yourself, right, or you may review code with other people, right pair programming as a practice that happens frequently inside of a development house. And like I said, the whole idea behind this is to provide assurances to provide assurance cases to The client to some kind of tech lead. Whoever is in charge of overseeing the project now. The advantage of using humans in order to try and identify bugs is that you can leverage on human intuition in order to identify where the problems are. You can have people sort of understand or abstract and kind of usage context that the code will come across in order to think in order to elicit some kind of problem that may not necessarily be obvious, but again, you're leveraging on human experience. You're leveraging on human understanding in order to apply that intuition.
 
 **但使用人类的问题是，他们要花钱。人类会累，人类会犯错，最终人类的分析速度非常非常慢**。因此，如果你想分析一个巨大的代码库，**比如说一个操作系统的大小，为了让人们手动审查整个代码，以识别所有的潜在错误，所有的潜在问题，这是非常困难的，所以没有保证**。But the problem with using humans is that they cost money. Humans get tired, humans can make mistakes and ultimately humans are very, very slow with their analysis. So if you wanted to analyze a huge codebase, something the size of an operating system say, it's very difficult in order to get people to manually review that code in its entirety in order to identify all of the potential bugs, all of the potential problems With it so there are no guarantees.
-
-## 功能性测试：Feature Testing
-
-![](/static/2022-01-31-21-16-12.png)
-
-**虽然说功能测试不提供任何保证，但它允许我们建立某种开发程序的【有效性**】。我们要确保功能是有效的。我们要确保你为什么会在那里冒出来。我们要确保这些功能是有效的。我们要确保我们放在一起的软件是正常工作的。因为当然，如果功能要求没有得到满足，将客户委托的任何种类的软件或系统放在一起都没有意义。它根本不可能工作。因此，你可以把一系列的测试放在一起，有几个**测试框架**可以使用，以便提供保证。**行为验证保证**是一个Junit，但还有许多存在于不同的执行环境中。不同的语言，你可以而且可能会在你的职业生涯中使用。但是，软件的问题假定了行为测试的问题。验证的问题是，它不一定为你提供安全保证，那么还有什么可以做的呢？所以这就是静态分析发挥作用的地方。Though speaking feature testing doesn't offer any guarantees, it allows us to establish the validity of some kind of developed program. We want to ensure that the features are working. We want to ensure why have you popped up there. We want to ensure that the features are working. We want to ensure that the software we have put together is working correctly. Because of course there's no point in putting together any kind of software or system that has been commissioned by a client if the functional requirements aren't met. It's simply not going to work. So you can put together a series of tests and there are several testing frameworks that you can use in order to provide assurances. Behavioral validation assurance is a Junit I believe is one of the testing frameworks that the university teaches you in Level 2, I believe, but there are many more that exist for different execution environments. Different languages that you can and probably will use in your professional career. But the problem with software assumes the problem with behavioral testing. The problem with validation is that it doesn't necessarily provide you with security assurances, So what else can be done? So this is where static analysis comes into play.
 
 # Static Analysis
 
@@ -112,16 +123,20 @@ A key element of security conscious software development process is performing c
   - 注意静态分析，准确的报告是不能保证的，静态分析的结果可能是误导性的，我们需要人类来仔细检查。Accurate reporting is not guranteed, the static analysis results may be misleading, and we need humans to double check.
 - **静态分析允许我们 "带头 "分析，并考虑代码基础上可能存在的问题**。Static Analysis allows us to 'spearhead' the analysis and consider where the problems may be on a code base.
   - 是否在哪里引入缓解措施, determine where we may want to apply mitigations
+- **前面两种软件质量保证方式，都不提供安全保证，而静态分析可以提供，如果能覆盖所有代码** Can provide guarantees if it can cover all the code.
 
-:orange: 静态分析优点
+:orange: 静态分析**优点**
 
 - **代码覆盖率**。•	Code coverage.
+  - 静态分析可以提供，如果能覆盖所有代码 Can provide guarantees if it can cover all the code.
 - **分析速度**。•	Speed of analysis.
 
-:orange: 静态分析缺点。
+:orange: 静态分析**缺点**。
 
-- 报告的准确性。•	Accuracy of reporting.
-- 报告的复杂性。•	Complexity of reporting.
+- 报告的**准确性**。•	Accuracy of reporting.
+  - 可能会提供**假阳性结果** might provide false positives
+- 报告的**复杂性**。•	Complexity of reporting.
+  - 在**大型代码库**上可能需要**很长时间完成** can take long time to complete on large code base
 
 :orange: 静态分析可以**帮助你作为一个开发者了解在分析一个大的代码库时，你可能要把注意力集中在哪里。像专家系统一样，它应该只为开发者提供信息**。•	Static analysis helps you as a developer understand where you may want to focus your attention when analyzing a large codebase. Like an expert system, it should only serve to inform the developer.
 
@@ -129,7 +144,7 @@ A key element of security conscious software development process is performing c
 
 ---
 
-这就是静态分析发挥作用的地方。**静态分析背后的整个想法是，我们希望分析某种类型的代码，而不必运行它。这个程序应该使用一系列的规则，整个想法是我们得到一个程序来分析一个程序，以告诉我们问题在哪里**。因为如果你仔细想想。源代码本质上是一个文本文件。例如 Java，Python，c，c + + 。所有这些高级语言。这些都是文字。所以**静态分析工具是专门用来分析**。编程语言，反过来是分析某种类型的文本文件，所以您可能有某种类型的 Java 分析程序。您可能拥有某种 C 静态分析器，它了解这些不同语言的语法，并将**遵循一系列规则来理解或识别该代码中的模式以及获得计算机、程序和算法的最大优势**。so this is where static analysis comes into play. Now the whole idea behind static analysis is that we want to analyze some kind of code without necessarily running it. There are a series of rules that the program should use, and the whole idea is that we're getting a program to analyze a program in order to tell us where the problems are. Because if you think about it. Source code is essentially a text file. Java, Python, C, C++, for example. All these high level languages. It's all text at the end of the day. So static analysis tools that are designed specifically to analyze some kind of. Programming language, in turn are analyzing some kind of text file, so you may have some kind of Java analyzer. You may have some kind of C static analyzer that understands the syntax of these different languages and will follow a series of rules in order to understand or identify patterns within that code And the biggest advantage with getting a computer, a program and algorithm.
+这就是静态分析发挥作用的地方。**静态分析背后的整个想法是，我们希望分析某种类型的代码，而不必运行它。【这个程序应该使用一系列的规则，整个想法是我们得到一个程序来分析一个程序，以告诉我们问题在哪里**】。因为如果你仔细想想。源代码本质上是一个文本文件。例如 Java，Python，c，c + + 。所有这些高级语言。这些都是文字。所以**静态分析工具是专门用来分析**。编程语言，反过来是分析某种类型的文本文件，所以您可能有某种类型的 Java 分析程序。您可能拥有某种 C 静态分析器，它了解这些不同语言的语法，并将**遵循一系列规则来理解或识别该代码中的模式以及获得计算机、程序和算法的最大优势**。so this is where static analysis comes into play. Now the whole idea behind static analysis is that we want to analyze some kind of code without necessarily running it. There are a series of rules that the program should use, and the whole idea is that we're getting a program to analyze a program in order to tell us where the problems are. Because if you think about it. Source code is essentially a text file. Java, Python, C, C++, for example. All these high level languages. It's all text at the end of the day. So static analysis tools that are designed specifically to analyze some kind of. Programming language, in turn are analyzing some kind of text file, so you may have some kind of Java analyzer. You may have some kind of C static analyzer that understands the syntax of these different languages and will follow a series of rules in order to understand or identify patterns within that code And the biggest advantage with getting a computer, a program and algorithm.
 
 * **分析代码就是代码覆盖率 code coverage**。因为计算机不会累，计算机在技术上不会出错，**所以你可以让一个程序来处理你庞大的代码库并通过它来处理它。非常快速**，这是主要优势。 To analyze the code is that of code coverage. Because computers don't get tired, computers don't technically make mistakes, so you can have a program take your massive codebase and crunch through it in. Very quick fashion and that is the main advantage.
 * 然而，使用**静态分析的最大缺点**是，您**不一定能够获得人类的直觉，所以您能够获得代码覆盖率，但是可以说是以智能为代价的**。你**在分析中没有得到人的因素**。 However, the biggest disadvantage with using static analysis is that you don't necessarily get that human intuition, so you are able to get code coverage, but at the expense of intelligence, so to speak. You're not necessarily getting that human intuition. You're not getting that human element in the analysis.
@@ -143,22 +158,26 @@ A key element of security conscious software development process is performing c
 
 好了，现在有各种工具存在。其中有些是专有的，有些是开源的，但我相信其中相当多的工具是以学生项目开始的。我认为Findbugs特别是作为一个学生项目开始的，它变成了一个宠物项目，然后变成了一个全功能的力量程序。对于静态分析，我们有像LVM这样的东西。Klein HP fortify吗？这些都是你可以在商业环境中使用的工具的例子，以便识别代码中的错误。因此，我们要做的是，我们要解开其中一些程序是如何在引擎盖下工作的，在这个幌子下，我们要把我们自己的静态分析程序放在一起，因为你可以很容易地使用这些工具，你可以阅读输出，你可以从输出中进行分析工作。但是，我今天想做的是在技术上深入了解这些分析器的工作原理，因为我们的想法是，如果你了解这些工具是怎样的，这些工具是怎样工作的，而不是在引擎盖下，那么当然这将使你比那些仅仅使用这些工具而不一定知道这些工具在引擎盖下是怎样工作的人处于更好的地位。OK, so there are various tools in existence. Some of them are proprietary, some of them are open source, but a fair number of these I believe started off as student projects. I think Findbugs specifically is something that started as a student project that turned into a pet project that turned into a fully featured force program. For static analysis we have things like LVM. Have Klein HP fortify? These are all examples of tools that you can use in a commercial setting in order to identify where bugs are in the code. So what we're going to do is we're going to sort of unpack how some of these programs work under the hood, under the guise that we are looking to put together our own static analysis program, because you can easily use these tools, you can read the output and you can sort of work on the analysis from the output. But what I want to do today is to take a technical dive into how some of these analyzers work, because the idea is that if you understand how these tools are, how these tools work, rather under the hood, then of course that will put you in better standing than people who are simply using the tools without necessarily knowing how the tools are working under the hood.
 
+# ==================
+
 # 静态分析如何有效？What does Static Analysis do
 
-## Halting Problem
+> 停顿问题以其不可判定性而闻名。也就是说，对于所有的程序和所有的输入，没有算法能够解决它 •	The halting problem is famous for being undecidable. That is, no algorithm can solve it for all programs and all inputs.
+
+# 停顿问题：Halting Problem
 
 ![](/static/2022-01-31-21-38-00.png)
 
-静态分析是如何做好的？ 停顿问题是现有的最著名的计算科学问题之一。它在图灵论文中被讨论过。这个想法是，**我们想尝试写一个分析工具，可以证明任何一种程序和所有的输入，程序是否会终止**。有某种分析工具？程序是否会终止，所以这里的这个问题已经被证明是在侧壁。**我们不一定有任何一种算法存在，可以为所有潜在的程序和所有潜在的输出解决它**。现在，停止问题与静态分析的概念有关，具体来说，**就是停止问题的不可解性适用于静态分析，因为。当涉及到识别某个东西是否会成为一个bug或者某个东西会有问题时，最大的挑战之一是当你在设计时编写它时，当你创建它时，你不一定了解该程序将在什么相关的使用环境下运行**。 how does static analysis work well? the halting problem is one of the most famous computing science problems in existence. It was discussed in the Turing thesis. The idea is that we want to try and write an analysis tool that can prove for any kind of program and all of the inputs into it, whether or not the program will terminate. So we have here our program we want to. Have some kind of analyzer? Will the program terminate, so this problem here has been proven to be on the side wall. We don't necessarily have any kind of algorithm in existence that can solve it for all potential programs and all potential outputs. Now the halting problem is relevant to the notion of static analysis, and specifically it is the undecidability of the halting problem that is applicable to static analysis because. One of the biggest challenges when it comes to identifying whether or not something is going to be a bug or something is going to be problematic is that when you're writing it at design time when you're creating it, you don't necessarily understand the associated usage context that that program is going to operate under. 
+静态分析是如何做好的？ 停顿问题是现有的最著名的计算科学问题之一。它在图灵论文中被讨论过。这个想法是，**我们想尝试写一个分析工具，可以证明任何一种程序和所有的输入，程序是否会终止**。有某种分析工具？程序是否会终止，所以这里的这个问题已经被证明是在侧壁。**我们不一定有任何一种算法存在，可以为所有潜在的程序和所有潜在的输出解决它**。现在，停止问题与静态分析的概念有关，具体来说，**就是停止问题的不可解性适用于静态分析，因为。当涉及到识别某个东西是否会成为一个bug或者某个东西会有问题时，最大的挑战之一是当你在设计时编写它时，当你创建它时，你不一定了解该程序将在什么相关的使用环境下运行**。 how does static analysis work well? the halting problem is one of the most famous computing science problems in existence. It was discussed in the Turing thesis. The idea is that we want to try and write an analysis tool that can prove for any kind of program and all of the inputs into it, whether or not the program will terminate. So we have here our program we want to. Have some kind of analyzer? Will the program terminate, so this problem here has been proven to be on the side wall. We don't necessarily have any kind of algorithm in existence that can solve it for all potential programs and all potential outputs. Now the halting problem is relevant to the notion of static analysis, and specifically it is the undecidability of the halting problem that is applicable to static analysis because. One of the biggest challenges when it comes to identifying whether or not something is going to be a bug or something is going to be problematic is that when you're writing it at design time when you're creating it, you don't necessarily understand the associated usage context that that program is going to operate under.
 
-## 静态分析原理
+# 静态分析原理
 
 ![](/static/2022-01-31-21-54-45.png)
 
-- 静态分析是试图**预测输入到源代码中的代码问题**的算法。
-- 它们试图解决确定一个给定的变量在代码中的可信赖程度这一不可确定的问题。
-- 它们通过**识别源代码中的模式**来做到这一点。
-- **利用模式**，分析者可以**通过预测程序的行为来确定其安全问题**
+- 静态分析是试图**预测输入到源代码中的代码问题**的算法。•	Static analysis are algorithms that attempt to predict code problems with source code that is input into them.
+- 它们试图解决确定一个给定的变量在代码中的可信赖程度这一不可确定的问题。•	They try to address the undecidable problem of determining how trustworthy a given variable is in code.
+- 它们通过**识别源代码中的模式**来做到这一点。•	They do this by identifying patterns in the source code.
+- **利用模式**，分析者可以**通过预测程序的行为来确定其安全问题** •	Leveraging on patterns allows analyser to determine security problems with programs by predicting their behaviour.
 
 例如，如果你正在写一个方法，这个方法负责**接受某种变量作为输入**，它将构建某种SQL查询，以便在某种数据库后端执行该查询，**你并不提前知道你可以期待什么样的输入进入该方法主体本身【模块化编码**】。For example, if you're writing a method and this method is responsible for taking some kind of variable as input and it will construct some kind of SQL query in order to execute that query on some kind of database back end, you don't know ahead of time what kind of input you can expect into that method body itself. 
 
@@ -166,7 +185,8 @@ A key element of security conscious software development process is performing c
   * 要详尽地了解这个变量是如何被使用的，**这是一场失败的战斗，尤其是在非常大的模块化代码基础上，现在以【模块化的方式编码】的优势是，当然是可用性、可理解性和可扩展性，通过各种方式，这是一个非常好的软件工程实践**。To understand exhaustively how that variable can be used, it's a losing battle on especially very large modular code base is now the advantage with coding something in a modular fashion is, of course re usability, understandability and scalability, and by all means it is a very good software engineering practice to use.
   * 但这种工程实践的缺点是，**它引入了不可知的概念**。But the disadvantage with that engineering practice is that it introduces this notion of undecidability. You don't know how these different modules are going to be communicating with each other at runtime. You don't necessarily know what the value of different input parameters are going to be at runtime. It may be the case that it is something that we are expecting that it could be normal, but at the same time it could be malicious in nature. We don't necessarily know, 
     * **你不知道这些不同的模块在运行时是如何相互交流的。你不一定知道不同的输入参数在运行时的值是什么**。可能是我们所期待的东西，它可能是正常的，但同时它也可能是恶意的。
-* 所以静态分析的想法是，我们想尝试**了解程序如何处理变量，并了解【是否会以一种可能被认为具有风险的方式使用某些东西】，这使我们能够带头进行分析为了了解我们可能希望在哪里引入消毒剂等【缓解措施**】。所以我们想尝试在代码中<font color="deeppink">识别这些模式。我们希望将一系列规则应用于我们的代码，以了解这种危险行为可能或正在出现的位置，以便对代码库执行某种清理</font> so the idea with static analysis is that we want to try and understand how Programs behave with variables and order to understand whether or not Something will be used in a manner that could be considered risky in nature, and that allows us to spearhead our analysis in order to understand where we may want to introduce mitigation actions like sanitizers. So we want to try and identify these patterns in code. There are a series of rules that we want to apply to our code in order to understand where this risky behavior can be or is being exhibited in order to perform some kind of sanitization on the codebase. 
+
+:orange: 所以静态分析的想法是，我们想尝试**了解程序如何处理变量，并了解【是否会以一种可能被认为具有风险的方式使用某些东西】，这使我们能够带头进行分析为了了解我们可能希望在哪里引入消毒剂等【缓解措施**】。所以我们想尝试在代码中<font color="deeppink">识别这些模式。我们希望将一系列规则应用于我们的代码，以了解这种危险行为可能或正在出现的位置，以便对代码库执行某种清理</font> so the idea with static analysis is that we want to try and understand how Programs behave with variables and order to understand whether or not Something will be used in a manner that could be considered risky in nature, and that allows us to spearhead our analysis in order to understand where we may want to introduce mitigation actions like sanitizers. So we want to try and identify these patterns in code. There are a series of rules that we want to apply to our code in order to understand where this risky behavior can be or is being exhibited in order to perform some kind of sanitization on the codebase.
 
 # 静态分析局限性&存在的问题：Challenges & issues
 
@@ -180,18 +200,19 @@ A key element of security conscious software development process is performing c
 
 静态分析的挑战在于，没有一个完美的静态分析器。它有三个主要问题。 the challenge with static analysis really is that perfection is impossible. There's no such thing as a perfect static analyzer. There are three major issues with it.
 
-* **不确定**是其中之一。分析器有可能永远不会终止。**这在非常大的、复杂的软件系统上尤其如此**。我们将在一分钟内谈论一个给定的静态分析器的两个关键权衡。 Non determination is one of them. It's possible that the analyzer may never terminate. This is especially true on very large, complex software systems. We'll talk about in just a minute the two key tradeoffs for a given static analyzer.
-* 虚假警报是另一个问题。例如，对于那些以前使用过IDE的人来说。有可能IDE将你的代码标记为有问题，但你提前知道该代码不一定会有问题。这是一个静态分析规则的例子，你的ID正在遵循这个规则。分析你的代码，并且是告诉你，嘿，我认为你写的东西是有问题的，或者我认为你写的代码是不可达的，或者类似的东西。就是说，一系列的规则。静态分析器正在检查，以便在环境本身中为你这个开发者提供一些反馈。但这也是一个错误警报的例子。因此，**即使你的静态分析器可能会报告某些东西是错误的，但它实际上可能不是错误的**。**当然，这也是为什么我们不一定能完全自动化的原因**，也是为什么我们作为安全分析师的工作是相当安全的，至少对于接下来的事情也是如此。 False alarms are another issue. With those of you, for example, who have used an IDE before. It's possible that the IDE may have flagged your code as being problematic, but you know ahead of time that the code is not necessarily going to be problematic. This is an example of a static analysis rules that your ID is following. Analyzing your code and is telling you, hey, I think that what you're writing is buggy or I think that the code you're writing is unreachable or something to that effect. That is, a series of rules. That are static analyzer is checking in order to provide you the developer some feedback within the environment itself. But it's also an example of a false alarm. So even though your static analyzer may report something is being buggy, it may not actually be buggy. And of course, that is why we cannot necessarily fully automate the process and why our jobs as security analysts are pretty much secure, at least for the next thing also.
+* **不确定**是其中之一。分析器有可能永远不会终止。**这在非常大的、复杂的软件系统上尤其如此**。 Non determination is one of them. It's possible that the analyzer may never terminate. This is especially true on very large, complex software systems. We'll talk about in just a minute the two key tradeoffs for a given static analyzer.
+* **虚假警报【假阳性**】是另一个问题。例如，对于那些以前使用过IDE的人来说。有可能IDE将你的代码标记为有问题，但你提前知道该代码不一定会有问题。这是一个静态分析规则的例子，你的ID正在遵循这个规则。分析你的代码，并且是告诉你，嘿，我认为你写的东西是有问题的，或者我认为你写的代码是不可达的，或者类似的东西。就是说，一系列的规则。静态分析器正在检查，以便在环境本身中为你这个开发者提供一些反馈。但这也是一个错误警报的例子。因此，**即使你的静态分析器可能会报告某些东西是错误的，但它实际上可能不是错误的**。**当然，这也是为什么我们不一定能完全自动化的原因**，也是为什么我们作为安全分析师的工作是相当安全的，至少对于接下来的事情也是如此。 False alarms are another issue. With those of you, for example, who have used an IDE before. It's possible that the IDE may have flagged your code as being problematic, but you know ahead of time that the code is not necessarily going to be problematic. This is an example of a static analysis rules that your ID is following. Analyzing your code and is telling you, hey, I think that what you're writing is buggy or I think that the code you're writing is unreachable or something to that effect. That is, a series of rules. That are static analyzer is checking in order to provide you the developer some feedback within the environment itself. But it's also an example of a false alarm. So even though your static analyzer may report something is being buggy, it may not actually be buggy. And of course, that is why we cannot necessarily fully automate the process and why our jobs as security analysts are pretty much secure, at least for the next thing also.
 * 当然，我们也有**遗漏的错误**，报告也不一定能找到bug。 Of course, we also have missed errors, and the reports may not necessarily find bugs.
+  * 注意静态分析器如果没有报告任何错误，从技术上讲没有错
 
 # 静态分析健全性，完整性权衡：Balancing Act of Static Analysis
 
 - 健全性。Soundness
   - 如果分析报告了一个漏洞，那么就存在一个漏洞。If an analysis reports a vulnerability then there is a vulnerability.
-  - accuracy
+  - **accuracy**
 - 完整性。Completeness.
   - 如果有漏洞可寻，那么分析就会发现它。If there is a vulnerability to find then the analysis will find it.
-  - coverage
+  - **coverage**
 - <font color="red">如果希望一个系统即健全又完整，可能需要很长时间来完成。而完美的静态分析器不存在，在大规模code base情况下，时间成本不够</font>
 
 ---
@@ -225,7 +246,7 @@ A key element of security conscious software development process is performing c
 
 ![](/static/2022-02-01-14-32-38.png)
 
-**要么健全，要么就是完整的**。更完整的静态分析器通常是最好的复杂性分析本身，因为直观地认为，**我们在这些静态分析本身中使用的规则越多，分析就越准确**。因此，**我们增加了健全性，但同时也减少了程序的完整性**，因为我们不希望 相反，重要的是我们**能够在某种合理的时间范围内完成静态分析**，然后是专业的软件开发环境。你不一定有闲情逸致坐在那里好几天，比如说，等待你的静态分析器完成，以便向你报告某种bug。你根本没有那么多的时间，所以有一些东西是介于健全性和完整性之间的。这就是为什么很多人都这样做。There's either sound or it is either complete. The more complete static analyzer is usually the best complexity analysis itself is because it's intuitive to think that the more rules that we are using in these static analysis itself, the more accurate the analysis will be. Therefore, we increase the soundness, but we decrease Simultaneously, the completeness of the program because we don't want Rather, it's important for us to be able to complete the static analysis within some kind of reasonable time frame, and then a professional software development environment. You don't necessarily have the luxury of sitting there for days, for instance, waiting for your static analyzer to complete in order to report some kind of bugs to you. You simply don't have that luxury of time, So having something that sort of falls between soundness and completeness. That is why a lot of them do that. 
+**要么健全，要么就是完整的**。更完整的静态分析器通常是最好的复杂性分析本身，因为直观地认为，**我们在这些静态分析本身中使用的规则越多，分析就越准确**。因此，**我们增加了健全性，但同时也减少了程序的完整性**，因为我们不希望 相反，重要的是我们**能够在某种合理的时间范围内完成静态分析**，然后是专业的软件开发环境。你不一定有闲情逸致坐在那里好几天，比如说，等待你的静态分析器完成，以便向你报告某种bug。你根本没有那么多的时间，所以有一些东西是**介于健全性和完整性之间的**。这就是为什么很多人都这样做。There's either sound or it is either complete. The more complete static analyzer is usually the best complexity analysis itself is because it's intuitive to think that the more rules that we are using in these static analysis itself, the more accurate the analysis will be. Therefore, we increase the soundness, but we decrease Simultaneously, the completeness of the program because we don't want Rather, it's important for us to be able to complete the static analysis within some kind of reasonable time frame, and then a professional software development environment. You don't necessarily have the luxury of sitting there for days, for instance, waiting for your static analyzer to complete in order to report some kind of bugs to you. You simply don't have that luxury of time, So having something that sort of falls between soundness and completeness. That is why a lot of them do that. 
 
 # Summary
 
@@ -250,9 +271,12 @@ A key element of security conscious software development process is performing c
     1. 攻击面的分析。Analysis of the attack surface.
     2. 攻击面的最小化。Minimisation of the attack surface.
     3. **输入验证机制**的应用。Application of input validation mechanisms.
-- **污染流分析有助于确定一个程序的攻击面**。Tainted flow analysis helps to determine the attack surface of a program.
+- **污染流分析有助于确定一个程序的攻击面【这是low level层面的，，前面lecture1介绍的安全设计原则里面有这个点，减少攻击面**。Tainted flow analysis helps to determine the attack surface of a program.
 
 ---
+
+:orange: <font color="deeppink">下面几个点主要说明，模块化实践在开发中很重要，但是使输入参数不可预测，但是我们可以通过静态分析-污点流分析来预测哪里可能引入问题，想尽量减少这个攻击面，针对问题是否采取缓解措施等
+</font>
 
 例如，SQL注入是网络安全的典型例子之一，很多都是通过错误的代码促成的。这个想法是，你在代码库的某个地方有某种模块，假设它正在接受某种受信任的数据，并且正在对这些受信任的数据进行操作。**当涉及到测试软件时，测试可能会被清除。我们想确保这个特定的SQL查询在我们得到它的输入时能够工作**，而且可能是这样的情况，**我们不一定考虑到什么可能出错**。你经常期待着某种可信赖的输入。这就是你所期待的，你将对该特定的输入进行操作。但是，**网络安全中的很多问题很大程度上来自于某种组件所接收的输入，而这种输入不一定是我们所期望的**。So SQL injection, for example, is sort of one of the poster child examples of cyber security in general, and a lot of that rather is facilitated through buggy code. The idea is that you have some kind of module somewhere in a code base that assumes that it is taking in some kind of trusted data and is performing operations on that trusted data. when it comes to testing the software, the tests probably cleared. we want to ensure that this particular SQL query works when we get it as input, and there it may be the case that we're not necessarily thinking about what could possibly go wrong. the idea is that when you have multiple modular operations, you have multiple modular components in a software program. You're often expecting some kind of trusted input. You're often expecting input, that is what you are expecting, and you will perform operations on that particular input. But a lot of the problems in cyber security largely come from input that is being received by some kind of component that is not necessarily what we are expecting.
 
@@ -282,13 +306,13 @@ A key element of security conscious software development process is performing c
 
 # 定义-污点流分析
 
-Flow analysis tracks how values might ‘flow’ between the different memory relocations in a program. 流分析追踪数值如何在程序中的不同内存重定位之间 "流动"【一种静态分析方法
+Flow analysis tracks how values might ‘flow’ between the different memory relocations in a program. 流分析追踪数值如何在程序中的不同内存重定位之间 "流动"【**一种静态分析方法，分析攻击面，尝试最小化攻击面**
 
 - <font color="red">静态分析通常与人工分析相结合，提供一种分析指导，如关注点在哪。在大型复杂系统下尤为重要，因为人工分析涉及大量时间，并且容易犯错。而静态分析能缩减要分析的范围</font>
 - 其原理是**确定一个有污点的数据源，并通过程序的逻辑执行跟踪该数据**。•	The principle is to identify a tainted source of data and follow that data through the logical execution of a program.
   - 代码中的污点流分析使你作为一个开发人员能够识别代码中的关注区域。Taint flow analysis in code allows you as a developer to identify areas of concern in the code.
   - **确定该数据在程序中的最终位置**。•	To identify where the data will end up in the program.
-  - <font color="red">我们想知道污点数据位置，并且可信与不可信数据在哪里交汇，比如SQL注入，我们信任了某些不可信数据来进行SQL查询，，我们能用污点流识别，并想出缓解措施（或者至少是进行报告</font>
+  - <font color="red">我们想知道污点数据位置，并且可信与不可信数据在哪里交汇（攻击面在哪），比如SQL注入，我们信任了某些不可信数据来进行SQL查询，，我们能用污点流识别，并想出缓解措施（或者至少是进行报告</font>
 - 污点流分析的目的是试图**让污点数据远离未受污染的数据**。•	The objective of taint flow analysis is to try and keep the tainted data away from untainted data.
   - 具体来说，我们**不希望未受污染的变量被创建或受到污染数据的影响**。•	Specifically, we don’t want untainted variables being created or influenced with tainted data.
   - 如果不能做到这一点，那么我们就会**报告这是一个潜在的安全漏洞**。•	If this is not possible, then we report this as being a potential security vulnerability.
@@ -304,17 +328,6 @@ Flow analysis tracks how values might ‘flow’ between the different memory re
 
 ---
 
-# 发现污点后措施？
-
-- 要么接受代码的现状，要么...•	Either accept the code as is or…
-- 在代码中创建某种缓解措施。•	Create some sort of mitigation in the code.
-  - 消毒器通常是确保代码安全的解决方案，这些代码已经被确定为污点流分析的问题。•	Sanitizers are often the solution to securing code that has been identified as being a problem with taint flow analysis.
-  - 在数据进入时进行擦洗，如果它不是某个哨兵值，就忽略它。Scrub data as it comes in, ignore it if it is not some sentinel value etc.
-  - 这超出了本课程的范围，但**重点是发现问题，而不是立即解决它们**。This is beyond the scope of the course, but the point is to identify problems, not immediately solve them.
-  - 你如何解决静态分析器所发现的问题，往往是针对你正在进行的项目的。How you solve the problems identified by a static analyzer is often specific to the project you’re working on.
-
----
-
 因此，污点流分析的想法是试图**识别，没有验证数据输入时，产生的错误**。这个想法是**在信息进入某种程序范围时对其进行标记，以考虑该程序将流向何处**，该数据将在某种代码库中传播，分析的关键目标本质上是沙盒代码，我们要尝试**让不信任的数据远离信任的数据**  So the idea with tainted flow analysis is to try and identify bugs that arises when we are not necessarily verifying our data input. The idea is to sort of tag information as it comes into some kind of program scope in order to consider where that program will flow, where that data will propagate within some kind of code base, and the key objective with painful analysis is to essentially Sandbox code we want to try and keep data that we do not trust away from data that we do trust. 
 
 * 因此，我们**不信任的数据通常被称为污点**，或者我们将其称为**污点数据或污点变量**，而被**信任的数据被称为未受污染的数据或我们控制的东西** So data that we do not trust is often known as tainted, or we refer to it as tainted data or tainted variables, and data that is trusted is known as untainted or something that we control.
@@ -326,6 +339,17 @@ Flow analysis tracks how values might ‘flow’ between the different memory re
 * 而我们要做的是，当这些**污点数据进入某种程序模块时，我们要尝试考虑它的去向，看它最终是否会评估某种未受污染的输入参数，因为很多操作和程序会期望在受信任的数据上进行操作**。 And what we want to do is we want to try and consider where this tainted data goes when it enters into some kind of program module to see whether or not it will eventually evaluate some kind of untainted input parameter because a lot of operations and program will expect to operate on trusted data.
   * 例如 SQL。我们正在组合的处理代码将期望某种可信数据作为输入，并且它将使用该可信数据对数据库执行操作。 For example the SQL. The handling code that we're putting together it will expect some kind of trusted data as input into it, and it will perform operations on the database with that trusted data. 
   * 因此，我们在**静态分析**中想要做的是考虑在何处或**是否有可能使用受污染的数据来评估 SQL 查询**，以便让我们认为 OK，我们可能需要一些缓解措施此句柄内的操作或一些**缓解代码应该对输入执行适当的清理**。So what we want to do in static analysis is to think about where or whether or not there is a possibility that tainted data could be used to evaluate that SQL query as it comes through in order to make us think OK, we might need some mitigation Action or some mitigation code inside of this handle, ought to perform appropriate sanitization of the input. 
+
+# 发现污点后措施？
+
+发现攻击面后，这里几步差不多和威胁建模提到的一样，，**但是注意重点是找出攻击面/问题，如何解决 取决于项目本身**
+
+- 要么接受代码的现状，要么...•	Either accept the code as is or…
+- 在代码中创建某种缓解措施。•	Create some sort of mitigation in the code.
+  - 消毒器通常是确保代码安全的解决方案，这些代码已经被确定为污点流分析的问题。•	Sanitizers are often the solution to securing code that has been identified as being a problem with taint flow analysis.
+  - 在数据进入时进行擦洗，如果它不是某个哨兵值，就忽略它。Scrub data as it comes in, ignore it if it is not some sentinel value etc.
+  - 这超出了本课程的范围，但**重点是发现问题，而不是立即解决它们**。This is beyond the scope of the course, but the point is to identify problems, not immediately solve them.
+  - 你如何解决静态分析器所发现的问题，往往是针对你正在进行的项目的。How you solve the problems identified by a static analyzer is often specific to the project you’re working on.
 
 # Tax计算器例子：Tax Calculator Example
 
@@ -351,9 +375,11 @@ type qualifier
   - 未被污染的代表受信任的数据。•	`Untainted` represents trusted data.
     - 无污点意味着信息被认为不会被攻击者控制。Untainted means info that is assumed not to be controlled by an attacker.
   - 希腊符号代表未知的限定词。•	Greek symbols represent unknown qualifiers:
-- 约束求解的重点是确定这些未知数在某个时候会变成污点还是未被污染。•	The point of constraint solving is to determine whether these unknowns will become tainted or untainted at some point.
+- **约束求解的重点是确定这些未知数在某个时候会变成污点还是未被污染**。•	The point of constraint solving is to determine whether these unknowns will become tainted or untainted at some point.
 
 ---
+
+![](/static/2022-04-26-20-37-45.png)
 
 所以我们可以看到，我们在这里有两个标签。我们有污点红色，我们有未受污染的绿色。**我们自己控制的任何东西都被认为是未受污染的，因此是值得信任的。所以我们的想法是，getBand()。也许是一个方法，。算是存在于程序中某种预定的范围内。我们知道它将向我们的大程序返回某种可信的输出，而它反过来也会接受某种可信的数据**。so we can see here that we have two labels here. We have tainted and red, and we have untainted and green. anything that we control ourselves is considered untainted and therefore trusted. So the idea is that getBand(). Maybe a method that. Sort of exists within some kind of predetermined scope within the program. We know that it will return some kind of trusted output to our larger program and it will in turn take some kind of trusted data. 
 
@@ -364,6 +390,8 @@ type qualifier
 所以这里的想法是，我们要我们有两个方法，我们有金额，这是getinput()的结果，get input在这里将返回某种有污点的输出，它将被用来评估这个变量的金额。所以getinput()没有说明，但我们可以假设它可能连接到互联网，或者它甚至可能提示最终用户输入某种信息并返回。 So the idea here is that we want to we have two methods here we have amount which is the result of getinput() get input here is going to return some kind of tainted output which will be used to evaluate this variable amount. So getinput() isn't illustrated, but we can assume for example it might connect to the Internet or it might even prompt the end user for some kind of input and return that. 
 
 与此不同的是，我们还有getBand()，这是get band的结果。这里的方法调用。我们还有一个tax。tax还没有被标记为任何东西，一会儿就会回到这个想法或原因上了。所以你可能会问，**为什么不立即对这个进行简单的消毒？好吧，静态分析的全部意义在于确定代码中的问题所在**。我可以给大家讲讲消毒器，但现实地说，你的消毒器的样子在很大程度上还是取决于你正在做的项目。消毒器的功能意味着一定要有相同的外观。你也许想使用预先创建的消毒器库，但这些讲座的全部意义不一定是让你去思考如何使用。消毒器，**而是让你思考在什么地方要使用消毒器，或者为什么在代码中使用消毒器会很重要**。 Unlike wise, we also have getBand() which is the result of the get band. Method call here. And we also have a tax. tax isn't labeled as anything yet and will come back to the idea or the reason why in just a moment. So you might be asking why not simply sanitize this immediately? Well, the whole point of static analysis is to identify where the problems are in the code. Could have a lecture on sanitizers, but realistically speaking how your sanitizer will look will largely be dependent again on the project that you're working on. sanitizer functions mean necessarily look the same. You may want to use pre created sanitizer libraries perhaps, but the whole point of these lectures is not necessarily to get you to think about how you use. Sanitizers, but it's to get you to think about where you would want to use sanitizers or why it would be important to use sanitizers in the code. 
+
+* 注意静态分析重点就是找攻击面，怎么解决的取决于项目本身 & 经验
 
 因此，这里的想法是，**我们正试图阻止不受信任的数据与受信任的数据进行互动，而这个例子在这里失败了，因为当我们对税收进行估价时，受污染的数据和未受污染的数据彼此相遇**。So the idea here is that we are trying to keep the untrusted data from interacting with the trusted data and this example here fails because the tainted and the untainted data meet one another when we are valuating tax. 
 
@@ -414,6 +442,7 @@ C2 = 𝑢𝑛𝑡𝑎𝑖𝑛𝑡𝑒𝑑 ≤ 𝛽
 C3 = 𝛽 ≤ 𝑢𝑛𝑡𝑎𝑖𝑛𝑡𝑒𝑑
 
 solve - analysis solution is good (as no meeting of tainted & untainted)
+- tainted没流入untainted，没非法流
 •	𝑡𝑎𝑖𝑛𝑡𝑒𝑑 ≤ 𝛼
 •	𝑢𝑛𝑡𝑎𝑖𝑛𝑡𝑒𝑑 ≤ 𝛽 ≤ 𝑢𝑛𝑡𝑎𝑖𝑛𝑡𝑒𝑑
 '''
@@ -452,7 +481,7 @@ sinkMethod(z)
 但是，在相反的情况下，我们有一个**期待可信数据的G方法**。所以这可能是我们的SQL处理代码。也许不是，因为它**只接受一个未受污染的整数输入**。但这里的想法是，我们有一个正在被评估的整数B，但它是不被信任的，然后我们**调用G并传入这个不被信任的变量B**。因此，期待着可信数据的G，可能会被传入恶意数据，这是一个**非法流**。 But to take the opposite case, here we have void G which is expecting trusted data. So this could be for example our SQL handling code. Maybe not because it's simply taking an untainted integer input. But the idea here is that we have an integer B which is being evaluated, but it is not to be trusted and then we call G and pass in this variable B which is on which is not to be trusted. So G which is expecting trusted data which is expecting good data could be passed malicious data and that is an illegal flow.
 
 *  在另一个例子中，G期待的东西是好的，是我们控制的。但它可能会被传递一些恶意的东西。它可能被传递了垃圾，这在**运行时可能是一个问题**。简而言之，这就是我们**在静态分析中想要识别的东西。我们要识别这些实例，以便为我们的分析打头阵。当涉及到识别像这样的错误和应用消毒剂时**。 something we control and on the other example G is expecting something which is OK, which we control. But it could be passed something malicious. It could be passed garbage and that could be a problem at runtime. And this is in a nutshell, what we're looking to identify in static analysis. We want to identify instances of this in order to spearhead our analysis. When it comes to Identifying the bugs like this one and the application of sanitizers, 
-* 具体来说，你想如何处理这个问题取决于你。这取决于程序，项目的背景。相反，当你在专业背景下处理代码时，你发现自己身处其中，但这从根本上说是在引擎盖下。你的**静态分析器是如何工作的。他们正在寻找识别代码中的一个模式**，以报告给作为开发者的你。**为什么这个功能和这个输入会有问题？你想对它做什么**？这不会有问题。我们将忽略它，或者这将是一个关键任务。我们需要尽快用消毒剂来解决这个问题。specifically how you want to deal with this problem is up to you. It's dependent on the program, the project context. Rather, you found yourself in when you are working on code in a professional context, but this is fundamentally under the hood. How your static analyzers are working. They're looking to identify a pattern in code to report to you as a developer. Why this function with this input could be problematic? What do you want to do about it and on review it may be the case that OK? This isn't going to be problematic. We'll ignore it or this is going to be mission critical. We need to fix this with sanitisers ASAP. 
+* 具体来说，你想如何处理这个问题取决于你。这取决于程序，项目的背景。相反，当你在专业背景下处理代码时，你发现自己身处其中，但这从根本上说是在引擎盖下。你的**静态分析器是如何工作的。他们正在寻找识别代码中的一个模式**，以报告给作为开发者的你。**为什么这个功能和这个输入会有问题？你想对它做什么**？这不会有问题。我们将忽略它，或者这将是一个关键任务。我们需要尽快用消毒剂来解决这个问题。specifically how you want to deal with this problem is up to you. It's dependent on the program, the project context. Rather, you found yourself in when you are working on code in a professional context, but this is fundamentally under the hood. How your static analyzers are working. They're looking to identify a pattern in code to report to you as a developer. Why this function with this input could be problematic? What do you want to do about it and on review it may be the case that OK? This isn't going to be problematic. We'll ignore it or this is going to be mission critical. We need to fix this with sanitisers ASAP.
 
 # 网格模型表示法：Lattice Model Representation
 
@@ -511,11 +540,13 @@ sinkMethod(z)
 
 type qualifier: tainted, untainted, 及其他的Geek（用于不知道某变量是否可信，未知的）
 
-* 限定词一般用于识别信任的变量类型
+* 限定词一般用于识别变量的可信类型
 
 ---
 
 主要是用来推断未知限定符，最后是否为污点？
+
+![](/static/2022-04-26-20-58-42.png)
 
 - 把**流分析**看作是一种**类型推断**（如果没有限定词，我们必须推断出来）Think of flow analysis as a kind of type inference (and if no qualifier is present, we must infer it)
 - 步骤。Steps:
@@ -544,16 +575,15 @@ type qualifier: tainted, untainted, 及其他的Geek（用于不知道某变量�
 
 ---
 
+![](/static/2022-02-01-20-37-37.png)
+
 - 这里没有问题，因为**没有污点的数据源导致问题**。
 - 这里的代码很简单，我们只需看一下就可以推断出正确的结论。
 
-![](/static/2022-02-01-20-37-37.png)
+![](/static/2022-04-26-21-00-47.png)
 
 * 假设移除污点限定符，把所有变量，方法限定为非污点
 * 显然，tax是非污点
-
----
-
 - 随着有**污点的数据源的存在**，它变得不那么清晰。
 - 特别是在**大型代码库中**。
   - 分析会变得非常复杂。**不可能手动来推断**
@@ -593,17 +623,17 @@ type qualifier: tainted, untainted, 及其他的Geek（用于不知道某变量�
         * 注意这里只是一开始假设，形参是可信的，但随时间推移，可能getBand最后是不可信的，**这一点最后到底有没有问题是希望静态分析器能报告出来的，然后就能考虑到底要不要对getBand采用缓解措施**
   * C3
     * getBand(amount)返回非污点(看getBand的签名最前面的限定符是untainted),trusted data
-    * 因此`untainted<=β`
+    * 因此`untainted<=Q`
 
 ---
 
 3
 
-`tainted<=a<=untainted<=b`
+`tainted<=a<=untainted<=Q`
 
 * tainted（getInput返回的）数据流入被限定为a的变量
 * a流入getBand的形参（untainted）
-* getBand非污点返回值流入β
+* getBand非污点返回值流入Q
 
 ![](/static/2022-02-01-21-40-53.png)
 
@@ -893,7 +923,7 @@ C1，C3约束组合后同理，非法流
 
 # 隐式流：Implicit Flows
 
-比如受控制流结构影响的赋值语句，此时是隐式流（信息流）
+比如**受控制流结构影响的赋值语句，此时是隐式流（信息流**）
 
 之前概念（流敏感，路径敏感）不够用来得出下面例子的结论(存不存在非法流)
 
@@ -905,7 +935,7 @@ C1，C3约束组合后同理，非法流
 
 ![](/static/2022-02-02-20-49-55.png)
 
-- 先前的流是一种隐性流，因为一个值中的信息隐性地影响着另一个值。The prior flow is an implicit flow, since information in one value implicitly influences another.
+- 先前的流是一种隐性流，因为**一个值中的信息隐性地影响着另一个值**。The prior flow is an implicit flow, since information in one value implicitly influences another.
 - 发现这些威胁的一种方法是**维护一个范围内的程序计数器（pc）标签** One way to discover these threats is to maintain a scoped program counter (pc) label
 - **赋值语句产生涉及pc实例的约束。赋值𝑥=𝑦将产生两个约束**。Assignments generate constraints involving the pc example. The assignment 𝑥 = 𝑦 will produce two constraints:
   - label(y)<=label(x)
@@ -976,28 +1006,28 @@ C1，C3约束组合后同理，非法流
   * C8， `z=2`关联的pc2，，`γ2<=Pc2(tainted)`
   * C9同理
 
-
 结合约束
 
 ![](/static/2022-02-03-16-46-16.png)
 
-* C6&C8.C7&C9，存在非法流
+* C6&C8.C7&C9，存在隐式非法流
 
-标记Path
+标记Path【【【汇总，按Path分析
 
 * 一共3条
 * 还有一条 y!=0，，直接到sink，，，显式流分析了
-  * 不存在问题
+  * 不存在显式非法流
   * ![](/static/2022-02-03-16-48-35.png)
-* Path1 （1,2）
+* Path1 （1,2，3，到结束）
   * ![](/static/2022-02-03-17-37-17.png)
   * 语句约束
   * 【C6+C8】untaitned<=γ2<=tainted(pc2)
     * 这个code block存在隐式非法流**implicit illegal flow**【不一定会造成过大问题，但也许想要解决】
   * 但结合前面显式流分析，并不存在显式非法流
     * ![](/static/2022-02-03-17-35-53.png)
-* Path2 （1，2,3,4）
+* Path2 （1，2,3,4，到结束）
   * ![](/static/2022-02-03-17-42-18.png)
+  * 隐式非法流，无显式非法流
 
 # Example2
 

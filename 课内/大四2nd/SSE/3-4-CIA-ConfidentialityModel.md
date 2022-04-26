@@ -229,6 +229,7 @@ Definition. Let 𝑈 be a set of entities and let 𝜓 be some information. Then
 - **可供鉴证的软件设计**。Forensic-ready software design: 【forensic ready software】
   * **分析系统事件（用户或系统行为）以检测问题**，或分析**数据本身**以查看所需的约束是否成立。Analysis of system events (user or system actions) to detect problems or analyse data itself to see if required constraints hold.
   * 机制可以报告**具体**的问题，也可以**简单地报告**文件被破坏。Mechanisms may report on specific problems, or they may simply report that the file is corrupt.
+  * <font color="deeppink">我们不使用准备好的取证软件来预防安全问题的最大原因是，这种软件侧重于记录事件。它的设计根本不是为了防止它们。**这是入侵检测和入侵预防软件之间的主要区别。一个侧重于预防，另一个侧重于记录**。</font>The biggest reason we don't use forensic ready software to prevent security problems is the fact that such software focuses on logging events. It simply isn't designed to prevent them. This is the main difference between Intrusion Detection software and Intrustion Prevention software. One focuses on prevention and the other, logs.
 
 # 可用性：Availability-Security Properties
 
@@ -339,6 +340,7 @@ Definition. Let 𝑈 be a set of entities and let 𝜓 be some information. Then
       - Mandatory Access Control (MAC)
       - 通常在操作系统中讨论。**系统控制谁**可以访问数据。Commonly discussed in operating systems. System controls who has access to data.
       - 对象访问的规则**不是由用户控制**的。Rules for object access are not controlled by users.
+      - **MAC使用一套预定义的规则来允许/拒绝对资源的访问，不受终端用户的直接控制**。MAC uses a set of predefined rules to permit/deny access to resources and is not under the direct control of end users.
 - **有许多访问控制的变体，其中大多数都以某种方式与自由裁量或强制方法有关**。There are numerous variants of access control, most of them relate to either discretionary or mandatory approaches in one way or another.
 
 # 状态，机制&政策：Protection Software
@@ -360,6 +362,7 @@ Definition. Let 𝑈 be a set of entities and let 𝜓 be some information. Then
     - 一个对象可以是任何东西，一个资源，基本上是一个实体。An object can be anything, a resource, an entity essentially.
   - 一种**自由裁量的访问控制的形式**。A form of discretionary access control.
     - DAC
+- <font color="red">ACM的最大限制是它们不具备任何上下文信息，如安全级别。</font> The big limitation with ACMs is that they do not possess any contextual information such as security levels.
 
 ---
 
@@ -380,6 +383,7 @@ Definition. Let 𝑈 be a set of entities and let 𝜓 be some information. Then
   - **描述了某人可以对其他事物做什么(某人对系统中其他东西，能做什么**)。Describes what someone can do to other things.
 - ACL是矩阵中的一列 ACL is a column in the matrix
   - **描述某物上可以有某人做什么（同一种资源，其他人可以做什么**） Describes what can be done to something by someone
+  - ACL告诉我们可以对一个对象做什么，这是通过一个列来传达的。 an ACL tells us what can be done on an object, this is conveyed through a column.
 - M1,M1
   - cyclic privileges on itself, have the ability to read or wrtie on itself
 
@@ -435,6 +439,8 @@ Definition. Let 𝑈 be a set of entities and let 𝜓 be some information. Then
 - 展示如何利用保密性政策实现信息流控制。
 
 # 4信息流：Information Flow
+
+我们可以**根据对象之间的信息传播方式来推断关系**。但**箭头的方向总是表明信息流的方向**。它并没有定义关系本身的性质。We can infer relations based on how the informaiton propagates between objects. But the direction of arrows always indicates the direction of information flow. It does not define the nature of the relation iteself.
 
 ![](/static/2022-03-09-23-23-18.png)
 
