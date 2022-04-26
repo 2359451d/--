@@ -226,7 +226,7 @@ Definition. Let 𝑈 be a set of entities and let 𝜓 be some information. Then
 
 - 这样的机制并不试图防止违反完整性。Such mechanisms do not try and prevent integrity violations.
 - 它们所做的只是**报告某物的完整性不再得到保证**。All they do is report that the integrity of something is no longer assured.
-- **可供鉴证的软件设计**。Forensic-ready software design:
+- **可供鉴证的软件设计**。Forensic-ready software design: 【forensic ready software】
   * **分析系统事件（用户或系统行为）以检测问题**，或分析**数据本身**以查看所需的约束是否成立。Analysis of system events (user or system actions) to detect problems or analyse data itself to see if required constraints hold.
   * 机制可以报告**具体**的问题，也可以**简单地报告**文件被破坏。Mechanisms may report on specific problems, or they may simply report that the file is corrupt.
 
@@ -334,8 +334,9 @@ Definition. Let 𝑈 be a set of entities and let 𝜓 be some information. Then
     - 1.	**自由裁量**。Discretionary:
       - 个人用户控制ACL以允许或拒绝对某物的访问。Individual users control ACLs to permit or deny access to something.
       - **信息的拥有者可以决定如何控制它**。Owners of information are left to decide how to control it.
-      - DAC
-    - 2.	**强制性的**。Mandatory:
+      - Discretionary Access Control (DAC)
+    - 2.	**强制性的【MAC**】。Mandatory:
+      - Mandatory Access Control (MAC)
       - 通常在操作系统中讨论。**系统控制谁**可以访问数据。Commonly discussed in operating systems. System controls who has access to data.
       - 对象访问的规则**不是由用户控制**的。Rules for object access are not controlled by users.
 - **有许多访问控制的变体，其中大多数都以某种方式与自由裁量或强制方法有关**。There are numerous variants of access control, most of them relate to either discretionary or mandatory approaches in one way or another.
@@ -585,7 +586,7 @@ secret level情况下，还需要考虑catrgories (what category applicable to a
 - 鉴于NUC、EUR、US的类别。Given categories NUC, EUR, US:
   - 基于 "需要知道 "的原则，人们可以接触到其中的任何内容。Based on “need to know” principle one can have access to any of these:
   - None, {NUC}, {EUR}, {US}, {NUC, EUR} … {NUC, EUR, US}
-- 安全级别是（许可，类别集）。**Security level** is (**clearance<level of privilege**>, **category set<what aspects of business do they belong to**>) (结合这两个概念，，感觉就是标签+类别集= =，，<font color="deeppink">L=(C, S)，C是clearance/classification(也就是机密性标签,下面3个), S是set of categories</font>。。后面那个Biba一样的就是概念用的名字可以不一样,Biba-C是classification指完整性分类)
+- 安全级别是（许可，类别集）。**Security level** is (**clearance<level of privilege**>, **category set<what aspects of business do they belong to**>) (结合这两个概念，，感觉就是标签+类别集= =，，<font color="deeppink">L=(C, S)，C是clearance/classification(也就是机密性标签,下面3个,  subject关联的叫clearance，， object关联的叫classification), S是set of categories</font>。。后面那个Biba一样的就是概念用的名字可以不一样,Biba-C是classification指完整性分类)
   - 最高机密，{NUC, EUR, ASI}。`Top Secret, {NUC, EUR, ASI}`
   - 机密，{EUR, ASI}。`Confidential, {EUR, ASI}`
   - 秘密，{NUC，ASI}。`Secret, {NUC, ASI}`

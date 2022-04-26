@@ -109,11 +109,14 @@ A key element of security conscious software development process is performing c
 - **与其让人去分析代码，不如让软件去分析它**。•	Instead of humans analyzing code, have software analyze it.
 - 试图通过**应用多种规则来编纂人类的直觉，从而在代码中形成一个复杂的模式分析**。•	Try and codify human intuition by applying multiple rules that come together to formulate a complex pattern analysis in code.
 - <font color="red">静态分析通常与人工分析相结合，提供一种分析指导，如关注点在哪。在大型复杂系统下尤为重要，因为人工分析涉及大量时间，并且容易犯错。而静态分析能缩减要分析的范围</font>
+  - 注意静态分析，准确的报告是不能保证的，静态分析的结果可能是误导性的，我们需要人类来仔细检查。Accurate reporting is not guranteed, the static analysis results may be misleading, and we need humans to double check.
+- **静态分析允许我们 "带头 "分析，并考虑代码基础上可能存在的问题**。Static Analysis allows us to 'spearhead' the analysis and consider where the problems may be on a code base.
+  - 是否在哪里引入缓解措施, determine where we may want to apply mitigations
 
 :orange: 静态分析优点
 
-- 代码覆盖率。•	Code coverage.
-- 分析的速度。•	Speed of analysis.
+- **代码覆盖率**。•	Code coverage.
+- **分析速度**。•	Speed of analysis.
 
 :orange: 静态分析缺点。
 
@@ -780,7 +783,7 @@ C1，C3约束组合后同理，非法流
 - 一个对流敏感的分析会考虑到内容发生变化的变量。A flow sensitive analysis would account for variables whose contents change.
   - 允许我们为变量的每次使用分配不同的限定词。Allows us to assign each use of a variable to have a different qualifier:
   - 例如，在第1行𝑥=0时，**𝛼1可以是𝑥的限定符**，但在第2行𝑥=1时，我们**对𝑥有一个不同的限定符，即𝛼2**。For example, at line 1 where 𝑥 = 0, 𝛼1 can be the qualifier for 𝑥 but at line 2 where 𝑥 = 1, we have a different qualifier for 𝑥, 𝛼2
-- 这类似于**使用静态单一赋值（SSA）符号**来转换代码的表示方法 This is similar to transforming the representation of the code using Static Single Assignment (SSA) notation.
+- 这类似于**使用静态单一赋值（SSA）符号**来转换代码的表示方法 This is similar to transforming the representation of the code using Static Single Assignment (SSA) notation. 【Static Single Assignmet】
   - 表示法中的每个变量最多分配一次 Every variable in the representation is at most assigned once.
   - **遇到变量重新赋值，重新分配一个限定词**
 

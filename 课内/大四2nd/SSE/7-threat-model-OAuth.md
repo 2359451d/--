@@ -193,6 +193,7 @@
 * 可以考虑给实体间交互关系进行标记，以便与他人沟通交流分析问题存在位置时候没那么模糊
   * 用于与stakeholder交流，组件之间通信的信任状态可能在哪改变(where the trust state of communications between components can change)
   * 在哪点会引入威胁，在哪点更容易受到攻击
+* **spearhead the analysis of threats.**
 
 # 2-识别威胁(STRIDE)：What can go wrong
 
