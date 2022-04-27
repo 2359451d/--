@@ -16,13 +16,13 @@
 * [政策重要性&CIA框架:Importance of Policies](#政策重要性cia框架importance-of-policies)
 * [什么决定政策：What Informs Policy](#什么决定政策what-informs-policy)
 * [机密性-安全性质：Confidentiality - Security Properties](#机密性-安全性质confidentiality---security-properties)
-  * [目标：Objectives of Confidentiality](#目标objectives-of-confidentiality)
-* [强制机密性的机制：Confidentiality Mechanisms](#强制机密性的机制confidentiality-mechanisms)
+* [机密性-目标：Objectives of Confidentiality](#机密性-目标objectives-of-confidentiality)
+* [机密性-强制机制：Confidentiality Mechanisms](#机密性-强制机制confidentiality-mechanisms)
 * [Summary](#summary)
 * [===================](#)
 * [完整性：Integrity - Security Property](#完整性integrity---security-property)
   * [例子：Mechanism Exmaple](#例子mechanism-exmaple)
-  * [检测机制：Detection Mechanisms](#检测机制detection-mechanisms)
+* [完整性-检测机制：Detection Mechanisms](#完整性-检测机制detection-mechanisms)
 * [可用性：Availability-Security Properties](#可用性availability-security-properties)
 * [Summary](#summary-1)
 * [===================](#-1)
@@ -32,7 +32,8 @@
 * [访问控制机制：Access Control Mechanisms](#访问控制机制access-control-mechanisms)
 * [状态，机制&政策：Protection Software](#状态机制政策protection-software)
 * [ACM访问控制矩阵：Access Control Matrix](#acm访问控制矩阵access-control-matrix)
-  * [例子1](#例子1)
+* [ACM例子](#acm例子)
+  * [1](#1)
   * [例子2](#例子2)
 * [ACM局限性-访问控制矩阵模型: Problems with ACM](#acm局限性-访问控制矩阵模型-problems-with-acm)
 * [代理问题:The Deputising Problem](#代理问题the-deputising-problem)
@@ -45,14 +46,14 @@
 * [=====================](#-3)
 * [场景](#场景)
 * [下面BLP原则后续要参考dom](#下面blp原则后续要参考dom)
-* [读取规则：Reading Information](#读取规则reading-information)
-* [写入规则：Writing Information](#写入规则writing-information)
-* [读写规则：Reading Writing Information](#读写规则reading-writing-information)
-* [保护原则: Principles of Protection](#保护原则-principles-of-protection)
+* [读取规则-simple security：Reading Information](#读取规则-simple-securityreading-information)
+* [写入规则-star：Writing Information](#写入规则-starwriting-information)
+* [读写规则-strong star：Reading Writing Information](#读写规则-strong-starreading-writing-information)
+* [保护-设计原则: Principles of Protection](#保护-设计原则-principles-of-protection)
 * [类别(集)：Categories](#类别集categories)
 * [网格层次结构:The Lattice Hierarchy](#网格层次结构the-lattice-hierarchy)
 * [BLP安全级别=许可+类别集：BLP Categories](#blp安全级别许可类别集blp-categories)
-* [Dominate (dom) Relationship](#dominate-dom-relationship)
+* [dom支配性-解决ACM：Dominate (dom) Relationship](#dom支配性-解决acmdominate-dom-relationship)
   * [例子](#例子)
 * [simple-读取(BLP)：Reading Information](#simple-读取blpreading-information)
 * [star-写入(BLP)：Writing Information](#star-写入blpwriting-information)
@@ -64,8 +65,8 @@
 * [5Integrity Properties in Software](#5integrity-properties-in-software)
 * [完整性政策：Integrity Policies](#完整性政策integrity-policies)
 * [完整性定义&目标：Integrity](#完整性定义目标integrity)
-* [商业完整性政策：Requirements of Commercial Integrity Policies (Lipner)](#商业完整性政策requirements-of-commercial-integrity-policies-lipner)
-* [操作原则-完整策略：Integrity Policy - Principles of Opeartion](#操作原则-完整策略integrity-policy---principles-of-opeartion)
+* [商业完整性政策：Requirements of Commercial Integrity Policies (Lipner模型)](#商业完整性政策requirements-of-commercial-integrity-policies-lipner模型)
+* [操作原则-完整性策略：Integrity Policy - Principles of Opeartion](#操作原则-完整性策略integrity-policy---principles-of-opeartion)
 * [Biba完整性级别=分类+类别集：Integrity Levels](#biba完整性级别分类类别集integrity-levels)
 * [完整性分类：Classification of Integrity](#完整性分类classification-of-integrity)
 * [类别集：Set Categories](#类别集set-categories)
@@ -81,8 +82,8 @@
 * [(读变体)主体低水标策略：Low-Watermark Policy for Subjects](#读变体主体低水标策略low-watermark-policy-for-subjects)
   * [图：Low-Watermark Policy for Subjects Diagram](#图low-watermark-policy-for-subjects-diagram)
 * [(写变体)对象低水标策略：Low-Watermark Policy for Objects](#写变体对象低水标策略low-watermark-policy-for-objects)
-* [低水标完整性审计策略：Low-Watermark Integrity Audit Policy](#低水标完整性审计策略low-watermark-integrity-audit-policy)
-* [Ring Policy](#ring-policy)
+* [(写)低水标完整性审计策略：Low-Watermark Integrity Audit Policy](#写低水标完整性审计策略low-watermark-integrity-audit-policy)
+* [环形策略: Ring Policy](#环形策略-ring-policy)
 * [Biba优缺点：Advantages And Disadvantages](#biba优缺点advantages-and-disadvantages)
 * [Summary](#summary-6)
 * [=====================](#-7)
@@ -98,7 +99,7 @@
 - **政策**是关于什么是允许的，什么是不允许的**声明**。A policy is a statement on what is, and is not permitted.
 - **机制**是一种方法、工具或程序，用于**执行政策**。A mechanism is a method, tool or procedure that is enacted to enforce a policy.
 - 例子
-  - CPU执行，用户和系统分层（policy），mechanism确保用户系统分离，policy能被满足
+  - CPU执行，用户和系统分层（policy规定），mechanism确保用户系统分离，policy能被满足
 
 # 安全策略，系统状态：Policies and Computer Systems
 
@@ -135,6 +136,8 @@
 
 # 什么决定政策：What Informs Policy
 
+根据什么制定政策
+
 - **商业目标**。Business objectives.
 - **最终用户的安全和隐私偏好**。End user security and privacy preferences.
   - 比如安卓，决定app授权，访问文件，wifi access等
@@ -153,9 +156,9 @@ Definition. Let 𝑈 be a set of entities and let 𝜓 be some information. Then
 
 * 阻止未授权行为获取信息
 
-## 目标：Objectives of Confidentiality
+# 机密性-目标：Objectives of Confidentiality
 
-1.	保护信息不被未经授权的人访问。Protecting information from being accessed by unauthorized parties.
+1.	**保护信息不被未经授权的人访问**。Protecting information from being accessed by unauthorized parties.
 - 只有获得合法授权的个人才被允许访问信息。Only individuals with the legitimate authorisation are permitted to access information.
 - 也可以认为是 "需要知道 "的基础。Can also be thought of ‘need to know’ basis.
 
@@ -169,7 +172,7 @@ Definition. Let 𝑈 be a set of entities and let 𝜓 be some information. Then
 
 ---
 
-2.	保护某人的理解的存在。Protecting the existence of someone’s understanding.
+2.	**保护某人知道的事实的存在**。Protecting the existence of someone’s understanding.
 - 在封闭式投票系统中，知道一个选项相对于另一个选项的得票率并不重要。In closed voting systems, knowing the ratio of votes for one option as opposed to the other is not important.
 - 重要的是确保特定个人的投票方式不为人知。What is important is ensuring the way specific individuals voted remains unknown.
 
@@ -182,7 +185,7 @@ Definition. Let 𝑈 be a set of entities and let 𝜓 be some information. Then
   * 授权的 -> `Kφ`
   * 非授权的 -> `not Kφ`
 
-# 强制机密性的机制：Confidentiality Mechanisms
+# 机密性-强制机制：Confidentiality Mechanisms
 
 - **密码学**。Cryptography.
 - **访问控制**.Access Control.
@@ -220,11 +223,12 @@ Definition. Let 𝑈 be a set of entities and let 𝜓 be some information. Then
 
 ![](/static/2022-03-09-20-27-47.png)
 
-## 检测机制：Detection Mechanisms
+# 完整性-检测机制：Detection Mechanisms
 
 ![](/static/2022-03-09-20-39-00.png)
 
-- 这样的机制并不试图防止违反完整性。Such mechanisms do not try and prevent integrity violations.
+这样的机制并不试图防止违反完整性的行为。Such mechanisms do not try and prevent integrity violations.
+
 - 它们所做的只是**报告某物的完整性不再得到保证**。All they do is report that the integrity of something is no longer assured.
 - **可供鉴证的软件设计**。Forensic-ready software design: 【forensic ready software】
   * **分析系统事件（用户或系统行为）以检测问题**，或分析**数据本身**以查看所需的约束是否成立。Analysis of system events (user or system actions) to detect problems or analyse data itself to see if required constraints hold.
@@ -244,10 +248,12 @@ Definition. Let 𝑈 be a set of entities and let 𝜓 be some information. Then
 - 软件设计中需要考虑的**重要方面**。Important aspect to consider in the design of software. 
 - **没有可用的资源和没有资源一样糟糕**。No available resources are as bad as no resources at all
 - **拒绝服务**是一种针对可用性的常见攻击。Denial of service is a common attack that targets availability.
-- 保证机制。Assurance Mechanisms.
-  * 通常表现为一些**网络监控**解决方案。Typically manifest as some network monitoring solution. 
-  * **统计模型**。Statistical models:
-    * (确定不寻常的访问模式是否表明是故意操纵的)(Determine if the unusual access patterns suggest deliberate manipulation)
+
+:orange: **可用性保证机制**。Assurance Mechanisms.
+
+* 通常表现为一些**网络监控**解决方案。Typically manifest as some network monitoring solution. 
+* **统计模型**。Statistical models:
+  * (确定不寻常的访问模式是否表明是故意操纵的)(Determine if the unusual access patterns suggest deliberate manipulation)
 
 # Summary
 
@@ -255,10 +261,11 @@ Definition. Let 𝑈 be a set of entities and let 𝜓 be some information. Then
   - 保密性 - 对未经授权的用户来说，数据是模糊的。Confidentiality – the obfuscation of data to unauthorised users.
   - 完整性--保证数据的**可信度**。Integrity – the assurance of trustworthiness of data.
   - 可用性--数据对人和服务的持续可及性。Availability – the continued accessibility of data to people and services.
-- 政策规定了一个软件系统中什么是允许的，什么是不允许的。Policies specify what is and what is not permissible on a software system.
+- **政策规定了一个软件系统中什么是允许的，什么是不允许的**。Policies specify what is and what is not permissible on a software system.
   - 它本质上是一本规则手册。It is a rulebook essentially.
-- 机制在软件中执行政策。Mechanisms enforce the policies in software.
+- **机制**在软件中执行政策。Mechanisms enforce the policies in software.
   - 为了保障我们迄今为止所讨论的属性。To safeguard the properties that we have discussed thus far.
+  - 注意机制不总是和软件挂钩
 
 # ===================
 
@@ -268,11 +275,12 @@ Definition. Let 𝑈 be a set of entities and let 𝜓 be some information. Then
   - 一个脆弱的状态可能会导致违反安全/隐私政策。A vulnerable state may result in the violation of security/privacy policy.
   - **攻击是**一组将**系统的状态转移到脆弱状态**的行动。An attack is a set of actions that moves the state of a system to a vulnerable one.
   - 安全的软件工程试图**减轻甚至防止攻击的发生**。Secured Software Engineering attempts to mitigate or even prevent attacks from occurring.
-- 我们将在本课程的后期对威胁进行全面的讲授。We will have a full lecture on threats later in the course.
 
 # 政策满足：Policy Satisfaction
 
 ![](/static/2022-03-09-20-52-46.png)
+
+:orange: **根据分析来确定机制是否能满足政策**
 
 - 所选机制是否符合政策？Does a chosen mechanism satisfy a policy?
 - 可以通过分析来研究这个问题。Can investigate this by analysing:
@@ -282,7 +290,7 @@ Definition. Let 𝑈 be a set of entities and let 𝜓 be some information. Then
 
 ---
 
-- 政策规定有什么允许不允许的状态，机制防止系统从安全状态转移到非安全状态，**基于两个基本假设**。Based on two fundamental assumptions:
+- <font color="deeppink">政策规定有什么允许不允许的状态，机制防止系统从安全状态转移到非安全状态，**基于两个基本假设</font>**。Based on two fundamental assumptions:
 
 1.	政策被适当地指定。The policy is properly specified.
 2.	机制被正确执行。The mechanisms are correctly implemented.
@@ -294,7 +302,7 @@ Definition. Let 𝑈 be a set of entities and let 𝜓 be some information. Then
 
 - **对于机制**。For the mechanism:
 
-1.	在执行中必须是没有错误的。Must be error free in the implementation.
+1.	在**执行中必须是没有错误的**。Must be error free in the implementation.
 
 ---
 
@@ -320,27 +328,29 @@ Definition. Let 𝑈 be a set of entities and let 𝜓 be some information. Then
 
 # 可信任的机制应满足(要求): Trusting mechanisms
 
-- **可信机制的工作需要一些假设**。Trusting that mechanisms work requires some assumptions:
-  - **每个机制都是为了实现安全策略的一个或多个部分**。Each mechanism is designed to implement one or more parts of the security policy.
-  - 它们结合在一起以满足整个政策。They combine to satisfy the policy as a whole.
-  - 这些机制应该被正确地实施。The mechanisms should be implemented correctly.
-  - 机制应该被正确地安装和管理 The mechanisms should be installed and administered correctly
-  - 也就是说，使用这些机制的人应该知道如何正确使用它们。i.e. humans that use such mechanisms should be aware of how to use them properly.
+**可信机制的工作需要一些假设**。Trusting that mechanisms work requires some assumptions:
+
+- **每个机制都是为了实现安全策略的一个或多个部分**。Each mechanism is designed to implement one or more parts of the security policy.
+- 它们**结合在一起以满足整个政策**。They combine to satisfy the policy as a whole.
+- 这些**机制应该被正确地实施**。The mechanisms should be implemented correctly.
+- **机制应该被正确地安装和管理** The mechanisms should be installed and administered correctly
+- 也就是说，**使用这些机制的人应该知道如何正确使用它们**。i.e. humans that use such mechanisms should be aware of how to use them properly.
 
 # 访问控制机制：Access Control Mechanisms
 
 "旨在检测和拒绝未经授权的访问，并允许对信息系统的授权访问"。“Aims to detect and deny unauthorized access and permit authorized access to an information system”.
 
-- **有两种基本的访问控制方式**。There are two fundamental flavours of access control:
-    - 1.	**自由裁量**。Discretionary:
-      - 个人用户控制ACL以允许或拒绝对某物的访问。Individual users control ACLs to permit or deny access to something.
-      - **信息的拥有者可以决定如何控制它**。Owners of information are left to decide how to control it.
-      - Discretionary Access Control (DAC)
-    - 2.	**强制性的【MAC**】。Mandatory:
-      - Mandatory Access Control (MAC)
-      - 通常在操作系统中讨论。**系统控制谁**可以访问数据。Commonly discussed in operating systems. System controls who has access to data.
-      - 对象访问的规则**不是由用户控制**的。Rules for object access are not controlled by users.
-      - **MAC使用一套预定义的规则来允许/拒绝对资源的访问，不受终端用户的直接控制**。MAC uses a set of predefined rules to permit/deny access to resources and is not under the direct control of end users.
+**有两种基本的访问控制方式**。There are two fundamental flavours of access control:
+
+- 1.	**自由裁量**。Discretionary:
+  - 个人用户控制ACL以允许或拒绝对某物的访问。Individual users control ACLs to permit or deny access to something.
+  - **信息的拥有者可以决定如何控制它**。Owners of information are left to decide how to control it.
+  - Discretionary Access Control (DAC)
+- 2.	**强制性的【MAC**】。Mandatory:
+  - Mandatory Access Control (MAC)
+  - 通常在操作系统中讨论。**系统控制谁**可以访问数据。Commonly discussed in operating systems. System controls who has access to data.
+  - 对象访问的规则**不是由用户控制**的。Rules for object access are not controlled by users.
+  - **MAC使用一套预定义的规则来允许/拒绝对资源的访问，不受终端用户的直接控制**。MAC uses a set of predefined rules to permit/deny access to resources and is not under the direct control of end users.
 - **有许多访问控制的变体，其中大多数都以某种方式与自由裁量或强制方法有关**。There are numerous variants of access control, most of them relate to either discretionary or mandatory approaches in one way or another.
 
 # 状态，机制&政策：Protection Software
@@ -375,7 +385,9 @@ Definition. Let 𝑈 be a set of entities and let 𝜓 be some information. Then
 - **所有权限的集合 𝑅** Set of all rights 𝑅
   - **对对象允许或不允许的行动/操作**。Actions/operations that are either allowed or disallowed on objects.
 
-## 例子1
+# ACM例子
+
+## 1
 
 ![](/static/2022-03-09-22-00-27.png)
 
@@ -385,7 +397,7 @@ Definition. Let 𝑈 be a set of entities and let 𝜓 be some information. Then
   - **描述某物上可以有某人做什么（同一种资源，其他人可以做什么**） Describes what can be done to something by someone
   - ACL告诉我们可以对一个对象做什么，这是通过一个列来传达的。 an ACL tells us what can be done on an object, this is conveyed through a column.
 - M1,M1
-  - cyclic privileges on itself, have the ability to read or wrtie on itself
+  - 主体循环特权，cyclic privileges on itself, have the ability to read or wrtie on itself
 
 ## 例子2
 
@@ -396,6 +408,7 @@ Definition. Let 𝑈 be a set of entities and let 𝜓 be some information. Then
 1.**信息禁锢问题**。Information Confinement Problem:
 
 * **无法确定是否存在任何机制，使【被授权】访问一个对象的主体【可能将该对象中包含的信息泄露】给其他【未被授权】访问该对象的主体**。It is impossible to determine whether there is any mechanism by which a subject authorized to access an object may leak information contained in that object to some other subject not authorized to access that object.
+  * 一个授权的主体可能将信息泄露给别的未授权的主体，，没有机制来保证机密性
 
 2.**信息敏感度问题**。Information Sensitivity Problem:
 
@@ -464,7 +477,7 @@ Definition. Let 𝑈 be a set of entities and let 𝜓 be some information. Then
 # （BLP）Bell-LaPadula Model
 
 - 一种信息保密模型。An information confidentiality model.
-- 结合了**强制性（安全级别）和DAC自由决定访问控制（需要许可**）。Combines mandatory (security levels) and discretionary (permission required)
+- 结合了**强制性MAC（安全级别）和DAC自由决定访问控制（需要许可**）。Combines mandatory (security levels) and discretionary (permission required)
 - 开发于20世纪70年代 Developed in the 1970s
 
 ---
@@ -519,11 +532,13 @@ general representation
 
 # 下面BLP原则后续要参考dom
 
-# 读取规则：Reading Information
+# 读取规则-simple security：Reading Information
 
 “read ups" are not allowed, "read downs" are allowed 不允许“向上读”，允许“向下读” ( **模型是基于mandatory access control mechanisms，主体基于discretionary mechanisms** ）
 
 1. **Simple Security Property**
+
+![](/static/2022-04-27-01-35-42.png)
 
 * **如果𝐿(𝑜)≤𝐿(𝑠)，并且𝑠有权限读取𝑜，则主体𝑠可以读取对象𝑜**。Subject 𝑠 can read object 𝑜 iff 𝐿(𝑜) ≤ 𝐿(𝑠) and 𝑠 has permission to read 𝑜
   * read downs permission
@@ -533,11 +548,13 @@ general representation
 
 **阻止主体读取更高层次的物体**（禁止向上读取规则）Prevents subjects from reading objects at higher levels (**no read up rule**)
 
-# 写入规则：Writing Information
+# 写入规则-star：Writing Information
 
 “write ups” allowed, “write downs” disallowed
 
 1. star Property (*property)
+
+![](/static/2022-04-27-01-36-55.png)
 
 * **如果𝐿(𝑠)≤𝐿(𝑜)并且𝑠有权限写入𝑜，则主体𝑠可以写入对象𝑜**。Subject 𝑠 can write object 𝑜 iff 𝐿(𝑠) ≤ 𝐿(𝑜) and 𝑠 has permission to write 𝑜
 * 防止主体往较低层次写入对象（没有写下规则）Prevents subjects from writing objects at lower levels (no write down rule)
@@ -545,7 +562,7 @@ general representation
 * 结合后面的dom关系就是扩展成
   * iff L(s)≤𝐿(o), and C(s) ⊆ C(o)
 
-# 读写规则：Reading Writing Information
+# 读写规则-strong star：Reading Writing Information
 
 Read/write up and down is not allowed.
 
@@ -556,9 +573,9 @@ Strong Star Property (Strong *property)
 * **如果𝐿(𝑠)= 𝐿(𝑜)，并且𝑠有权限写入𝑜，则主体s可以写入对象𝑜**。Subject 𝑠 can write object 𝑜 iff 𝐿(𝑠) = 𝐿(𝑜) and 𝑠 has permission to write 𝑜
 * **防止主体读写更高或更低层次的对象**（没有向上/向下读/写规则）Prevents subjects from reading and writing objects at higher or lower levels (no read/write up/down rule)
 
-# 保护原则: Principles of Protection
+# 保护-设计原则: Principles of Protection
 
-- **指导原则--最小特权原则**。Guiding principle – principle of least privilege.
+- **设计指导原则【lecture1】--最小特权原则**。Guiding principle – principle of least privilege.
   - **主体应该在一个对象上被赋予【足够的特权】来完成他们的任务**。Subjects should be given just enough privileges on an object to perform their tasks.
 - **需要知道的原则**。Need to know principle.
   - **主体应该只能够访问那些目前需要完成其工作的对象**。Subjects should only be able to access those objects that are currently required to complete their jobs.
@@ -598,9 +615,9 @@ secret level情况下，还需要考虑catrgories (what category applicable to a
   - 秘密，{NUC，ASI}。`Secret, {NUC, ASI}`
   - 根据这种notion，可以表示出domination relationship
 
-# Dominate (dom) Relationship
+# dom支配性-解决ACM：Dominate (dom) Relationship
 
-支配性检查是一种逻辑规则，它结合了安全和类别检查来确定访问权。解决了ACM所带来的问题•	Dominance checking is a logical rule that incorporates both security and category checks to determine access rights.
+支配性检查是一种逻辑规则，它**结合了安全和类别检查来【确定访问权】。解决了ACM所带来的问题** •	Dominance checking is a logical rule that incorporates both security and category checks to determine access rights.
 
 - 捕获**安全分类(许可)和类别集**的组合。Captures the combination of **security classification and category set**.
   - 消除combination of sensitivity levels & category sets. 然后根据一系列操作，决定who is access to what and in what capacity
@@ -663,21 +680,23 @@ confinement 问题--假设保罗被批准进入安全级别(Secret, {EUR, US, NU
 
 Identify all possible ways that users can interact with objects to maintain confidentiality based on the simple security property.
 
+![](/static/2022-04-27-01-48-36.png)
+
 * **如果𝐿(𝑜)≤𝐿(𝑠)，并且𝑠有权限读取𝑜，则主体𝑠可以读取对象𝑜**。Subject 𝑠 can read object 𝑜 iff 𝐿(𝑜) ≤ 𝐿(𝑠) and 𝑠 has permission to read 𝑜
   * read downs permission
   * lateral read permission
 
 # Summary (Principles)
 
-- BLP模式使我们能够解决信息禁锢和信息敏感性的表达问题。BLP model allows us to address the issue of information confinement and the expression of information sensitivity.
+- **BLP模式使我们能够解决信息禁锢和信息敏感性的表达问题**。BLP model allows us to address the issue of information confinement and the expression of information sensitivity.
 - BLP在3个原则上运作。BLP operates on 3 principles.
   - **简单安全原则**，这涉及到阅读权限。Simple, which concerns read permissions.
   - **`*`**，涉及写权限。* which concerns write permissions.
   - **强***，涉及读和写的权限。`Strong *` which concerns read and write permissions.
 - 保密性政策通常不关心完整性。Confidentiality policies typically do not care about integrity.
-  - 强*是一个例外。The strong * is an exception to this.
+  - <font color="deeppink">强*是一个例外</font>。The strong * is an exception to this.
 - **分类和类别**通常被用来确定用户对哪些对象有什么权限。Classifications(security clearance) and categories are typically used to determine what permissions users have with what objects.
-  - 支配性检查涉及检查分类和类别的成员资格 Dominance checking concerns checking classification and category memberships
+  - **支配性检查涉及检查分类和类别的成员资格** Dominance checking concerns checking classification and category memberships
 
 # =====================
 
@@ -711,23 +730,25 @@ Identify all possible ways that users can interact with objects to maintain conf
 2. **防止【授权用户】进行不正当或未经授权的修改**。Preventing authorized users from making improper or unauthorized modifications.
 3. **保持数据和程序的内部和外部一致性**Maintaining internal and external consistency of data and programs
 
-# 商业完整性政策：Requirements of Commercial Integrity Policies (Lipner)
+# 商业完整性政策：Requirements of Commercial Integrity Policies (Lipner模型)
 
-1. 用户不会编写自己的程序，而是使用现有的生产程序和数据库。Users will not write their own programs but will use existing production programs and databases.
-2. 程序员将在一个非生产系统上开发和测试程序；如果他们需要访问实际数据，他们将通过一个特殊的程序获得生产数据，但将在自己的开发系统上使用。Programmers will develop and test programs on a non-production system; If they need access to actual data, they will be given production data via a special process but will use it on their own development systems.
-3. 必须遵循一个特殊的过程，将程序从开发系统安装到生产系统上。A special process must be followed to install a program from the development systems onto the production system.
-4. 要求3中的特殊过程必须被控制和审计。The special process in requirement 3 must be controlled and audited.
-5. 管理人员和审计人员必须能够接触到系统状态和生成的系统日志。The managers and auditors must have access to both the system state and the system logs that are generated.
+integrity auditing policy
 
-# 操作原则-完整策略：Integrity Policy - Principles of Opeartion
+1. 用户不会编写自己的程序，而是**使用现有的生产程序和数据库**。Users will not write their own programs but will use existing production programs and databases.
+2. 程序员将**在一个非生产系统上开发和测试程序**；如果他们需要访问实际数据，他们将通过一个特殊的程序获得生产数据，但将在自己的开发系统上使用。Programmers will develop and test programs on a non-production system; If they need access to actual data, they will be given production data via a special process but will use it on their own development systems.
+3. **必须遵循一个特殊的过程，将程序从开发系统安装到生产系统上**。A special process must be followed to install a program from the development systems onto the production system.
+4. 要求3中的**特殊过程必须被控制和审计**。The special process in requirement 3 must be controlled and audited.
+5. **管理人员和审计人员必须能够接触到系统状态和生成的系统日志**。The managers and auditors must have access to both the system state and the system logs that are generated.
+
+# 操作原则-完整性策略：Integrity Policy - Principles of Opeartion
 
 - 有两个操作原则。There are two principles of operation:
 
-* 业务分离：不应允许单个人执行一项关键功能的所有步骤。Separation of Duty: Single person should not be allowed to carry out all steps of a critical function.
-  - 将一个程序从开发中转移到生产中。Moving a program from Development to production.
+* **业务分离：不应允许单个人执行一项关键功能的所有步骤**。Separation of Duty: Single person should not be allowed to carry out all steps of a critical function.
+  - 将一个程序从**开发中转移到生产**中。Moving a program from Development to production.
   - 一个程序的开发者和认证者（安装者）Developer and Certifier (installer) of a program
   - 授权支票和兑现支票。Authorizing checks and cashing them.
-* 函数分离。Separation of function:
+* **函数分离**。Separation of function:
   - **不要在开发系统上处理生产数据**。Do not process production data on a development system.
 
 # Biba完整性级别=分类+类别集：Integrity Levels
@@ -750,7 +771,7 @@ Identify all possible ways that users can interact with objects to maintain conf
 
 # 类别集：Set Categories
 
-- **标签中包含的【类别集合】将【是系统中所有集合的主体**】。The set of categories contained in the label will be a subject of all the sets in the system.
+- **标签中包含的【类别集合】将是【系统中所有集合的主体**】。The set of categories contained in the label will be a subject of all the sets in the system.
 - **类别集的分类是不分等级的**。The classification of the set of categories is non-hierarchical.
 
 ---
@@ -767,7 +788,7 @@ Identify all possible ways that users can interact with objects to maintain conf
 - 完整性等级由**标签定义**，由两部分组成。Integrity levels are defined by labels, consisting of two parts:
   - 一个**分类**。A classification.
   - 一组**类别集**。A set of categories.
-- 完整性等级被赋予系统中的主体和对象。Integrity levels are given to the subjects and objects in the systems.
+- 完整性等级被赋予系统中的**主体**和**对象**。Integrity levels are given to the subjects and objects in the systems.
 - **完整性标签规定了可以放在数据中的信任程度** Integrity labels specify the degree of confidence that may be placed in the data.
 
 ---
@@ -788,12 +809,12 @@ Identify all possible ways that users can interact with objects to maintain conf
 
 # 访问模式（访问权）：Access Modes
 
-Biba模型由以下访问权限组成。The Biba model consists of the following access rights:
+**Biba模型**由以下访问权限组成。The Biba model consists of the following access rights:
 
-- **修改**：允许一个主体对一个对象进行写入。Modify: allows a subject to write to an object.
-- **观察**：允许一个主体读取一个对象。这个命令与其他模型的读关系是同义的。Observe: allows a subject to read an object. This command is synonymous with the read relation of other models.
-- **调用**。允许一个主体与另一个主体交流。Invoke: Allows a subject to **communicate** with another subject.
-- **执行**。允许一个主体执行一个对象。该命令本质上允许一个主体执行一个作为对象的程序。Execute: Allows a subject to execute an object. The command essentially allows a subject to execute a program which is the object.
+- **修改**：允许一个主体对一个对象进行写入。**Modify**: allows a subject to write to an object.
+- **观察**：允许一个主体读取一个对象。这个命令与其他模型的读关系是同义的。**Observe**: allows a subject to read an object. This command is synonymous with the read relation of other models.
+- **调用**。允许一个**主体与另一个主体交流**。**Invoke**: Allows a subject to **communicate** with another subject.
+- **执行**。允许一个主体执行一个对象。该命令**本质上允许一个主体执行一个作为对象的程序**。**Execute**: Allows a subject to execute an object. The command essentially allows a subject to execute a program which is the object.
 
 # Summary
 
@@ -802,6 +823,7 @@ Biba模型由以下访问权限组成。The Biba model consists of the following
   - 就像BLP对保密性能的操作一样。Like how BLP operates with confidentiality properties.
 - 完整性策略一般不关心保密性。Integrity policies generally don't care about confidentiality.
   - 同样地，保密性政策通常也不关心完整性。Likewise, confidentiality policies typically don't care about integrity.
+    - BLP strong star一个例外
 - **Lipner模型是Biba模型在商业环境中的一个改编**。Lipner model is an adaptation of Biba model for commercial environments.
   - 在企业中以某种形式普遍使用。Commonly used in enterprise in some form.
 
@@ -814,26 +836,30 @@ Biba模型由以下访问权限组成。The Biba model consists of the following
 - Biba模型是一个不同政策的系列。The Biba model is a family of different policies.
 - 该模型的目标是**防止 "干净 "的高层实体被 "肮脏 "的低层实体所污染**。The goal of the model is to prevent the contamination of ‘clean’ high level entities from ‘dirty’ low level entities.
   - 这些都是相对的定义。These are relative definitions.
-- 该模型支持**强制性和自由裁量的政策**。The model supports both mandatory and discretionary policies.
+- 该模型支持**强制性MAC和自由裁量DAC的政策**。The model supports both mandatory and discretionary policies.
 
 # 严格完整性政策：Strict Integrity Policy
 
-The Strict Integrity Policy is the first part of the Biba model.
+The **Strict Integrity Policy** is the first part of the Biba model.
 
 组成
 
+![](/static/2022-04-27-02-13-20.png)
+
 * **Simple Integrity Condition**
-  * 𝑠 ∈ 𝑆 can observe 𝑜 ∈ 𝑂 iff 𝑖 𝑠	≤ 𝑖(𝑜)
+  * 𝑠 ∈ 𝑆 can observe 𝑜 ∈ 𝑂 iff 𝑖(𝑠)	≤ 𝑖(𝑜)
   * (“no read down”)
   * dom关系
-    * o dom s
+    * o dom s - C(s) ⊆ C(o)
 * **Integrity Star Property**
-  * 𝑠 ∈ 𝑆 can modify 𝑜 ∈ 𝑂 iff 𝑖 𝑜	≤ 𝑖 𝑠
+  * 𝑠 ∈ 𝑆 can modify 𝑜 ∈ 𝑂 iff 𝑖(𝑜)	≤ 𝑖 (𝑠)
   * (“no write-up”)
   * dom关系
-    * s dom o
+    * s dom o - C(o) ⊆ C(s)
 * **Invocation Property**
   * 𝑠1 ∈ 𝑆 can invoke 𝑠2 ∈ 𝑆 iff 𝑖(𝑠2)	≤ 𝑖(𝑠1)
+    * s1与本层和下层主体交流
+    * s1 dom s2 - C(s1) ⊆ C(s2)
 
 ---
 
@@ -859,7 +885,8 @@ no read down
 
 主体的低水印策略是**简单完整性条件（读）的一个放松的变体**。The low-watermark policy for subjects is a relaxed variant of the simple integrity condition.
 
-* 针对read没有限制，任何主体都能读object，但是之后主体完整性级别会变化
+* <font color="deeppink">针对read没有限制，任何主体都能读object，但是之后主体完整性级别会变化</font>
+* 前面simple integrity不能向下读
 
 组成
 
@@ -867,11 +894,12 @@ no read down
   * 如果s检查o，则 i'(s)=min(i(s), i(o))
     * i'(s)是读取后主体的完整性级别
   * ![](/static/2022-03-11-12-57-38.png)
-* * **Integrity Star Property**
+* * **Integrity Star Property**不变
   * 𝑠 ∈ 𝑆 can modify 𝑜 ∈ 𝑂 iff 𝑖 𝑜	≤ 𝑖 𝑠
   * (“no write-up”)
   * remains unmodified
-* **Invocation Property**
+  * s dom o
+* **Invocation Property**不变
   * 𝑠1 ∈ 𝑆 can invoke 𝑠2 ∈ 𝑆 iff 𝑖(𝑠2)	≤ 𝑖(𝑠1)
   * remains unmodified
 
@@ -891,6 +919,7 @@ The low-watermark policy for objects is a relaxed variant of the Integrity Star 
 * (调用和简单的完整性条件不受此政策的影响)(The invocation and simple integrity conditions are unaffected with this policy)
 * 对象的低水印政策也是一个动态政策，与主体的低水印政策类似。The low-watermark policy for objects is also a dynamic policy, similar to the low-watermark policy for subjects.
 - 这个政策的缺点是它**不能阻止一个不受信任的主体修改一个受信任的对象**。The disadvantage of this policy is it does nothing to prevent an untrusted subject from modifying a trusted object.
+  - 向上写
 - 许多人会认为这不是一个实用的政策。Many would argue that this is not a practical policy.
   - 至少实践中不那么可用
 
@@ -910,23 +939,24 @@ The low-watermark policy for objects is a relaxed variant of the Integrity Star 
   * 𝑠1 ∈ 𝑆 can invoke 𝑠2 ∈ 𝑆 iff 𝑖(𝑠2)	≤ 𝑖(𝑠1)
   * remains unmodified
 
-# 低水标完整性审计策略：Low-Watermark Integrity Audit Policy
+# (写)低水标完整性审计策略：Low-Watermark Integrity Audit Policy
 
 低水印完整性审计策略由以下规则组成。The low-watermark integrity audit policy consists of the following rules:
 
-1. 任何主体都可以修改任何对象，无论完整性等级如何。Any subject may modify any object, regardless of integrity levels.
+1. **任何主体都可以修改任何对象，无论完整性等级如何**。Any subject may modify any object, regardless of integrity levels.
 2. 如果一个主体**在更高的完整性级别上修改一个对象**（**一个更可信的对象**），**它将导致该交易被记录在审计日志中**。If a subject modifies an object at higher integrity level (a more trusted object) it results in the transaction being recorded in an audit log.
+   1. 向上写，会被记录在审计日志中
 
 - 这个策略的缺点是它**不能防止对一个对象的不正当修改**。The drawback to this policy is it does not prevent improper modifications to an object.
 - 这个政策类似于对象的低水标政策，除了在这种情况下，**对象的完整性等级不会被降低，而是被记录**。This policy is similar to the low-watermark for objects policy, except in this case the objects integrity level is not lowered, it is recorded.
 
-# Ring Policy
+# 环形策略: Ring Policy
 
-用于环形策略的完整性标签是固定的，类似于严格完整性策略中的标签。Integrity labels used for the ring policy are fixed similar to those in the strict integrity policy.
+用于**环形策略的完整性标签是固定的**，类似于严格完整性策略中的标签。Integrity labels used for the ring policy are fixed similar to those in the strict integrity policy.
 
 - 环形政策**允许任何主体观察任何物体**。这个政策**只关注直接修改**。The Ring Policy allows any subject to observe any object. This policy is only concerned with direct modification.
-- 这个策略的缺点是它**允许不正当的修改间接发生**。The drawback to this policy is that it allows improper modifications to indirectly take place.
-  - **一个主体可以读取一个不太信任的对象。然后该主体可以在自己的完整性级别上修改它所观察到的数据**。A subject can read a less trusted object. Then the subject could modify the data it observed at its own integrity level.
+- 这个策略的缺点是它**允许不正当的修改【间接】发生**。The drawback to this policy is that it allows improper modifications to indirectly take place.
+  - **一个主体可以读取一个不太信任的对象（向下读）。然后该主体可以在自己的完整性级别上修改它所观察到的数据（间接向上写**。A subject can read a less trusted object. Then the subject could modify the data it observed at its own integrity level.
   - 这方面的一个例子是，一个用户读了一个不太受信任的对象，然后后来以自己的完整性级别将该数据写入一个对象中。An example of this would be a user reading a less trusted object, then later write that data to an object at their own integrity level.
 
 组成
