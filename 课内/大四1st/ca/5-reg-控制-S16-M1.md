@@ -3,6 +3,7 @@
 * [Content](#content)
 * [Register Transfer Machine](#register-transfer-machine)
 * [Register File](#register-file)
+* [寄存器堆大小](#寄存器堆大小)
 * [Register and memory](#register-and-memory)
 * [寄存器文件的端口:Ports to the register file](#寄存器文件的端口ports-to-the-register-file)
 * [Register file black box](#register-file-black-box)
@@ -18,8 +19,8 @@
   * [Simulation Driver](#simulation-driver)
 * [========](#)
 * [Sigma16 architecture](#sigma16-architecture)
-* [Data types](#data-types)
-* [Registers and memory](#registers-and-memory)
+* [数据类型：Data types](#数据类型data-types)
+* [寄存器&内存：Registers and memory](#寄存器内存registers-and-memory)
 * [指令格式：Instruction formats](#指令格式instruction-formats)
   * [RRR指令：Representation of RRR instruction: one word](#rrr指令representation-of-rrr-instruction-one-word)
   * [RX指令：Representation of an RX instruction: two words](#rx指令representation-of-an-rx-instruction-two-words)
@@ -115,6 +116,16 @@
   * With names like R0, R1, R2, etc
 * Registers are implemented in a circuit called the register file 寄存器在称为寄存器文件的电路中实现
 * A register file can read or write a value, given the register number 给定寄存器编号，寄存器文件可以读取或写入值
+
+---
+
+# 寄存器堆大小
+
+在一个**小的寄存器文件**中，不会有足够的寄存器来容纳所有常用的变量。**程序将需要在内存中保存中间结果，并将其加载回来使用。这将导致执行许多额外的加载和存储指令，这特别昂贵，因为内存地址比处理器操作慢**。With a small register file, there won’t be enough registers to hold all the commonly used variables. The program will need to save intermediate results in memory, and load them back to use them. This will result in the execution of many additional load and store instructions, which is particularly expensive because memory addresses are slower than processor operations.
+
+对于一个**大得多的寄存器文件，不会比一个中等大小的文件有太大的好处，因为典型的循环不会使用数百个单独的标量变量**。但是**大的寄存器文件会降低时钟速度，因为它的地址解码树很可能在处理器的关键路径上**。此外，当一个**中断**发生时，它将需要更多的时间来保存状态。一般来说，**有必要将整个寄存器文件存储到内存中，所以如果寄存器的数量超过了实际需要，在每次中断时都会有很多不必要的内存访问。要有效地实现过程调用和返回，也可能变得更加复杂**。With a much larger register file, there won’t be much benefit over a moderate size one, as typical loops don’t use hundreds of individual scalar variables. But the large register file will slow down the clock speed, as its address decoder trees are likely to be on the critical path of the processor. Furthermore, it will take much more time to save state when an interrupt occurs. In general, it will be necessary to store the entire register file into memory, so if there are more registers than really needed, there will be a lot of unnecessary memory accesses on every interrupt. It may also become more complicated to implement procedure call and return efficiently.
+
+* 一个大的寄存器文件允许大量的变量保存在寄存器中，从而减少了所需的加载和存储指令的数量；这一点很重要，因为内存访问比寄存器中的算术慢得多。**一个大的寄存器文件需要更多的时间进行寄存器地址解码，需要更多的比特来指定一个寄存器，这可能会导致更大的指令大小，并产生更多的中断开销，因为寄存器的状态需要被保存和恢复。**  A large register file allows a large number of variables to be kept in registers, thus reducing the number of load and store instructions needed; this is significant since memory accesses are much slower than arithmetic in registers. A large register file requires more time for register address decoding, requires more bits to specify a register which could lead to larger instruction size, and produces more overhead for interrupts as the register state needs to be saved and restored.
 
 # Register and memory
 
@@ -214,13 +225,38 @@ effect & outputs
 
 ![](/static/2021-11-09-19-57-47.png)
 
-# Data types
+# 数据类型：Data types
 
 ![](/static/2021-11-09-20-00-58.png)
 
-# Registers and memory
+操作数16bit
+
+# 寄存器&内存：Registers and memory
 
 ![](/static/2021-11-09-20-09-03.png)
+
+有效地址
+
+Pc保存下一条指令的地址；每当机器语言程序的一个字被取走，控制算法就会增加pc。Pc holds the address of the following instruction; whenever a word of the machine language program is fetched the control algorithm increments pc.
+
+Ir保存着当前正在执行的指令，其中的字段被传送到寄存器文件以访问源寄存器和目的寄存器。控制算法还检查ir的操作码字段，以确定哪条指令正在被执行。Ir holds the instruction currently being executed, and fields within it are transmitted to the register file to access source and destination registers. The control algorithm also examines the opcode field of the ir to determine which instruction is being executed.
+
+ad寄存器保存双字指令的第二个字，在计算有效地址时作为一个临时变量使用。The ad register holds the second word of two-word instructions, and is used as a temporary variable while calculating effective addresses.
+
+---
+
+S16只有一种内存访问的寻址模式，由一个索引寄存器和一个16位位移组成。有效地址只是索引和位移的总和
+
+* 控制算法按以下步骤计算有效地址。
+  * (1)获取位移并加载到adr寄存器中；
+  * (2)将adr和reg[ir_sa]相加；总和就是有效地址并加载到adr中。
+* 访问一个静态变量：load R1,x[R0]，其中x是变量的地址；
+  * 这使用了R0总是包含0的不变性。 
+* 访问一个数组x[i]的元素：load R1,i[R0]，load R2,x[R1]。
+  * 这里的有效地址是x+i，也就是x[i]的位置。
+* 访问一个指针p的目标：load R1,p[R0], load R2,0[R1]。这里的有效地址是指针的值。
+  * R1 = 指针p指向的地址，，R1= mem[p]
+  * R2 = 解引p，值载入R2
 
 # 指令格式：Instruction formats
 
@@ -273,6 +309,12 @@ RX instructions
 # 为什么分开设计数据通路&控制电路：Why separate a design into datapath and control?
 
 ![](/static/2021-11-09-21-43-07.png)
+
+(1) 通过分而治之简化了设计，因为数据通路和控制通常具有相似的复杂性。(1)	Simplifies design through divide and conquer, as the datapath and control are typically of similar complexity.
+
+(2) 控制被自然地指定为具有解释器结构的算法，所以它的设计与软件类似。(2)	The control is specified naturally as an algorithm with the structure of an interpreter, so it can be designed similarly to software.
+
+(3) 有几种不同的方法可以从控制算法中合成控制电路，因此将控制表达为一种算法可以使设计者有多种选择。(3)	There are several different ways to synthesise a control circuit from a control algorithm, so expressing the control as an algorithm keeps the designer’s options open.
 
 # Review of Sigma16: Instruction formats
 

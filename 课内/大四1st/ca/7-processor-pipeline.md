@@ -2,11 +2,11 @@
 
 * [Content](#content)
 * [指令周期、机器周期和时钟周期](#指令周期机器周期和时钟周期)
-* [改进执行时间：Execution time](#改进执行时间execution-time)
+* [CPU性能方程-改进执行时间：Execution time](#cpu性能方程-改进执行时间execution-time)
 * [方法-减少执行时间:Approach for reducing execution time](#方法-减少执行时间approach-for-reducing-execution-time)
 * [硬件并行性：Parallelism in computer systems(hardware)](#硬件并行性parallelism-in-computer-systemshardware)
 * [==========](#)
-* [电路重定时：Retiming](#电路重定时retiming)
+* [电路重定时(加快时钟频率）：Retiming](#电路重定时加快时钟频率retiming)
 * [重定时缩减关键路径例子](#重定时缩减关键路径例子)
 * [流水线：Pipelining](#流水线pipelining)
 * [流水线化RRR指令流例子：Pipelining a stream of RRR Instruction](#流水线化rrr指令流例子pipelining-a-stream-of-rrr-instruction)
@@ -22,7 +22,8 @@
 * [实现转发：Implementing bypassing](#实现转发implementing-bypassing)
 * [控制冒险：Control Hazards](#控制冒险control-hazards)
 * [流水线效率：Performance of pipelining](#流水线效率performance-of-pipelining)
-* [流水线ISA设计：Impact of instruction set on pipelining](#流水线isa设计impact-of-instruction-set-on-pipelining)
+* [流水线&ISA设计-提高性能：Impact of instruction set on pipelining](#流水线isa设计-提高性能impact-of-instruction-set-on-pipelining)
+* [流水线效率局限](#流水线效率局限)
 * [==========](#-1)
 * [超标量：superscalar](#超标量superscalar)
 * [执行单元：Functional units](#执行单元functional-units)
@@ -37,6 +38,8 @@
 * [忙位-指令发射：Issuing an instruction](#忙位-指令发射issuing-an-instruction)
 * [忙位-指令执行：executing the instruction](#忙位-指令执行executing-the-instruction)
 * [忙位策略局限：Limitations of busy bits scheme](#忙位策略局限limitations-of-busy-bits-scheme)
+* [无CDB（保留站）例子](#无cdb保留站例子)
+* [====================](#-2)
 * [保留站：Reservation stations](#保留站reservation-stations)
 * [保留站例子2](#保留站例子2)
 * [公共数据总线：Common Data Bus (CDB), Difficulties with busy bits](#公共数据总线common-data-bus-cdb-difficulties-with-busy-bits)
@@ -44,29 +47,51 @@
 * [CDB-指令发射：Issuing an instruction](#cdb-指令发射issuing-an-instruction)
 * [CDB-功能单元完成: when a functional unit finishes](#cdb-功能单元完成-when-a-functional-unit-finishes)
 * [CDB例子](#cdb例子)
+* [CDB文字例子](#cdb文字例子)
 * [使用CDB意义->Registers are no longer a bottleneck](#使用cdb意义-registers-are-no-longer-a-bottleneck)
-* [==========](#-2)
+* [==========](#-3)
 * [历史影响和当前意义：Historical impact and current significance](#历史影响和当前意义historical-impact-and-current-significance)
 * [数据流：dataflow-beyond the CDB](#数据流dataflow-beyond-the-cdb)
 * [执行单元调度：Scheduling functional units](#执行单元调度scheduling-functional-units)
-* [==========](#-3)
+* [==========](#-4)
 
 # 指令周期、机器周期和时钟周期
 
 ![](/static/2022-04-27-23-11-52.png)
 
-# 改进执行时间：Execution time
+# CPU性能方程-改进执行时间：Execution time
 
 目标：**减少程序的总CPU执行时间**•	Goal: reduce the total CPU execution time of programs
 
 - **I = 指令的数量（ISA，编译器技术**） –	I = number of instructions (ISA, compiler technology)
 - **CPI = 每条指令的平均周期数(组织，ISA**) –	CPI = average number of cycles per instruction (organisation, ISA)
 - **T = 时钟周期时间(硬件技术，组织**) –	T = clock cycle time (hardware technology, organisation)
-- CPU性能方程。	CPU_time = I × CPI × T •	CPU performance equation:	**`CPU_time = I × CPI × T`**
+- CPU性能方程。	**`CPU_time = I × CPI × T`** •	CPU performance equation:	**`CPU_time = I × CPI × T`**
   - **要减少CPU_时间，就必须减少这个乘积**•	To reduce CPU_time it's necessary to reduce this product
     - 不仅仅是乘积的一个组成部分!–	Not just one component of the product!
 - <font color="red">有些 "优化 "在减少一个因素的同时增加另一个因素</font> •	Some “optimisations” reduce one factor while increasing another
   - 而且它们实际上会使执行时间恶化 –	And they actually worsen the execution time
+
+---
+
+(d) 考虑一个32位的处理器，其数据通路有4个阶段(IF, RF, OP, WR)，并假设。1) 一个**全加器的延迟是2ns**; 2) **关键路径的延迟是由ALU电路决定的，它在OP阶段**。使用性能方程(CPU时间=I x CPI x T)计算以下情况下单条指令的平均执行时间：
+
+* i)一个顺序处理器和用行波进位加法器实现的ALU；i) a sequential processor and the ALU implemented with a ripple carry adder;
+* ii)一个顺序处理器和用**超前进加法**器实现的ALU；ii) a sequential processor and the ALU implemented with a fast adder;
+* iii)一个流水线处理器(假设完美流水线)和用行波进位加法器实现的ALU； iii) a pipelined processor (assume perfect pipelining) and the ALU implemented with a ripple carry adder; 
+* iv)一个流水线处理器(假设完美流水线)和用快速加法器实现的ALU。iv) a pipelined processor (assume a perfect pipelining) and the ALU implemented with a fast adder. What is the fastest case? Explain why.
+
+什么是最快的情况？解释一下原因。
+
+* 时钟周期T是由关键路径的延迟给出的，**使用行波进位加法器是32 x 2ns = 64ns，使用快速加法器是log2 32 x 2ns = 10ns**。
+* **顺序处理器的CPI是4(4阶段数据通路)，而【完美】流水线处理器的CPI是1**。
+* 那么，四种情况下的CPU时间是： 
+  * i) 1 x 4 x 64ns = 256ns; 
+  * ii) 1 x 4 x 10ns = 40ns; 
+  * iii) 1 x 1 x 64ns= 64ns; 
+  * iv) 1 x 1 x 10ns = 10ns。
+
+最快的情况显然是iv），因为它使用了最好的电路设计技术，即完美的流水线和快速加法器。
 
 # 方法-减少执行时间:Approach for reducing execution time
 
@@ -90,7 +115,7 @@
 # 硬件并行性：Parallelism in computer systems(hardware)
 
 - **电路层面：使用硬件算法来降低关键路径**•	Circuit level: use hardware algorithms to lower critical path
-  - 重定时，快速加法器–	Retiming, fast adder
+  - **重定时，快速加法器**–	Retiming, fast adder
 - **指令层面：多个指令同时执行（单处理器**）。•	Instruction level: multiple instructions executed concurrently (uniprocessor)
   - **指令部分重叠：流水线**–	Instructions partially overlapped: pipelining
   - **执行重叠（多个执行单元）：超标量**、VLIW、EPIC –	Execution overlapped (multiple execution units): superscalar, VLIW, EPIC
@@ -102,7 +127,7 @@
 
 # ==========
 
-# 电路重定时：Retiming
+# 电路重定时(加快时钟频率）：Retiming
 
 > 重定时改变了一个系统的状态表示，但是并不改进它的逻辑行为。通常用它来平衡一个流水线系统中各个阶段之间的延迟
 
@@ -142,6 +167,7 @@
 
 ![](/static/2022-04-26-02-03-52.png)
 
+- <font color="red">每个指令都需要几个时钟周期，因为各步骤之间存在数据依赖关系。【然而，一条指令的一个步骤和下一条指令的前一个步骤之间往往没有数据依赖关系。例如，一条指令可能在执行算术运算的同时，下一条指令访问其寄存器，而后一条指令则从缓存中加载】。理论上最大的改进是4倍，但是流水线的加速系数一般会小于阶段的数量</font>。Each instruction requires several clock cycles, because of data dependencies between the steps. However, there are often no data dependencies between one step of an instruction and an earlier step of the following instruction. For example an instruction might be executing an arithmetic operation in parallel with the following instruction accessing its registers and the instruction after that being loaded from cache. The theoretical maximum improvement would be 4x, but a pipeline will generally give a speedup factor less than the number of stages
 - 每条指令都需要几个必须依次执行的步骤•	Each instruction requires several steps that must be performed in sequence
 - 数据通路包含**每个步骤**的**硬件（一个阶段**）。•	The datapath contains hardware (a stage) for each step
 - 思路：**在一个时钟周期内，每个阶段都在处理一个单独的指令**•	Idea: during a clock cycle, every stage is working on a separate instruction
@@ -250,6 +276,9 @@ IF、RF、OP、WR
 **先写后读相关性（RAW**）。	R7 :=R2-R3; R6 :=R7+R4•	**Read after Write (RAW**)
 
 - 对R7的读取是在对R7的写入之后进行的，所以该写入的结果必须由读取得到。–	The read of R7 comes after the write to R7, so the result of that write must be obtained by the read
+- RAW危险是指一条指令将结果写入寄存器，下一条指令读取该寄存器，但**获得了错误的值，因为结果在被获取时还没有到达目的寄存器**。A RAW hazard is a situation where an instruction writes a result into a register, and the next instruction reads that register but obtains the wrong value because the result has not yet reached the destination register by the time it is being fetched.
+  - 例如：add **R1**,R2,R3; sub R4,**R1**,R5会导致一个RAW危险，因为sub指令是在add指令准备加载总和的同一周期内获取R1。For example: add R1,R2,R3; sub R4,R1,R5 causes an RAW hazard because the sub instruction is fetching R1 during the same cycle that the add instruction is preparing to load the sum into it.
+  - **控制可以通过比较回写阶段的目标寄存器和执行阶段的两个操作数寄存器来检测**；如果其中任何一个相等，就有危险。在这种情况下，**控制器可以暂停流水线**，让加法完成，同时保留第二条指令。**另一种方法是使用转发：可以引入一个特殊的路径来连接ALU的输出（它有加法的结果）和子的操作数锁存器（绕过寄存器文件**）The control can detect this by comparing the destination register in the writeback stage with the two operand registers in the execute stage; if either of those is equal then there is a hazard. In this case the control can stall the pipeline, letting the add complete while holding back the second instruction. Another alternative is to use bypassing: a special path can be introduced to connect the output of the ALU (which has the result of the add) to the operand latch for the sub (bypassing the register file).
 
 **先读后写相关性（WAR**）。	R1 :=R2+R3; R2 :=R4+R5 •	**Write after Read (WAR**)
 
@@ -260,6 +289,10 @@ IF、RF、OP、WR
 
 - R2的最终值必须是result2，**但在WAW危险中，它是result1** –	The final value of R2 must be result2 but in a WAW hazard it's result1
   - 可能第二条指令先执行
+- WAW危险是指**两个连续的（或邻近的）指令都将其结果写入同一个寄存器，但第二条指令在第一条指令之前写入其结果；结果是指令顺序被错误地执行**（其效果与省略第二条指令相同）。A WAW hazard is a condition where two consecutive (or nearby) instructions both write their result to the same register, but the second instruction writes its result before the first one does; as a consequence the instruction sequence is executed incorrectly (the effect is the same as omitting the second instruction).
+- 解释什么是WAW（写后）流水线危险。解释为什么在ALU中执行所有计算的指令序列中不能发生WAW危险。解释为什么在一个有多个功能单元的处理器中，一个包含由功能单元执行的操作的指令序列可以发生WAW危险。
+  - 如果操作是在**ALU**中进行的（例如整数加法），第一条计算只需一个周期，并在第二条计算发生前完成，所以结果将以正确的顺序写入目标寄存器。If the operations are performed in the ALU (integer addition, for example) the first calculation will take only one cycle and will be ready before the second calculation takes place, so the results will be written to the destination register in the correct order.
+  - 然而，如果操作是在不同的**功能单元**中进行的，那么第一个操作有可能比第二个操作多花几个周期；在这种情况下，结果可能以错误的顺序写入目标寄存器。有几种技术可以防止这种错误的发生，包括繁忙位、公共数据总线和中央控制分析（记分牌）。However, if the operations are performed in separate functional units it is possible for the first one to take several cycles longer than the second; in this case the results may be written to the destination in the wrong order. There are several techniques for preventing this error from occurring, including busy bits, common data bus, and central control analysis (scoreboard).
 
 :orange: **注意，没有RAR危险**•	Note that there is no RAR hazard
 
@@ -298,12 +331,13 @@ IF、RF、OP、WR
   - 即，，，sub先执行
   - 那么sub将得到错误的值•	Then the sub would get the wrong value
 - <font color="deeppink">但是ALU在寄存器中出现结果之前就已经有了这个周期</font>。–	But the ALU has the result in the cycle before it appears in the register
-- 数据通路可以让sub从两个不同的位置获得第一个操作数：寄存器文件和ALU输出。•	The datapath can make the first operand available to the sub from two separate locations: the register file, and the ALU output
-  - 多路复用器在这两者之间进行选择（第二操作数也是如此）。–	A multiplexer selects between these (same for the second operand)
+- **数据通路可以让sub从两个不同的位置获得第一个操作数：寄存器文件和ALU输出**。•	The datapath can make the first operand available to the sub from two separate locations: the register file, and the ALU output
+  - **多路复用器mux**在这两者之间进行选择（第二操作数也是如此）。–	A multiplexer selects between these (same for the second operand)
   - multi inputs one output
 - <font color="red">控制单元检查后面阶段的目标字段和前面阶段的源字段</font>•	The control unit examines the destination field of the later stage and the source field of the earlier stage
   - RAW里面，write的目标和read的源
   - <font color="deeppink">如果它们相同，则设置多路复用器控制以选择ALU而不是第一个操作数的寄存器文件（否则，选中寄存器堆</font>。 If they are the same, it sets the multiplexor control to select the ALU rather than the register file for the first operand
+  - 控制可以通过比较**回写阶段的目标寄存器和执行阶段的两个操作数寄存器（irx_a, irx_b）来检测**；如果其中任何一个相等，就有危险。在这种情况下，控制器可以**暂停流水线**，让加法完成，同时保留第二条指令。另一种方法是**使用转发**：可以引入一个特殊的路径来连接ALU的输出（它有加法的结果）和子的操作数锁存器（绕过寄存器文件）The control can detect this by comparing the destination register in the writeback stage with the two operand registers in the execute stage; if either of those is equal then there is a hazard. In this case the control can stall the pipeline, letting the add complete while holding back the second instruction. Another alternative is to use bypassing: a special path can be introduced to connect the output of the ALU (which has the result of the add) to the operand latch for the sub (bypassing the register file).
 
 # 实现转发：Implementing bypassing
 
@@ -351,10 +385,13 @@ ALU_input_buffer_1 =
 - 最大可能的**提速**因素是**阶段的数量（IPC(instruction per cycle≈1**）•	The maximum possible speedup factor is the number of stages (IPC ≈ 1)
 - 在实践中，这很难实现(实践中，IPC < 1) • 	In practice, that is difficult to achieve (IPC < 1)
   - **暂停会降低性能，并不总是可以避免的** –	Stalls reduce performance and not always can be avoided
+    - 处理器的时钟速度通常要比内存速度快一个数量级。这意味着，如果不仔细设计，流水线在每次加载或存储时都需要停顿。此外，流水线还需要等待许多周期来获得下一条指令。The processor clock speed is typically almost an order of magnitude faster than memory speed. This means that, without careful design, the pipeline would need to stall for every load or store. Furthermore, the pipeline would need to wait many cycles to obtain the next instruction.
   - **所有的指令都必须经过相同的阶段，即使其中一些指令可以用更少的阶段来解决** –	All instructions must go through the same stages, even if some of them could be solved with fewer stages
   - **在不同阶段完成的工作可能需要不同的时间，但所有阶段都必须以最慢的速度运行** –	The work done in different stages might require different time, but all stages have to run at the speed of the slowest
 
-# 流水线ISA设计：Impact of instruction set on pipelining
+# 流水线&ISA设计-提高性能：Impact of instruction set on pipelining
+
+解释为什么内存访问会导致流水线性能不佳。描述在系统执行**包含加载和存储指令**的程序时，可以使用三种技术来提高其性能
 
 - **ISA的设计可以简化流水线，也可以使其变得复杂和无效**•	ISA can be designed to ease pipelining or to make it complex and ineffective
   - 例如，复杂的阶段会减缓时钟周期–	E.g. complex stages slow the clock period
@@ -364,6 +401,24 @@ ALU_input_buffer_1 =
 - RISC解决方案：不要引入以下指令•	RISC solution: don’t introduce instructions that
   - 需要较慢的时钟–	Require a slower clock
   - 干扰优化技术（分支延迟槽等）。–	Interfere with optimisation techniques (branch delay slots, etc)
+
+处理器的时钟速度通常要比内存速度快一个数量级。这意味着，如果**不仔细设计，流水线在每次加载或存储时都需要停顿。此外，流水线还需要等待许多周期来获得下一条指令**。The processor clock speed is typically almost an order of magnitude faster than memory speed. This means that, without careful design, the pipeline would need to stall for every load or store. Furthermore, the pipeline would need to wait many cycles to obtain the next instruction.
+
+- 这个问题可以通过**指令缓存**来解决，这样几乎所有的指令都可以在一个周期内从缓存中获取。对于数据访问，高速缓存（无论是一般的高速缓存，还是特定的数据高速缓存）可以将大多数访问的时间减少到一个周期。-	That problem is solved using an instruction cache, so that almost all instructions will be fetched from the cache in one cycle. For data access, a cache (either a general cache, or a specific data cache) can reduce the time for most accesses to one cycle.
+- 另一种技术是使用交错存储器，它允许对连续地址的访问同时进行。这有助于在实际需要数据之前的几个周期启动内存访问。-	Another technique is the use of interleaved memory, which allows accesses to consecutive addresses to take place concurrently. This is assisted by initiating memory accesses several cycles before the data will actually be needed.
+- **RISC架构**也有助于将常用的数据保存在寄存器中，从而**减少内存访问的数量**。-	RISC architectures also help by keeping commonly used data in registers, thus reducing the number of memory accesses.
+  - 寄存器足够大
+- 另外，流水线可以被组织起来，以便**在等待内存访问时完成有用的工作**（例如，**分支延迟槽**）。-	Also, the pipeline can be organised so that useful work may get done while waiting for memory accesses (e.g. branch delay slots).
+
+# 流水线效率局限
+
+- <font color="red">每个指令都需要几个时钟周期，因为各步骤之间存在数据依赖关系。【然而，一条指令的一个步骤和下一条指令的前一个步骤之间往往没有数据依赖关系。例如，一条指令可能在执行算术运算的同时，下一条指令访问其寄存器，而后一条指令则从缓存中加载】。理论上最大的改进是4倍，但是流水线的加速系数一般会小于阶段的数量</font>。Each instruction requires several clock cycles, because of data dependencies between the steps. However, there are often no data dependencies between one step of an instruction and an earlier step of the following instruction. For example an instruction might be executing an arithmetic operation in parallel with the following instruction accessing its registers and the instruction after that being loaded from cache. The theoretical maximum improvement would be 4x, but a pipeline will generally give a speedup factor less than the number of stages
+
+:orange: 流水线 speedup factor小于number of stages原因
+
+* 1）所有指令都必须经过相同的阶段序列，即使不同的指令可能需要不同的步骤序列。1)	all instructions have to go through the same sequence of stages even though different instructions might require different sequences of steps;
+* 2）有时会有数据依赖，如RAW危害，可能需要停顿流水线。2)	there are sometimes data dependencies, such as RAW hazards, that may require stalling the pipeline;
+* 3）不同的阶段可能有不同的路径深度，但都必须以最慢的速度进行计时。3)	different stages may have different path depths but all have to be clocked at the speed of the slowest.
 
 # ==========
 
@@ -559,6 +614,8 @@ ALU被限制在组合逻辑中可以在一个时钟周期内快速执行的操�
 
 # 忙位策略局限：Limitations of busy bits scheme
 
+没保留站，如果有数据依赖，暂停流水线 【【如果执行单元不可用也得停？
+
 这个计划很容易满足前两个要求•	This scheme easily meets the first two requirements
 
 - 识别依赖关系–	Recognise dependencies
@@ -566,6 +623,27 @@ ALU被限制在组合逻辑中可以在一个时钟周期内快速执行的操�
 
 - 第三个要求（独立指令进行,**允许独立指令提前执行（乱序执行））需要编译器的帮助**•	Third requirement (independent instructions proceed) requires compiler help
   - **为了使独立指令重叠，必须使用不同的寄存器**–	To overlap independent instructions different registers must be used
+
+# 无CDB（保留站）例子
+
+在下面的指令序列中，请说明哪些操作可以立即发给一个功能单元，哪些操作会使流水线停滞，以及为什么。
+
+```
+sub R3,R4 
+div R1,R2 
+div R5,R3 
+sub R1,R5
+```
+
+* 可以将R3和R4的内容发给加法器，因为两个寄存器都不忙。R3被标记为忙。
+* 第一条除法指令可以将R1和R2发给除法器，因为它们都不忙（没有数据依赖）。
+* **第二条除法指令现在发现R3是忙的，所以它停顿下来。这就保证了程序的正确执行**
+  * 流水线必须暂停，不准进行任何步骤，没有保留站
+  * 数据依赖
+* 当第一条sub指令完成后，它将结果加载到R3中，然后流水线可以向除法器发出第二条除法指令，也将R5标记为忙。
+* 第二条sub指令因为R5繁忙而停顿，当第二次除法完成后，sub指令可以继续进行。**因此，繁忙位机制通过暂停流水线来确保数据的依赖性，同时允许独立的计算继续进行**。
+
+# ====================
 
 # 保留站：Reservation stations
 
@@ -686,6 +764,24 @@ ALU被限制在组合逻辑中可以在一个时钟周期内快速执行的操�
 ![](/static/2022-04-29-19-46-40.png)
 ![](/static/2022-04-29-19-57-20.png)
 ![](/static/2022-04-29-20-05-49.png)
+
+# CDB文字例子
+
+说明第一次除法的结果如何绕过R5，而直接进入保留站进行第二次除法。 = =、、什么b问法
+
+```
+div R5,R2,R3; 
+div R6,R5,R2; 
+sub R5,R2,R2;
+```
+
+1. 管道通过将操作数发送到一个**除数保留站**来发出**第一个div**，它将**R5标记为忙**，并给它一个标签，以识别将产生结果的保留站。The pipeline issues the first div by sending the operands to a divisor reservation station, and it marks R5 as busy and gives it a tag identifying the reservation station that will be producing the result
+
+2. 然后流水线发出第二个除法，并将其操作数发送到一个（不同的）保留站；现在R5的内容是标签，而不是实际的数字数据。**特别是，流水线不会因为R5在忙时被取走而暂停**。The pipeline then issues the second div, and sends its operands to a (different) reservation station; the contents of R5 now are the tag, not actual numeric data. In particular, the pipeline does not stall because R5 was fetched while busy.
+
+3. 现在流水线发出sub指令（**第一个除法可能还在运行，因为它只过了两个时钟周期**）。sub指令发出了它的操作数，但是由于减法是一个更快的操作，<font color="red">它的结果将在第二次除法的结果**之前**（甚至可能在第一次除法完成之前）**出现**。这个结果被加载到R5中，R5不再繁忙</font>。 The pipeline now issues the sub instruction (and the first divide is probably still running, as it’s only two clock cycles later). The sub issues its operands, but since the substraction is a faster operation, its result will become available before the result of the second divide (and possibly even before the completion of the first divide).This result is loaded into R5, which is no longer busy.
+
+4. 同时，当**第一次除法完成**后，功能单元在**CDB上广播结果和标签，CDB与所有的保留站、寄存器和存储缓冲器相连**。分配给**第二次除法**的预留站将其第一个操作数的标签与CDB上的标签进行比较，**发现匹配，它就从CDB上加载数据值。这标志着操作数准备就绪，功能单元(第二个div)启动**。因此，架构已经将每个数据值传送到需要它的地方，但第一次除法的结果绕过了R5。  Meanwhile, when the first division finishes, the functional unit broadcasts the result and tag on the CDB, which is connected to all reservation stations, registers, and store buffers. The reservation station allocated to the second division compares its first operand tag with the tag on the CDB, finds a match, and it loads the data value from the CDB. This marks the operand as ready, the functional unit fires. Thus the architecture has transmitted each data value to where it is needed, but the result of the first divide bypasses R5.
 
 # 使用CDB意义->Registers are no longer a bottleneck
 

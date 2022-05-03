@@ -4,9 +4,7 @@
 * [Technology Trends](#technology-trends)
 * [Back to the early 2000s….](#back-to-the-early-2000s)
 * [为什么需要多核处理器](#为什么需要多核处理器)
-* [Recent chip multiprocessors (2018)](#recent-chip-multiprocessors-2018)
-* [2020](#2020)
-* [Amdahl’s law & efficiency](#amdahls-law--efficiency)
+* [算：Amdahl’s law & efficiency](#算amdahls-law--efficiency)
 * [多核处理器分类：Multiprocessor Types](#多核处理器分类multiprocessor-types)
 * [核内通信模型：Inter-processor communication models](#核内通信模型inter-processor-communication-models)
 * [共享内存-优缺点：Shared Memory](#共享内存-优缺点shared-memory)
@@ -37,15 +35,15 @@
 ![](/static/2022-04-30-23-35-21.png)
 ![](/static/2022-04-30-23-33-09.png)
 
-# Recent chip multiprocessors (2018)
+<!-- # Recent chip multiprocessors (2018)
 
 ![](/static/2022-04-30-23-36-00.png)
 
 # 2020
 
-![](/static/2022-04-30-23-36-16.png)
+![](/static/2022-04-30-23-36-16.png) -->
 
-# Amdahl’s law & efficiency
+# 算：Amdahl’s law & efficiency
 
 ![](/static/2022-04-30-23-37-37.png)
 
@@ -57,7 +55,14 @@
 
 ![](/static/2022-04-30-23-39-21.png)
 
+* **speedup factor**
 * 60%未被使用
+
+:orange: 流水线 speedup factor小于number of stages原因
+
+* 1）所有指令都必须经过相同的阶段序列，即使不同的指令可能需要不同的步骤序列。1)	all instructions have to go through the same sequence of stages even though different instructions might require different sequences of steps;
+* 2）有时会有数据依赖，如RAW危害，可能需要停顿流水线。2)	there are sometimes data dependencies, such as RAW hazards, that may require stalling the pipeline;
+* 3）不同的阶段可能有不同的路径深度，但都必须以最慢的速度进行计时。3)	different stages may have different path depths but all have to be clocked at the speed of the slowest.
 
 ---
 

@@ -31,18 +31,21 @@
 * [缓存组成：Whats in the cache](#缓存组成whats-in-the-cache)
 * [缓存命中：Cache hits and misses](#缓存命中cache-hits-and-misses)
 * [缓存块：Cache Block](#缓存块cache-block)
-* [缓存映射方式-缓存块位置：Cache Block Placement](#缓存映射方式-缓存块位置cache-block-placement)
+* [==============](#-3)
+* [缓存映射算法/方式-缓存块位置：Cache Block Placement](#缓存映射算法方式-缓存块位置cache-block-placement)
 * [缓存映射-查缓存：Searching the cache](#缓存映射-查缓存searching-the-cache)
 * [直接映射缓存：Direct Mapped Cache](#直接映射缓存direct-mapped-cache)
 * [全相联映射缓存:fully associative cache](#全相联映射缓存fully-associative-cache)
 * [组相联映射缓存：Set associative cache](#组相联映射缓存set-associative-cache)
+* [3个对比](#3个对比)
 * [CAM内容可寻址存储器: content addressable memory](#cam内容可寻址存储器-content-addressable-memory)
+* [==============](#-4)
 * [缓存算法(缓存满)](#缓存算法缓存满)
 * [缓存写模式（策略）：Cache Write Strategies](#缓存写模式策略cache-write-strategies)
 * [缓存写未命中情况](#缓存写未命中情况)
 * [多级缓存：Multi-Level Caches](#多级缓存multi-level-caches)
 * [Summary缓存问题：Cache Issues](#summary缓存问题cache-issues)
-* [========](#-3)
+* [========](#-5)
 * [虚拟内存:Virtual Memory](#虚拟内存virtual-memory)
 * [虚存其他功能：Additional Functions of Virtual memory](#虚存其他功能additional-functions-of-virtual-memory)
 * [虚存 vs 缓存：Virtual memory vs cache](#虚存-vs-缓存virtual-memory-vs-cache)
@@ -66,10 +69,10 @@
 * [内存保护：Basic Memory Protection](#内存保护basic-memory-protection)
 * [特权指令：Privileged Instructions](#特权指令privileged-instructions)
 * [系统状态-用户/核心态：System State](#系统状态-用户核心态system-state)
-* [========](#-4)
+* [========](#-6)
 * [虚拟机：Virtual Machines](#虚拟机virtual-machines)
 * [系统虚拟化实现：Implementing system virtualisation](#系统虚拟化实现implementing-system-virtualisation)
-* [========](#-5)
+* [========](#-7)
 
 # Review:三层次架构 Three Aspects of Computer Architecture
 
@@ -140,22 +143,46 @@ ISA编码：每条指令有多少位？•	Encoding the ISA: How many bits per i
 
 # CISC vs RISC
 
+<font color="red">RISC架构一般在一条指令中只做一个操作，如算术操作或内存访问。由于CISC指令通常在一条指令中进行多项操作，因此一个程序可能需要较少的CISC指令</font>
+
+程序的执行速度取决于时钟速度和每条指令的平均周期数；它并不取决于指令的数量【感觉这点有点奇怪】CPU=I * CPI*Time... The speed of program execution depends on the clock speed and the average number of cycles per instruction; it does not depend on the number of instructions. 
+
 CISC：复杂指令集计算机•	CISC: Complex Instruction Set Computer
 
 - **复杂指令（HLL特性-high level langugage）=>简单编译器(因为指令本身足够复杂?** –	Complex instructions (HLL features-high level langugage) => simple compiler
+  - 指令的语义更接近于高级编程语言。困难但常见的计算由指令来支持  Instructions have semantics closer to high level programming languages. Difficult but common computations are supported by instructions.
+  - 减少了编译器设计的复杂度
 - **寄存器数量少（过去，内存 "快"）=>内存操作数** –	Small number of registers (memory “fast”) => in-memory operands
-- **代码大小小，=>每条指令的时钟周期数高**–	Code size small => high number of clock cycles per instruction
+  - 寄存器数量少，导致存储临时变量，寄存器不够用情况下，要多次访问内存（将临时结果写入内存），效率低
+- **代码大小小，=>每条指令的执行时钟周期数高**–	Code size small => high number of clock cycles per instruction
+  - 对象代码更小，因为一条编码指令可以执行多个操作 Object code is smaller, because a single encoded instruction can perform several operations.
+  - 每条指令要更长的执行周期
 - **复杂而缓慢的解码=>变长指令**–	Complex and slow decoding => variable length instructions
 - **向后兼容的=>复杂性随时间增长**–	Backward compatibility => complexity grows over time
+  - 如果架构提供可写的控制存储，就有可能根据应用的需要调整指令集 There is the potential for adjusting the instruction set to the needs of the application, if the architecture provides writable control store.
 
 RISC。精简指令集计算机•	RISC: Reduced Instruction Set Computer
 
 - **简单的指令（标准化的）=>复杂编译器(因为简单指令要转换成高级表达**–	Simple instructions (standarised) => complex compiler
-- **大量的寄存器（内存非常慢）=>加载-存储架构**–	Large number of registers (memory very slow) => load-store architecture
+  - **但是RISC程序指令数量多**，，程序的大部分时间是在**循环**中度过的，而**指令缓存**使RISC机器几乎能以时钟速度获取指令；**由于这个原因，较多的指令数量并不会导致速度减慢** The crucial point is that programs spend most of their time in loops, and an instruction cache enables a RISC machine to fetch instructions at almost clock speed; for this reason the higher number of instructions does not lead to a slowdown.
+  - **需要更多【访存取指令**】，，RISC指令只执行一个操作，与CISC相比，执行一个计算需要更多的指令，有些指令执行几个操作。More memory accesses for instructions: RISC instructions perform just one operation, and more of them are needed to perform a computation than for CISC, where some instructions perform several operations.
+  - 需要高速缓存。因此，需要取用更多的RISC指令。**如果没有高速缓冲存储器，这将导致RISC的速度减慢，因为较慢的存储器访问将导致净减慢，而且流水线也不会有效，因为它将经常在存储器上停滞**。幸运的是，指令访问有很大的位置性，因为程序大部分时间都是在**循环**中度过的，这使得缓存存储器能够给指令提供有效的访问时间，从而使流水线的运行速度接近峰值。Need for cache: Therefore a larger number of RISC instructions need to be fetched. Without cache memory, this would cause a slowdown on RISC because the slower memory access would cause a net slowdown, and the pipeline wouldn’t be effective because it would frequently stall on the memory. Fortunately, instruction accesses have a great deal of locality because programs spend most of their time in loops, and that enables cache memory to give an effective access time for instructions that can keep the pipeline operating at close to peak speed.
+- **大量的寄存器（访存操作非常慢）=>加载-存储架构**–	Large number of registers (memory very slow) => load-store architecture
+  - <font color="red">更少的内存访问数据【访存取数据少】。RISC架构通常有一个较大的寄存器文件，允许在一长串指令中保持更多的变量在快速寄存器中被访问。CISC架构通常有从内存中获取一个或多个操作数的指令，这比寄存器到寄存器的操作要慢。</font>
   - 任何内存操作都需要涉及寄存器，，不能直接操作内存
+  - **大的寄存器文件**允许将数据保存在寄存器中，<font color="deeppink">不需要将临时结果写入内存，从而减少了内存访问的次数</font> The large register file allows data to be kept in registers, without the need to write temporary results to memory, thus reducing the number of memory accesses
+  - 一个大的寄存器文件允许大量的变量保存在寄存器中，从而减少了所需的加载和存储指令的数量；这一点很重要，因为内存访问比寄存器中的算术慢得多。**一个大的寄存器文件需要更多的时间进行寄存器地址解码，需要更多的比特来指定一个寄存器，这可能会导致更大的指令大小，并产生更多的中断开销，因为寄存器的状态需要被保存和恢复。**  A large register file allows a large number of variables to be kept in registers, thus reducing the number of load and store instructions needed; this is significant since memory accesses are much slower than arithmetic in registers. A large register file requires more time for register address decoding, requires more bits to specify a register which could lead to larger instruction size, and produces more overhead for interrupts as the register state needs to be saved and restored.
+    - 其他的局限&优点看L5 寄存器堆大小
+- ==============
 - **代码大小大 =>每条指令的时钟周期数低**–	Code size large  low number of clock cycles per instruction
+  - CPI减少
+  - RISC架构的设计是为了**尽量减少时钟周期，并通过使用流水线和其他形式的指令级并行来减少每条指令的周期**  A RISC architecture is designed to minimize the clock period and to reduce cycles per instruction by using pipelining and other forms of instruction level parallelism
 - **简单而快速地解码=>固定长度/格式的指令**–	Simple and fast decoding  fixed length/format instructions
+  - (RISC）指令具有相同的大小（或只有几个大小），简化了指令的获取。所有指令只经过两到三种执行模式中的一种，这意味着**流水线**可以有一个规则的结构 (RISC) Instructions have the same size (or just a couple of sizes), simplifying the fetching of instructions. All instructions go through one of just two or three patterns of execution, which means the pipeline can have a regular structure. 
+  - 指令集可以有一些特点（如延迟分支、寄存器窗口等），**提高流水线的性能或减少内存访问的数量** The instruction set can have features (such as delayed branches, register windows, etc.) that improves performance of the pipeline or reduces the number of memory accesses. 
 - **向后兼容更简单**–	Backward compatibility => much simpler
+- <font color="red">其他优点</font>
+  - 避免了会延长关键路径的操作；指令集被设计成使流水线有效并减少停顿；当流水线停顿时可以进行有用的工作（例如分支延迟槽）. Many reasons can be given that RISC may be faster: operations that would lengthen the critical path are avoided; the instruction set is designed to make pipelining efficient and to reduce stalls; useful work can be done when the pipeline stalls (e.g. branch delay slots).
 
 # ========
 
@@ -166,7 +193,7 @@ RISC。精简指令集计算机•	RISC: Reduced Instruction Set Computer
 ISA可以**按照指令中明确规定的操作数进行分类**•	ISAs may be categorised by the number of operands explicitly specified in instructions
 
 - **0-address结构**。操作数是通过**压栈弹栈**来访问的–	0-address architecture: The operands are accessed by pushing and popping a stack
-- **1-address结构**。**只有一个隐含使用的寄存器，并指定一个内存地址**–	1-address architecture: There is exactly one register, used implicitly, and one memory address is specified
+- **1-address结构**。**只有一个隐含使用的寄存器（AC,累加器），并指定一个内存地址**–	1-address architecture: There is exactly one register, used implicitly, and one memory address is specified
 - **2-address结构**。**典型的指令用一个寄存器指定一个操作数和一个内存地址**–	2-address architecture: Typical instructions specify one operand in a register and a memory address
 - **3-address结构**。典型的指令**指定两个操作数和一个结果，都在寄存器中**；<font color="red">内存访问是通过特殊的Load和Store指令（如sigma16、MIPS等）。</font> –	3-address architecture: Typical instructions specify two operands and one result, all in registers; memory accesses are via special Load and Store instructions (e.g. sigma16, MIPS, etc)
 - **k-address结构**。指令有可变的大小（如英特尔x86）。–	k-address architecture: Instructions have variable sizes (e.g. Intel x86)
@@ -177,9 +204,11 @@ ISA可以**按照指令中明确规定的操作数进行分类**•	ISAs may be 
 
 **大多数指令不包含地址**，所以**操作数的位置必须隐含地指定，如寄存器的栈顶**•	Most instructions contain no address, so the locations of the operands must be specified implicitly, as the top of a stack of registers
 
-- `push x`: 从地址x的内存中获取一个字，并将其推到寄存器堆栈中。–	push x: fetches a word from memory at address x and pushes it onto the register stack
-- `pop x`：从寄存器堆栈中取出一个字，并将其存储在地址为x的内存中。–	pop x: pops a word from the register stack, and stores it in memory at address x
+- 在前面的操作数先压，优先
+- `push x`: 从**地址x的内存中获取**一个字，并将其推到寄存器堆栈中。–	push x: fetches a word from memory at address x and pushes it onto the register stack
+- `pop x`：从寄存器堆栈中取出一个字，并将其**存储在地址为x的内存**中。–	pop x: pops a word from the register stack, and stores it in memory at address x
 - `neg`：从堆栈中取出一个字，对其进行否定，并将结果推回堆栈中。–	neg: pops a word from the stack, negates it, and pushes the result back onto the stack
+  - **无访存**
 - `add, sub, mul, div`: **弹出堆栈两次**，对两个数据值进行操作，并将结果推到堆栈中。–	add, sub, mul, div: pop the stack twice, performs the operation on the two data values, and push the result onto the stack
 
 # 0-Address优点&局限
@@ -205,11 +234,14 @@ ISA可以**按照指令中明确规定的操作数进行分类**•	ISAs may be 
 
 在许多早期的大型计算机中使用的一种风格，如IBM 7040。•	A style used in many early mainframe computers, such as IBM 7040
 
+- <font color="red">注意写的时候不要打乱顺序。。。下面先做加法是可以优化的，但是括号算术顺序被打乱= = 好像不让这么写</font>
 - **有一个寄存器，称为累加器**；因为<font color="red">只有一个，所以指令不需要明确地指定它</font>	There is one register, called the accumulator; since there is only one, the instructions don't need to specify it explicitly
 - `Load x`: **从地址x的内存中获取一个字，并将其加载到累加器中(`AC := x`)** –	Load x: fetches a word from memory at address x and loads it into the accumulator (AC := x)
 - `Store x`: **将累加器的值存储到内存地址x (`x := AC`)**–	Store x: stores the accumulator value into memory address x (x := AC)
 - `Add x`: **从内存地址 x 取出一个字，并把它加到累加器 (`AC := AC + x`)**–	Add x: fetches word from memory at address x, and adds it to the accumulator (AC := AC + x)
-- **乘法和除法**：**使用另一个隐式寄存器来保存一个额外的字**，允许双字乘法和除法。–	Multiplication and division: use another implicit register to hold an extra word, allowing for double word products and dividends
+  - 。。。加减乘除都是存入AC,但是 加减乘除让带一个直接操作数，，div b就是AC:= 别的操作数 / b
+  - <font color="red">先算术操作，，然后AC内存操作</font>
+- **乘法和除法**：**使用另一个【隐式寄存器】来保存一个额外的字**，允许双字乘法和除法。–	Multiplication and division: use another implicit register to hold an extra word, allowing for double word products and dividends
 
 # 1-Address架构优点&局限
 
@@ -224,15 +256,17 @@ ISA可以**按照指令中明确规定的操作数进行分类**•	ISAs may be 
 
 # 2-Address指令： 2-Address Instructions
 
+> 2-address结构。典型的指令用一个寄存器指定一个操作数和一个内存地址– 2-address architecture: Typical instructions specify one operand in a register and a memory address
+
 ![](/static/2022-04-24-22-38-24.png)
 
 **许多CISC和RISC机器都属于这一类别**•	Many CISC and RISC machines fall under this category
 
 - 例子：用于IBM 360的寄存器-寄存器操作（CISC）。•	Example: used for the register-register operations of the IBM 360 (CISC)
-- 由于一个典型的指令**有两个操作数和一个结果，所以有必要覆盖其中一个操作数**•	Since a typical instruction has two operands and a result, it is necessary to overwrite one of the operands
+- 由于一个典型的指令**有两个操作数和一个结果，所以有必要【覆盖】其中一个操作数**•	Since a typical instruction has two operands and a result, it is necessary to overwrite one of the operands
   - `AR 2,3`（"寄存器相加"）在IBM 360上意味着**Reg2 := Reg2 + Reg3** –	AR 2,3 (“add register”) on the IBM 360 means Reg2 := Reg2 + Reg3
   - `MR 2,3`（"移动寄存器"）在IBM 360上意味着**Reg2 :=Reg3** –	MR 2,3 (“move register”) on the IBM 360 means Reg2 := Reg3
-  - **加载和存储指令在内存和寄存器之间移动数据**–	Load and store instructions move data between memory and registers
+  - 【**加载和存储】指令在内存和寄存器之间移动数据**–	Load and store instructions move data between memory and registers
 - 也有一些机器使用双地址指令，操作数都在内存中。•	There have also been some machines with 2-address instructions with both operands in memory
 
 # 2-Address指令优点&局限
@@ -250,10 +284,13 @@ ISA可以**按照指令中明确规定的操作数进行分类**•	ISAs may be 
 
 # 3-Address指令：3-Address Instructions
 
+> 3-address结构。典型的指令指定两个操作数和一个结果，都在寄存器中；内存访问是通过特殊的Load和Store指令（如sigma16、MIPS等）。 – 3-address architecture: Typical instructions specify two operands and one result, all in registers; memory accesses are via special Load and Store instructions (e.g. sigma16, MIPS, etc)
+
 ![](/static/2022-04-24-22-44-20.png)
 
 大多数操作**有两个操作数和一个结果，都是明确规定的**•	Most operations have two operands and a result, all specified explicitly
 
+- 算术加减乘除等操作，**不会覆盖某寄存器**
 - 在早期的超级计算机（控制数据6600及其后续产品）、现代RISC架构（MIPS和SPARC）和Sigma16中使用•	Used in early supercomputers (Control Data 6600 and its successors), modern RISC architectures (MIPS and SPARC) and Sigma16
 - `add R1,R2,R3`：**获取两个源寄存器的内容，执行操作，并将结果放在目标寄存器中（R1 := R2 + R3)**–	add R1,R2,R3: fetches the contents of two source registers, performs operation, and places the result in destination register (R1 := R2 + R3)
 - `load R1,x`: **从地址x的内存中获取一个字，并将其加载到寄存器中（R1 := x**）。–	load R1,x: fetches a word from memory at address x and loads it into the register (R1 := x)
@@ -264,8 +301,9 @@ ISA可以**按照指令中明确规定的操作数进行分类**•	ISAs may be 
 - **操作数都是寄存器，所以可以紧凑地指定**。•	The operands are all registers, so they can be specified compactly
 - **加载/存储指令用于在内存和寄存器之间传输数据**•	Load/Store instructions used to transmit data between memory and registers
   - 它们是**唯一包含内存地址的指令**–	They are the only instructions that contain memory addresses
-- **有了合理数量的寄存器（通常是32个），就有可能把常用的数据保存在寄存器中**•	With a reasonable number of registers (typically 32 of them), it is possible to keep commonly-used data in registers
+- **有了【合理数量的寄存器】（通常是32个），就有可能把常用的数据保存在寄存器中**•	With a reasonable number of registers (typically 32 of them), it is possible to keep commonly-used data in registers
   - 这就**减少了内存访问所花费的时间**–	This reduces the time spent on memory accesses
+- 通常情况下，3地址指令集的性能最好，因为（1）**多次使用的变量，如a，可以在整个计算过程中留在寄存器中**，（2）不需要临时变量，因为**中间结果可以留在寄存器**中。Usually the 3-address instruction set will perform best, because (1) variables that are used several times, such as a, can be left in a register throughout the computation, and (2) temporary variables are not needed because intermediate results can be left in registers.
 
 # 寄存器&内存：Registers and Memory
 
@@ -436,7 +474,9 @@ ISA可以**按照指令中明确规定的操作数进行分类**•	ISAs may be 
 - **但同时也增加了缓存未命中的惩罚（更多的信息需要带来**）。–	But also increases the penalty of a cache miss (more info to bring)
   - 因为每个缓存块越大，，里面信息越多
 
-# 缓存映射方式-缓存块位置：Cache Block Placement
+# ==============
+
+# 缓存映射算法/方式-缓存块位置：Cache Block Placement
 
 内存地址有3种方式放入缓存（映射方式）
 
@@ -457,13 +497,16 @@ ISA可以**按照指令中明确规定的操作数进行分类**•	ISAs may be 
 - **最快**的方法：**直接映射**的高速缓存•	The quickest approach: direct mapped cache
   - **每个内存地址可以【精确】地进入一个高速缓存条目**–	Each memory address can go to exactly one cache entry
   - 只有**一个条目需要搜索**–	There is only one entry to search
+  - (1) 直接映射。主空间中的每个地址都被映射到高速缓存空间中的一个唯一的地址，例如，通过取地址的低阶k位，其中高速缓存包含2^k行。这就保证了一连串连续的内存位置将被映射到高速缓存的不同位置。(1)	direct mapped. Each address in primary space is mapped to a unique address in the cache space, e.g. by taking the lower order k bits of the address, where the cache contains 2^k lines. This ensures that a sequence of consecutive memory locations will be mapped to different locations in the cache.
 - **最通用**的方法：**全相连搜索**•	The most general approach: associative search
   - 每个内存地址可以进入**任何一个缓存条目**–	Each memory address can go to any cache entry
   - 我们需要**在所有的缓存条目中进行搜索**–	We need to search in all the cache entries
+  - 每个内存位置可以被放置在高速缓存中的任意位置。因此，**缓存行必须包含一个字的完整内存地址，以及该字的值**。fully associative. Each memory location could be placed at an arbitrary location in the cache. Thus the cache lines must contain the full memory address of a word, as well as the value of the word.
 - 一个**折中**的办法：**组相联映射缓存**•	A compromise: set associative cache
   - 每个内存地址都可以**进入一组缓存条目（2，4，8等**）。–	Each memory address can go to a set of cache entries (2, 4, 8, etc)
   - 我们只需要**在相应的缓存项集合中进行搜索**–	We need to search only in the corresponding set of cache entries
   - 大多采用这个方式
+  - 主空间中的每个地址都被映射到高速缓存空间中的一小部分可能的地址。对于一个4-way set associative cache来说，这可以通过生成一个初步的cache地址来完成，就像直接映射一样，但是要尝试所有2位的组合，这样每个内存地址就可以被放置在cache中4个可能的位置之一。set associative. Each address in primary space is mapped to a small set of possible addresses in the cache space. For a 4-way set associative cache, this may be done by generating a preliminary cache address as in direct mapped, but then by trying all combinations of a two bit field, so that each memory address could be placed in one of four possible locations in the cache.
 
 # 直接映射缓存：Direct Mapped Cache
 
@@ -498,6 +541,10 @@ ISA可以**按照指令中明确规定的操作数进行分类**•	ISAs may be 
   - 较高级别的缓存（L1）：2-或4-路通用–	Higher level caches (L1): 2- or 4-way common
   - 低级别的缓存（L2，L3）：8-32路通用–	Lower level caches (L2, L3): 8- to 32-way common
 
+# 3个对比
+
+直接映射需要简单的硬件，但是工作集中的几个字很有可能映射到同一个高速缓存行，从而导致该行重复的高速缓存丢失。这个问题在集合关联高速缓存中会大大减少，而且所需的额外硬件也相当小，因为每个地址在高速缓存中都只有一小部分可能的位置。一个完全关联的高速缓存可以确保由内存位置冲突引起的额外的高速缓存失误数量最小，但是它要求每一个高速缓存行都有一个比较器来检查该行的地址和一个广播内存地址。这就导致了在高速缓存中增加了大量的逻辑门，而且还需要一些额外的时间来检查高速缓存。因此，完全关联式通常在硬件复杂性和门延迟方面的成本太高，以至于无法证明它比集合关联式高速缓存更有优势。Direct mapped requires simple hardware, but there is a high probability that several words in the working set might map to the same cache line, resulting in repeated cache misses on that line. This problem is significantly reduced in a set associative cache, and the additional hardware required is fairly small because each address has only a small set of possible locations it could go in the cache. A fully associative cache ensures the minimal number of additional cache misses caused by memory placement conflicts, but it requires every cache line to have a comparator to check the line address against a broadcast memory address. This results in a very large amount of additional logic gates in the cache, and also takes some additional time for checking the cache. Thus fully associative is usually too costly, in both hardware complexity and gate delay, to justify its benefits over set associative cache.
+
 # CAM内容可寻址存储器: content addressable memory
 
 > 标准存储器RAM查找方式为通过地址查找相应地址的数据，而CAM为通过数据查找相应地址，实现了更快的数据搜索。
@@ -523,6 +570,8 @@ ISA可以**按照指令中明确规定的操作数进行分类**•	ISAs may be 
   - 一棵or-gates树可以在对数时间内确定是否存在匹配。–	A tree of or-gates can determine in logarithmic time if a match exists
 - **如果出现几个匹配，存储器必须解决这个问题**。•	If several matches occur, the memory must resolve this
   - 一个树状电路也可以在对数时间内确定一个唯一的响应者–	A tree circuit can also determine a unique responder in logarithmic time
+
+# ==============
 
 # 缓存算法(缓存满)
 
@@ -722,6 +771,7 @@ ISA可以**按照指令中明确规定的操作数进行分类**•	ISAs may be 
 > 动态地址转换（dynamic address translation，DAT）机制在运行期间把虚拟地址转换为物理地址。使用动态地址转换的系统具有以下特性：进程的虚拟地址空间中的连续地址在物理内存空间中不一定是连续的，即所谓的假临近（artificial contiguity）。
 
 - 当控制算法**计算出一个有效地址后，它需要从虚拟地址空间访问数据**•	When the control algorithm has calculated an effective address, it needs to access the data from the virtual address space
+  - 首先，有效地址被分割成一个页号和偏移量（这基本上不需要时间）。通过将页号加到页表地址寄存器中来计算页表项的地址（1ns）。**需要一个硬件内存访问来获取页表条目（10ns**）。这将被分析并提供帧地址，并将其添加到偏移量中（1ns）。最后在**真实地址上访问数据（10ns**）。总时间约为22ns。First the effective address is split into a page number and offset (this takes essentially no time). The address of the page table entry is calculated by adding the page number to the page table address register (1ns). A hardware memory access is needed to fetch the page table entry (10ns). This is analyzed and provides the frame address, which is added to the offset (1ns). Finally the data is accessed at the real address (10ns). The total time is about 22ns;
 - 这被称为**动态地址转换，要么**•	This is called dynamic address translation, either
   - 数据在一个帧中（**虚拟内存命中）：必须迅速找到实际的物理地址 (通过硬件**)–	The data is in a frame (virtual memory hit): the actual physical address must be found quickly! (by hardware)
   - 缺页错误（**虚拟内存未命中）：数据在磁盘上，必须启动I/O来获取数据（需要软件**）。–	Page fault (virtual memory miss): the data is on disk, and I/O must be started to get the data (requires software)
@@ -789,12 +839,13 @@ DAT算法的每一次内存访问都需要一个**额外的内存访问**•	The
 
 # TLB页表缓冲区-解决页表访问开销：Translation Lookaside buffer
 
-> 将一个虚拟地址放入MMU中进行转换时，硬件首先通过将该虚拟页号与TLB中所有表项同时(即并行)进行匹配，判断虛拟页面是否在其中。如果发现了一个有效的匹配并且要进行的访问操作并不违反保护位，则将页框号直接从TLB中取出而不必再访问页表。
+> 将一个虚拟地址放入MMU中进行转换时，硬件首先通过将该虚拟页号与TLB中所有表项同时(即并行)进行匹配，判断虛拟页面是否在其中。如果发现了一个有效的匹配并且要进行的访问操作并不违反保护位，**则将页框号直接从TLB中取出而不必再访问页表**。
 > 
 > 如果虚拟页号确实是在TLB中，但指令试图在一个只当虚拟页号不在TLB中时会怎样呢?如果MMU检测到没有有效的匹配项，就会进行正常的页表查询。接着从TLB中淘汰一个表项，然后用新找到的页表项代替它。这样，如果这一页面很快被再次访问。
 
 想法：为**页表中最活跃的页表项**引入一个特殊的缓存（称为TLB）。•	Idea: introduce a special cache (called the TLB) for the most active entries in the page table
 
+* 【无TLB情况】最重要的一点是，需要两次硬件内存访问。这意味着分页会使系统的速度降低2倍。然而，大多数分页表的访问可能是指一小部分活动页。TLB是一个特殊的高速缓存，用于保存页表中最活跃的部分。它有搜索电路，使用并行的硬件搜索来定位相关的页表条目。当TLB成功时，它避免了对页表的额外硬件内存访问，从而使速度提高了近2倍。The essential point is that two hardware memory accesses are required. This means that paging would slow the system down by a factor of 2. However, most page table accesses are likely to refer to a small set of active pages. A TLB is a special cache for holding the most active parts of the page table. It has searching circuitry to locate the relevant page table entry using a parallel hardware search. When the TLB succeeds, it avoids the extra hardware memory access to the page table, resulting in nearly a factor of 2 speedup.
 - 在每次**内存访问**时，都会**搜索该TLB缓存** •	On each memory access, the cache is searched
   - 通常情况下，它将**提供所需的页表项**–	Usually it will provide the needed page table entry
     - ![](/static/2022-04-25-22-09-15.png)
@@ -829,6 +880,14 @@ DAT算法的每一次内存访问都需要一个**额外的内存访问**•	The
   - 这就给架构**增加了限制（一些特权指令会产生一种特殊的异常，需要被拦截和仿真**）。–	This adds constraints to the architecture (some privileged instructions generate a special kind of exception to be intercepted and emulated)
 
 # 中断(OS,硬件)：Interrupts
+
+中断涉及访存，，下面是寄存器堆大小的影响
+
+在一个**小的寄存器文件**中，不会有足够的寄存器来容纳所有常用的变量。**程序将需要在内存中保存中间结果，并将其加载回来使用。这将导致执行许多额外的加载和存储指令，这特别昂贵，因为内存地址比处理器操作慢**。With a small register file, there won’t be enough registers to hold all the commonly used variables. The program will need to save intermediate results in memory, and load them back to use them. This will result in the execution of many additional load and store instructions, which is particularly expensive because memory addresses are slower than processor operations. 
+
+对于一个**大得多的寄存器文件，不会比一个中等大小的文件有太大的好处，因为典型的循环不会使用数百个单独的标量变量**。但是**大的寄存器文件会降低时钟速度，因为它的地址解码树很可能在处理器的关键路径上**。此外，当一个**中断**发生时，它将需要更多的时间来保存状态。一般来说，**有必要将整个寄存器文件存储到内存中，所以如果寄存器的数量超过了实际需要，在每次中断时都会有很多不必要的内存访问。要有效地实现过程调用和返回，也可能变得更加复杂**。With a much larger register file, there won’t be much benefit over a moderate size one, as typical loops don’t use hundreds of individual scalar variables. But the large register file will slow down the clock speed, as its address decoder trees are likely to be on the critical path of the processor. Furthermore, it will take much more time to save state when an interrupt occurs. In general, it will be necessary to store the entire register file into memory, so if there are more registers than really needed, there will be a lot of unnecessary memory accesses on every interrupt. It may also become more complicated to implement procedure call and return efficiently.
+
+---
 
 - **由【跳转指令以外的事件】启动的跳转（到操作系统**）。•	A jump (to the OS) initiated by an event other than a jump instruction
   - 无要求的跳转 –	Unrequested jumps
