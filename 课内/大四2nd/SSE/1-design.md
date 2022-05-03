@@ -335,3 +335,4 @@ Design is difficult because you are trying to abstract a solution which does not
 而且当你与项目经理沟通时，也是如此。你会希望以一种你想说他们的语言的方式与他们沟通，本质上，你不一定能在技术层面上与他们沟通，就像你与你的技术领导或你的同事一样， and again when you're communicating with project managers. You will want to communicate with them in a manner that you want to speak their language Essentially, you're not necessarily going to be able to communicate with them at the technical level, as you as you would your tech lead or your coworkers 
 
 这又回到了一个想法，<font color="deeppink">即有不同的抽象层次，软件系统的不同表现层次，我们希望能够对这些不同的表现层次进行某种分析。并交流我们为什么在这些不同层次的表述中做出这样的选择</font> ; and that sort of comes back to the idea that there are various levels of abstraction, various levels of representation of a software system, and we want to be able to Perform some sort of analysis on these different levels of representation. And communicate why we make the choices that we do at these various levels of representation.
+

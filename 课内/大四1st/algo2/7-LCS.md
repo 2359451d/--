@@ -7,10 +7,9 @@
 * [迭代-DP数组例子](#迭代-dp数组例子)
 * [迭代-复杂度分析](#迭代-复杂度分析)
 * [递归DP-LCS](#递归dp-lcs)
-  * [例子](#例子)
 * [记忆化搜索-避免重复计算：Avoiding repeated computation](#记忆化搜索-避免重复计算avoiding-repeated-computation)
   * [初始化-1例子：Example of lazy evaluation (an entry -1 indicates non-evaluation)](#初始化-1例子example-of-lazy-evaluation-an-entry--1-indicates-non-evaluation)
-* [避免初始化-使用“虚拟初始化” - Avoiding initialisation using “virtual initialisation”](#避免初始化-使用虚拟初始化---avoiding-initialisation-using-virtual-initialisation)
+* [避免全局数组初始化-使用“虚拟初始化” - Avoiding initialisation using “virtual initialisation”](#避免全局数组初始化-使用虚拟初始化---avoiding-initialisation-using-virtual-initialisation)
 * [===============](#)
 * [串局部相似度(最长公共子串?)-Local similarities in strings / texts](#串局部相似度最长公共子串-local-similarities-in-strings--texts)
   * [应用场景：Applications](#应用场景applications)
@@ -27,17 +26,23 @@
 
 ![](/static/2021-11-12-02-01-06.png)
 
-* 先找到前几个前缀的公共子序列长度
+* 先找到前几个**前缀的公共子序列**长度`fi,j`
   * Xi, X的前i个字符
   * Yj，Y的前j个字符
   * 注意都从1开始
 * 然后通过找到子前缀的公共子序列长度fi,j，延伸到整个X,Y的公共子序列长度fm,n
+* 初始状态 fi,0
+  * Y空串，与X无公共子序列
+* f0,j同理
 
 # Algorithm for Iterative DP
 
 (simple version – just to find LCS length)
 
-* 最简单迭代版本，只求LCS长度
+* 最简单迭代版本，只求**LCS长度**
+* 不匹配情况下，看上一次匹配位置的最大长度
+  * 在数组里表示，，i-1,j - 上面，i,j-1左边
+* 匹配情况下看 i-1,j-1 - 左上对角线
 
 ![](/static/2021-11-12-13-56-41.png)
 
@@ -45,32 +50,43 @@
 
 ![](/static/2021-11-12-14-08-34.png)
 
+如何根据DP数组得到LCS->回溯
+
+* 不匹配位置，fi,j值一定从左边或上面entry得来
+* 匹配位置，fi,j值一定从左上对角线来
+
 # 迭代-复杂度分析
 
 ![](/static/2021-11-12-14-28-44.png)
 
+* 时间空间都是O(mn)，2个for loop
+* 如果只求LCS长度，转移方程只需要前面一个row的信息，空间减少至O(n)
 * 递归可以优化
+  * lazy LCS evaluation, DP数组只有子集项需要被计算
 
 # 递归DP-LCS
 
 ![](/static/2021-11-12-14-31-52.png)
-
-## 例子
-
 ![](/static/2021-11-12-14-43-31.png)
 
 # 记忆化搜索-避免重复计算：Avoiding repeated computation
 
+lazy evaluation
+
 ![](/static/2021-11-12-14-48-18.png)
 ![](/static/2021-11-12-14-51-45.png)
 
-* 全局数组如果entry=-1，则还没有递归调用计算过。需要计算
+* 如果i,j未被计算过，直接走正常计算流程，并且值存进全局二维数组
+* 如果计算过，直接从二维数组中O(1)取值
+* 目标：随机获取i,j就能获取到值，并且要能与没被计算过的i,j区分开
+  * 全局数组如果初始化entry=-1，则还没有递归调用计算过。**但是意味着每个entry都要被计算**
+  * 如何不初始化所有格子？
 
 ## 初始化-1例子：Example of lazy evaluation (an entry -1 indicates non-evaluation)
 
 ![](/static/2021-11-12-14-55-29.png)
 
-# 避免初始化-使用“虚拟初始化” - Avoiding initialisation using “virtual initialisation”
+# 避免全局数组初始化-使用“虚拟初始化” - Avoiding initialisation using “virtual initialisation”
 
 ![](/static/2021-11-12-15-04-41.png)
 

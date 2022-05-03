@@ -1,6 +1,7 @@
 # Content
 
 * [Content](#content)
+* [指令周期、机器周期和时钟周期](#指令周期机器周期和时钟周期)
 * [改进执行时间：Execution time](#改进执行时间execution-time)
 * [方法-减少执行时间:Approach for reducing execution time](#方法-减少执行时间approach-for-reducing-execution-time)
 * [硬件并行性：Parallelism in computer systems(hardware)](#硬件并行性parallelism-in-computer-systemshardware)
@@ -10,16 +11,49 @@
 * [流水线：Pipelining](#流水线pipelining)
 * [流水线化RRR指令流例子：Pipelining a stream of RRR Instruction](#流水线化rrr指令流例子pipelining-a-stream-of-rrr-instruction)
 * [其他例子](#其他例子)
-* [完整指令集流水线：Pipeline for full instruction set](#完整指令集流水线pipeline-for-full-instruction-set)
+* [五级流水线-完整指令集流水线：Pipeline for full instruction set](#五级流水线-完整指令集流水线pipeline-for-full-instruction-set)
 * [流水线冒险：Pipeline Hazards](#流水线冒险pipeline-hazards)
 * [结构冒险: Structural hazards](#结构冒险-structural-hazards)
 * [数据冒险：Data Hazards](#数据冒险data-hazards)
 * [数据冒险分类（3情况）：classification of data hazards](#数据冒险分类3情况classification-of-data-hazards)
 * [检测数据冒险：Detecting data hazards](#检测数据冒险detecting-data-hazards)
 * [避免数据冒险：Handling data hazards](#避免数据冒险handling-data-hazards)
+* [数据冒险-RAW转发例子:Example of bypassing/forwarding](#数据冒险-raw转发例子example-of-bypassingforwarding)
+* [实现转发：Implementing bypassing](#实现转发implementing-bypassing)
+* [控制冒险：Control Hazards](#控制冒险control-hazards)
+* [流水线效率：Performance of pipelining](#流水线效率performance-of-pipelining)
+* [流水线ISA设计：Impact of instruction set on pipelining](#流水线isa设计impact-of-instruction-set-on-pipelining)
 * [==========](#-1)
+* [超标量：superscalar](#超标量superscalar)
+* [执行单元：Functional units](#执行单元functional-units)
+* [超标量控制：Superscalar control](#超标量控制superscalar-control)
+* [IBM system/360 Model 91](#ibm-system360-model-91)
+* [IBM360 Model 91 数据通路](#ibm360-model-91-数据通路)
+* [源汇：Source & sink](#源汇source--sink)
+* [数据通路-组件单元：Basic datapath :units](#数据通路-组件单元basic-datapath-units)
+* [数据通路-寄存器：Registers](#数据通路-寄存器registers)
+* [Tomasulo算法：Tomasulo's Algorithm](#tomasulo算法tomasulos-algorithm)
+* [Busy bit(繁忙位-保留指令流基本优先级Preservation of precedence](#busy-bit繁忙位-保留指令流基本优先级preservation-of-precedence)
+* [忙位-指令发射：Issuing an instruction](#忙位-指令发射issuing-an-instruction)
+* [忙位-指令执行：executing the instruction](#忙位-指令执行executing-the-instruction)
+* [忙位策略局限：Limitations of busy bits scheme](#忙位策略局限limitations-of-busy-bits-scheme)
+* [保留站：Reservation stations](#保留站reservation-stations)
+* [保留站例子2](#保留站例子2)
+* [公共数据总线：Common Data Bus (CDB), Difficulties with busy bits](#公共数据总线common-data-bus-cdb-difficulties-with-busy-bits)
+* [CDB结构：Structure of CDB](#cdb结构structure-of-cdb)
+* [CDB-指令发射：Issuing an instruction](#cdb-指令发射issuing-an-instruction)
+* [CDB-功能单元完成: when a functional unit finishes](#cdb-功能单元完成-when-a-functional-unit-finishes)
+* [CDB例子](#cdb例子)
+* [使用CDB意义->Registers are no longer a bottleneck](#使用cdb意义-registers-are-no-longer-a-bottleneck)
 * [==========](#-2)
+* [历史影响和当前意义：Historical impact and current significance](#历史影响和当前意义historical-impact-and-current-significance)
+* [数据流：dataflow-beyond the CDB](#数据流dataflow-beyond-the-cdb)
+* [执行单元调度：Scheduling functional units](#执行单元调度scheduling-functional-units)
 * [==========](#-3)
+
+# 指令周期、机器周期和时钟周期
+
+![](/static/2022-04-27-23-11-52.png)
 
 # 改进执行时间：Execution time
 
@@ -35,6 +69,10 @@
   - 而且它们实际上会使执行时间恶化 –	And they actually worsen the execution time
 
 # 方法-减少执行时间:Approach for reducing execution time
+
+> 关键路径通常是**指同步逻辑电路中，组合逻辑时延最大的路径**（这里我认为还需要加上布线的延迟），也就是说关键路径是对设计性能起决定性影响的时序路径。
+>
+> 对关键路径进行时序优化，可以直接提高设计性能。对同步逻辑来说，常用的时序优化方法包括Pipeline、Retiming、逻辑复制、加法/乘法树、关键信号后移、消除优先级等解决。
 
 - **减少I（指令的数量**）。•	Reduce I (the number of instructions)
   - 在每条指令中做更多的工作–	Do more work in each instruction
@@ -68,6 +106,12 @@
 
 > 重定时改变了一个系统的状态表示，但是并不改进它的逻辑行为。通常用它来平衡一个流水线系统中各个阶段之间的延迟
 
+![](/static/2022-04-27-23-03-24.png)
+![](/static/2022-04-27-23-03-47.png)
+![](/static/2022-04-27-23-04-12.png)
+
+---
+
 目标：减少关键路径 •	Goal: reduce the critical path
 
 - 对**不在关键路径上的电路进行加速是没有意义的**!–	There is no point in speeding up a circuit that isn't on the critical path!
@@ -91,6 +135,10 @@
   - WR (写结果): `rf[ir_d] := r` –	WR (write result):	rf[ir_d] := r
 
 # 流水线：Pipelining
+
+> 流⽔线技术是⼀种将每条指令分解为多步，并让各步操作重叠，从⽽实现⼏条指令并⾏处理的技术。程序中的指令仍是⼀条条顺序执 ⾏，但可以预先取若⼲条指令，并在当前指令尚未执⾏完时，提前启动后续指令的另⼀些操作步骤。这样显然可加速⼀段程序的运⾏过程。
+
+---
 
 ![](/static/2022-04-26-02-03-52.png)
 
@@ -124,7 +172,9 @@
 
 ![](/static/2022-04-26-03-25-32.png)
 
-# 完整指令集流水线：Pipeline for full instruction set
+# 五级流水线-完整指令集流水线：Pipeline for full instruction set
+
+![](/static/2022-04-28-15-33-33.png)
 
 我们已经看到如何为RRR指令引入一个3级流水线•	We've seen how to introduce a 3-stage pipeline for RRR instructions
 
@@ -134,6 +184,7 @@
 - **所有指令都必须经过相同的阶段序列**•	All instructions must go through the same sequence of stages
   - IF、RF、OP、WR，等等
   - ![](/static/2022-04-26-03-22-39.png)
+  - 译码/取数
 - **有些阶段将执行不同的操作，这取决于指令的情况**•	Some stages will perform different operations, depending on the instruction
   - RRR、RX（加载、存储、跳转）等 –	RRR, RX (load, store, jumps), etc
 
@@ -148,6 +199,7 @@
 - **数据**：**指令取决于前一个指令的结果**（还没有得到）。Data: instruction depends on result of previous one (not available yet)
 - **控制**：改变PC的行动（跳转、分支指令）。–	Control: actions changing PC (jumps, branch instructions)
   - 控制相关（Control Denpendency），一条指令要确定下一条指令的位置
+  - 正常情况下，指令在流水线中总是按顺序执行，当遇到改变指令执行顺序的情况时，流水线中指令的正常执行会被阻塞。这种由于发生了指令执行顺序改变而引起的流水线阻塞称为控制冒险（control hazards）。各类转移指令（包括调用、返回指令）的执行，以及异常和中断的出现都会改变指令执行顺序，因而都可能会引发控制冒险。
 
 每种类型的危险都必须被识别和解决 •	Each type of hazard must be identified and solved
 
@@ -226,15 +278,467 @@ IF、RF、OP、WR
 
 ![](/static/2022-04-26-03-31-18.png)
 
-- **暂停**：暂时停止前一阶段的指令进行，为后一阶段的指令完成其工作提供时间 •	**Stalling**: temporarily stop the instruction in an earlier stage from proceeding, giving time for a later stage to complete its work
+- **暂停**：**暂时停止前一阶段的指令进行**，为后一阶段的指令完成其工作提供时间 •	**Stalling**: temporarily stop the instruction in an earlier stage from proceeding, giving time for a later stage to complete its work
   - 这在流水线中引入了一个 "气泡"。–	This introduces a “bubble” into the pipeline
   - ![](/static/2022-04-26-03-21-13.png)
-- **绕过**：引入一些额外的电路，使流水线能够继续全速运行，不出错。•	**Bypassing**: introduce some additional circuitry that allows the pipeline to continue at full speed, without error
-  - 有时一个早期阶段需要一个来自寄存器的值–	Sometimes an early stage needs a value from a register
-  - 寄存器还没有收到这个值，但这个值已经存在于机器的其他地方（还没有到达最终目的地）–	The register hasn't yet received that value, but the value exists already somewhere else in the machine (hasn't reached the final destination yet)
+    - 3个nop/bubble完全解决，D取数延迟到周期7
+- **旁路/转发**：引入一些额外的电路，使**流水线能够继续全速运行，不出错**。•	**Bypassing/Forwarding**: introduce some additional circuitry that allows the pipeline to continue at full speed, without error
+  - ![](/static/2022-04-27-21-42-12.png)
+    - 当运算完成后在 Exec/Mem 流水段寄存器中已经存在后面指令可能需要用到的数据，我们<font color="deeppink">可以不等Wr阶段写回寄存器而是在硬件上稍加改动直接将流水段寄存器中的数据送往下一指令的ALU输入端</font>，这种操作称为 转发（Forwarding）或旁路（Bypassing），可以理解为 “抄近道” 了。
+  - 有时一个早期阶段需要一个**来自寄存器的值**–	Sometimes an early stage needs a value from a register
+  - <font color="deeppink">寄存器还没有收到这个值，但这个值已经存在于机器的其他地方（还没有到达最终目的地</font>）–	The register hasn't yet received that value, but the value exists already somewhere else in the machine (hasn't reached the final destination yet)
   - 我们可以引入一个新的信号，"绕过 "寄存器，将值直接传送到需要的地方。–	We can introduce a new signal that “bypasses” the register, and transmits the value to where it is needed directly
-  - 怎么做？我们需要更多的比较器和复用器!–	How? We need more comparators and multiplexers!
+  - 怎么做？我们需要更多的**比较器和复用器**!–	How? We need more comparators and multiplexers!
+
+# 数据冒险-RAW转发例子:Example of bypassing/forwarding
+
+- 考虑一个RAW危险：`add R1,R2,R3; sub R4,R1,R5`
+
+- 假设在sub读取R1的同一阶段，add写入了R1的结果•	Assume the add writes result in R1 in the same stage that the sub reads R1
+  - 即，，，sub先执行
+  - 那么sub将得到错误的值•	Then the sub would get the wrong value
+- <font color="deeppink">但是ALU在寄存器中出现结果之前就已经有了这个周期</font>。–	But the ALU has the result in the cycle before it appears in the register
+- 数据通路可以让sub从两个不同的位置获得第一个操作数：寄存器文件和ALU输出。•	The datapath can make the first operand available to the sub from two separate locations: the register file, and the ALU output
+  - 多路复用器在这两者之间进行选择（第二操作数也是如此）。–	A multiplexer selects between these (same for the second operand)
+  - multi inputs one output
+- <font color="red">控制单元检查后面阶段的目标字段和前面阶段的源字段</font>•	The control unit examines the destination field of the later stage and the source field of the earlier stage
+  - RAW里面，write的目标和read的源
+  - <font color="deeppink">如果它们相同，则设置多路复用器控制以选择ALU而不是第一个操作数的寄存器文件（否则，选中寄存器堆</font>。 If they are the same, it sets the multiplexor control to select the ALU rather than the register file for the first operand
+
+# 实现转发：Implementing bypassing
+
+IF、RF、OP、WR
+
+- 假设阶段3在**ir3中包含指令add R1,R2,R3，并且在周期中ALU输出总和**•	Suppose stage 3 contains instruction add R1,R2,R3 in ir3 and during the cycle the ALU is outputting the sum
+  - 在下一个周期中，结果将在R1中得到。–	On the following cycle the result will be available in R1
+- 阶段2在**ir2中包含指令sub R4,R1,R5**，现在需要加法的结果。•	Stage 2 contains instruction sub R4,R1,R5 in ir2 and needs the result of the addition right now
+- **ALU输入缓冲寄存器的来源在寄存器文件中（通常），但在这种情况下源是ALU的输出**。•	The source of the ALU input buffer register is in the register file (normally), but it's the ALU output (in this situation)
+  - 数据冒险时`sub R4,R1,R5(2), add R1,R2,R3(3)`
+
+```
+<!-- 前指令src==后指令des -->
+
+ALU_input_buffer_1 =
+ if ir2_sa1 == ir3_d
+  then ALU_output 
+  else reg[ir2_sa1]
+```
+
+# 控制冒险：Control Hazards
+
+问题：在有条件的分支（跳转）指令中，**是否跳转的决定要到后期才做出**。•	Problem: In a conditional branch (jump) instruction, the decision of whether to jump is not taken until a late stage
+
+![](/static/2022-04-27-22-48-26.png)
+
+- 由于指令分支而引起的控制冒险也称为分支冒险（branch hazard
+- 这就产生了**分支延迟槽**–	This creates branch delay slots
+  - **不确定在这个slot中放入什么指令**
+  - 早期的RISC采用微编程流水线的思路，改变了ISA语义定义，所以在分支/跳转后的指令老是在控制流改变发生以前被执行：
+  -  因此软件应该**在slot放置有效的指令，或者放空指令**。
+- <font color="deeppink">跳转后的指令可能假定跳转已满足，或未满足，或暂停</font>•	Instructions after the jump may assume the jump is **taken, not taken, or stall**
+  - **如果假设跳转，最后没有跳转，我们需要取消这些指令**。–	If assume taken and finally is not taken we need to cancel them
+  - 这些指令是**预测性**的–	These instructions are speculative
+
+:orange: 解决方案：**在跳转之后，包括独立于跳转的指令，以填补分支延迟槽（即非预测性**）。•	Solution: after a jump include instructions that are independent of it to fill the branch delay slots (i.e. not speculative)
+
+- 这样就可以做有用的工作，而不是在流水线上制造bubbles –	This allows to do useful work rather than creating bubbles in the pipeline
+
+# 流水线效率：Performance of pipelining
+
+流水线可以用来**提高时钟速度**，通过使用**重定时**将**几个组合操作分割成独立的周期** •	Pipelining can be used to improve clock speed by splitting several combinational operations into separate cycles using retiming
+
+- 它可以**提高吞吐量**，**但不能提高执行单个操作的时间** •	It improves throughput, but not the time to perform individual operations
+- 最大可能的**提速**因素是**阶段的数量（IPC(instruction per cycle≈1**）•	The maximum possible speedup factor is the number of stages (IPC ≈ 1)
+- 在实践中，这很难实现(实践中，IPC < 1) • 	In practice, that is difficult to achieve (IPC < 1)
+  - **暂停会降低性能，并不总是可以避免的** –	Stalls reduce performance and not always can be avoided
+  - **所有的指令都必须经过相同的阶段，即使其中一些指令可以用更少的阶段来解决** –	All instructions must go through the same stages, even if some of them could be solved with fewer stages
+  - **在不同阶段完成的工作可能需要不同的时间，但所有阶段都必须以最慢的速度运行** –	The work done in different stages might require different time, but all stages have to run at the speed of the slowest
+
+# 流水线ISA设计：Impact of instruction set on pipelining
+
+- **ISA的设计可以简化流水线，也可以使其变得复杂和无效**•	ISA can be designed to ease pipelining or to make it complex and ineffective
+  - 例如，复杂的阶段会减缓时钟周期–	E.g. complex stages slow the clock period
+- ISA可能有助于拥有**少量的指令类别**•	ISA may help to have a small number of classes of instructions
+  - 它们的执行**可以被组织成相同的阶段序列**–	Their execution can be organised into the same sequence of stages
+- RISC的目标：设计指令集，使流水线有效地工作。•	RISC goal: design the instruction set so that pipelining works effectively
+- RISC解决方案：不要引入以下指令•	RISC solution: don’t introduce instructions that
+  - 需要较慢的时钟–	Require a slower clock
+  - 干扰优化技术（分支延迟槽等）。–	Interfere with optimisation techniques (branch delay slots, etc)
 
 # ==========
+
+# 超标量：superscalar
+
+> 超标量（superscalar）是指在CPU中有⼀条以上的流⽔线，并且每时钟周期内可以完成⼀条以上的指令，这种设计就叫超标量技术。
+> 其实质是以空间换取时间。⽽超流⽔线是通过细化流⽔、提⾼主频，使得在⼀个机器周期内完成⼀个甚⾄多个操作，其实质是以时间换取 空间。
+
+- 基本处理器（如M1）：**严格按顺序进行（IPC<<1**）•	Basic processor (e.g. M1): strictly sequential (IPC << 1)
+- 流水线式处理器（如M2）：**在处于不同阶段的相邻指令之间引入并行性（理想IPC≈1，实际IPC<1**）•	Pipelined processor (e.g. M2): introduces parallelism between adjacent instructions that are in different phases (ideal IPC ≈ 1, real IPC < 1)
+- 计算之间不存在并行性–	There is no parallelism among calculations
+
+- 超标量处理器：使用多个执行/功能单元，使流水线更接近全速，获得计算之间的并行性 •	Superscalar processor: uses multiple execution/functional units to keep the pipeline closer to full speed, obtaining parallelism among calculations
+- **单发射处理器 (IPC ≈ ≈ 1)–	Single-Issue Processors** (IPC ≈ ≈ 1)
+- 多发射处理器 (IPC > 1)–	Multiple-Issue Processors (IPC > 1)
+
+请注意，大多数超标量CPU也是流水线的，但也有可能有 •	Note that most superscalar CPUs are also pipelined, but it's possible to have
+
+- 一个非流水线的超标量CPU–	A non-pipelined superscalar CPU
+- 一个有流水线的非超标量CPU–	A pipelined non-superscalar CPU
+
+# 执行单元：Functional units
+
+一个执行单元是一个独立的子系统，执行一个特定的操作•	A functional unit is a separate subsystem that performs a specific operation
+
+- 整数乘/除法，浮点加/乘法，sqrt，...。–	Integer multiplication/division, floating point addition/multiplication, sqrt, ..
+- 它由一个**数据通路、控制和一个接口**组成•	It consists of a datapath, control, and an interface
+  - 接口通常包括一个启动输入信号和一个准备输出信号–	Interface typically includes a **start input signal, and a ready output signal**
+
+优点•	Advantages
+
+- 使得流水线能够向一个功能单元发出一条 "困难 "指令，然后继续执行下一条 "容易 "指令–	Enables the pipeline to issue a “difficult” instruction to a functional unit and then to proceed with the next “easy” instruction
+- 这使得它可以**并行地进行多项计算**–	This makes it possible to perform several calculations in parallel
+
+ALU被限制在组合逻辑中可以在一个时钟周期内快速执行的操作（类似加法）。•	The ALU is restricted to operations that can be performed quickly in one clock cycle (addition-like) in combinational logic
+
+- ALU中的复杂操作会使关键路径增加很多–	Complex operations in the ALU would increase a lot the critical path
+
+# 超标量控制：Superscalar control
+
+- 有了所有这些并行性，控制就变得至关重要！。•	With all this parallelism, control is critically important!
+
+- **系统必须确保结果是正确的，同时允许尽可能多的并行性**•	The system must ensure that results are correct while allowing as much parallelism as possible
+
+- **集中控制**（记分板Scoreboarding算法）：**控制算法分析指令流并安排功能单元执行这些指令**。 Centralised control (scoreboarding): the control algorithm analyses the stream of instructions and schedules the functional units to perform them
+  - 例如，CDC 6600和后继者
+- **分布式控制：控制分布在各子系统中**（流水线、功能单元、信号）。Distributed control: the control is distributed among the subsystems(pipeline, functional units, signals)
+  - 例如：IBM 360/91和后续产品
+
+# IBM system/360 Model 91
+
+![](/static/2022-04-28-17-49-48.png)
+
+第一个Tomasulo算法实现(- 该算法适用于任何具有多个执行单元的计算机)The algorithm is applicable to any computer with multiple execution units
+
+- 高性能机器：在所有设计方面有新的发展•	High-performance machine: with novel developments in all design aspects
+  - 我们专注于数据通路和控制–	We focus on datapath and control
+- **流水线式处理器**•	Pipelined processor
+  - **执行阶段有两个独立的区域（定点、浮点**）。–	Execution stage has two independent areas (fixed-point, floating-point)
+- **超标量处理器（单发射）：功能单元并行运行**•	Superscalar processor (single-issue): functional units operate in parallel
+  - **快速运算（类似加法运算）由ALU在一个周期内完成**–	Fast operations (add-like operations) performed in one cycle by ALU
+  - **慢速运算（乘法、除法）需要几个时钟周期，由一个专门的功能单元处理**–	Slow operations (multiplication, division) require several clock cycles and are handled by a dedicated functional unit
+- <font color="deeppink">流水线不会暂停等待一个功能单元的操作完成</font>•	The pipeline doesn't stall waiting for an operation to finish in a functional unit
+  - 相反，流水线会向一个**可用的功能单元**发出一个操作 –	Instead, the pipeline issues an operation to an available functional unit
+
+# IBM360 Model 91 数据通路
+
+![](/static/2022-04-28-17-55-48.png)
+![](/static/2022-04-28-18-22-01.png)
+
+* 设计中有两个执行单元(function unit)，浮点加法单元和浮点乘法/除法单元。
+* 有三处寄存器堆(register file)：Floating-point buffers(FLBs)，Floating-point registers(FLRs)，Store data buffers(SDBs)。
+
+# 源汇：Source & sink
+
+- 源：提供数据（与M1术语中的源相同）•	Source: provides data (same as source in M1 terminology)
+- 汇：接收数据（在M1中称为目的地）•	Sink: receives data (called destination in M1)
+
+在指令adr F2,F4中 # (F2 := F2 + F4)•	In the instruction	adr F2,F4	# (F2 := F2 + F4)
+
+- F2被称为 "汇"，尽管它也是第一个操作数的源。–	F2 is called the “sink”, although it is also the source of the first operand
+- F4被称为 "源"。–	F4 is called the “source”
+
+**加法器（以及所有功能单元）的顶级通路包含缓冲寄存器**•	The top line of the adder (and all functional units) contains buffer registers
+
+![](/static/2022-04-28-18-02-36.png)
+
+- SINK将是第一个操作数（R2的内容）。–	SINK will be the first operand (contents of R2)
+- SOURCE是第二个操作数（R4的内容）。–	SOURCE will be the second operand (contents of R4)
+
+# 数据通路-组件单元：Basic datapath :units
+
+**指令单元（或取数单元**）：来源•	Instruction unit (or fetch unit): source
+
+- 执行中央控制功能，使...–	Implements central control functions, making…
+  - **多路复用器，将正确的数值放在信号上（"传输路径"**）。•	Multiplexers to put the right values on the signals (“transfer paths”)
+  - **子系统（"功能单元"、"寄存器"）来执行局部操作**•	Subsystems (“functional units”, “registers”) to perform local operations
+  - 指令单元(Instruction uint)将所有指令译码并将浮点单元指令依次存入浮点操作栈(Floating-point operand stack，FLOS)，在浮点处理单元FPU中进行二次译码，并依据指令类型将指令发射到不同的执行单元。
+
+**执行单元：源和汇**•	Functional units: source and sink
+
+- **加法器和乘法器/除法器**：可以有任何数量的这些东西–	Adder and multiplier/divider: there could be any number of these
+- **缓冲寄存器**：接收来自**流水线的操作数**（"汇"、"源"）。–	Buffer registers: to receive operands from pipeline (“sink”, “source”)
+- **结果缓冲器：保存结果**，直到它可以被送走–	Result buffer: holds the result until it can be sent away
+- **组合控制逻辑**–	Combinational control logic
+
+**存储控制器**：源和汇•	Storage controllers: source and sink
+
+- **两个单元来管理内存和I/O数据通道**–	Two units to manage memory and I/O data channels
+
+# 数据通路-寄存器：Registers
+
+![](/static/2022-04-28-18-10-22.png)
+
+- **浮点运算栈（FLOS）：源**•	Floating-point operantion stack (FLOS): source
+  - **暂时存放指令单元发出的指令的寄存器**–	Registers temporarily holding instructions issued by the instruction unit
+  - 指令单元(Instruction uint)将所有指令译码并将浮点单元指令依次存入浮点操作栈(Floating-point operand stack，FLOS)，在浮点处理单元FPU中进行二次译码，并依据指令类型将指令发射到不同的执行单元。
+
+- **浮点寄存器（FLR）：源和汇**•	Floating-point registers (FLR): source and sink
+  - **用于浮点数据的寄存器文件**（数据路径中未显示整数的RF）。–	Register file for floating point data (RF for integers not shown in datapath)
+
+- **浮点缓冲器（FLB）：源**•	Floating-point buffers (FLB): source
+  - **保存来自内存的数据的寄存器，直到处理器可以使用它们**–	Registers holding data from memory until processor can use them
+  - **处理器不需要等待数据到达（可以不按顺序到达**）。–	The processor doesn't wait for the data to arrive (can arrive out-of-order)
+  - 当数据从存储器中取出，通过总线加载到 FLBs 的寄存器中。
+
+- **存储数据缓冲区（SDB）：汇**•	Store data buffers (SDB): sink
+  - **暂时保存来自处理器的数据的寄存器，将被发送到内存中**–	Registers that temporarily hold data from processor to be sent to memory
+  - 当数据需要存入存储器，数据先被存进 SDBs 寄存器中，外部部件访问 SDBs 获得数据存入存储器中。
+
+# Tomasulo算法：Tomasulo's Algorithm
+
+![](/static/2022-04-28-18-36-55.png)
+
+---
+
+目标•	Goals
+
+- **保留指令流中的基本优先级**–	Preserve essential precedences in the instruction stream
+- **最大限度地实现独立指令的同时执行（IPC ↑**）。–	Maximise simultaneous execution of independent instructions (IPC ↑)
+
+要求•	Requirements
+
+- **识别依赖性的存在（即RAW危险**）。–	Recognise the existence of a dependency (i.e. RAW hazards)
+- **促成依赖性指令的正确排序**–	Cause the correct sequencing of the dependent instructions
+- **允许独立指令提前执行（乱序执行**）。–	Allow independent instructions to proceed ahead (out-of-order execution)
+
+# Busy bit(繁忙位-保留指令流基本优先级Preservation of precedence
+
+想法：**允许流水线以全速向功能单元发出指令，除非这将产生不正确的结果**•	Idea: allow the pipeline to issue instructions at full speed to the functional units unless this would produce incorrect results
+
+- <font color="deeppink">如果数据的依赖性会导致不正确的结果，则让流水线暂停</font>。–	Stall the pipeline if a data dependency could cause incorrect result
+
+- **每个浮点寄存器**（如F0）包含•	Each floating-point register (e.g. F0) contains
+  - 一个浮点值–	A floating point value
+  - 一个**忙位**–	A busy bit
+  - **一些用于转发的控制位**–	Some control bits used for forwarding
+
+**如果忙位为0`busy=0`，则该寄存器(FLR)包含一个有效的浮点数值**•	If the busy bit is 0, the register contains a valid floating point number
+
+**如果忙位为1 `busy=1`，寄存器处于 "忙 "状态**•	If the busy bit is 1, the register is “busy”
+
+- 它正在**等待一个功能单元的输出值**–	It is waiting the value from a functional unit
+  - 或者等存储Buffer的值？？？？
+- 其余的位都是垃圾–	The rest of the bits are garbage
+
+# 忙位-指令发射：Issuing an instruction
+
+- **如果 "汇 "寄存器繁忙，流水线停顿**。•	If the “sink” register is busy, the pipeline stalls
+  - 没改进情况下会stall
+
+- **如果 "源 "寄存器（非汇）繁忙，则向功能单元发出指令**•	If the “source” register (not sink) is busy, instruction issued to functional unit
+  - 控制位被设置为**在数据值到达时将其转发给功能单元** –	Control bits are set to forward data value to functional unit when it arrives
+  - 例子：**指令单元发出`mdr F2,F4`** •	Example: instruction unit issues	mdr F2,F4
+    - 如果F2不忙，它的内容被传送到乘法器（对F4也一样）–	If F2 is not busy, its contents is transmitted to the multiplier (same for F4)
+
+- **如果有数据危险，流水线会停顿，否则会继续进行**•	The pipeline stalls if there is a data hazard, otherwise it proceeds
+
+- **决定（停顿或继续）是基于寄存器的状态（忙位**）。•	The decision (stall or proceed) is based on the state of the registers (busy)
+  - 而不是基于比较指令中的字段（就像在正常的流水线中）。–	Not on comparing fields in the instructions (like in normal pipelining)
+    - 之前是在比较某一指令流里前后两个指令的src,des
+
+# 忙位-指令执行：executing the instruction
+
+- **当一个功能单元收到它的两个操作数后**，它就会启动,**执行指令**•	When a functional unit has received its two operands, it fires
+  - 就是说，它执行指令–	That is, it executes the instruction
+
+- **当它完成后（可能是几个周期后），它将结果传送回目的寄存器**•	When it finishes (perhaps several cycles later) it transmits the result back to the destination register
+
+- **目标寄存器加载结果并将其繁忙位设置为0**•	The destination register loads the result and sets its busy bit to 0
+
+- **如果流水线在这个寄存器上暂停，它将在下一个时钟位时恢复**。•	If the pipeline was stalled on this register it will resume at the next clock tick
+
+# 忙位策略局限：Limitations of busy bits scheme
+
+这个计划很容易满足前两个要求•	This scheme easily meets the first two requirements
+
+- 识别依赖关系–	Recognise dependencies
+- 正确安排依赖性指令的顺序–	Correct sequencing of dependent instructions
+
+- 第三个要求（独立指令进行,**允许独立指令提前执行（乱序执行））需要编译器的帮助**•	Third requirement (independent instructions proceed) requires compiler help
+  - **为了使独立指令重叠，必须使用不同的寄存器**–	To overlap independent instructions different registers must be used
+
+# 保留站：Reservation stations
+
+![](/static/2022-04-29-17-29-24.png)
+
+- 问题：第二个加法和乘法不能并行执行。•	Problem: second add and multiply cannot be executed in parallel!
+  - 只有一个FLR
+- 即使它们使用不同的汇（没有一个操作数是忙的）。–	Even though they use different sinks (none of the operands are busy)
+- 这类似于流水线上的结构性危险–	This is similar to a structural hazard in a pipeline
+
+---
+
+- 解决方案1（成本高）：增加一个或多个加法器•	Solution 1 (costly): addition of one or more adders
+- 额外的加法器只在一小部分时间内使用–	The extra adders would be in use only a small part of the time
+
+- **解决方案2（更便宜）：使用保留站对寄存器重新命名**•	Solution 2 (cheaper): register renaming using reservation stations
+  - **为功能单元增加额外的缓冲寄存器（控制、汇、源**）。–	Add extra sets of buffer registers (control, sink, source) to functional units
+  - **当一个功能单元的一个保留站有两个操作数出现时，该功能单元就会启动**。–	A functional unit fires when one of its reservation stations has both operands present
+  - **这就把等待和计算这两个任务分开了**–	This separates the two tasks of waiting and calculating
+  - <font color="deeppink">当 FLOS 发射一条指令到执行单元时，会给指令分配一个保留站，并检查该指令需要的源操作数是否可用，如果源操作数存在于 FLRs，FLRs中对应寄存器的值将会复制到保留站中去。如果不存在于 FLRs，将会将一个 标签(Tag)送到保留站中去</font>，例如某条指令的操作数，来自于另一条指令的目的寄存器，这样该操作数就是待定状态，将Tag写入保留站。
+
+---
+
+- **乘法被发出（汇F0不忙），随后，当E的值从内存中到达（乘法单元）时，乘法器开始工作**。•	The multiply is issued (the sink F0 is not busy), and later the multiplier starts when the value of E arrives from memory
+- **第一个加法，adr，发给一个保留站（F0忙，F2非忙**）。•	The first add, adr, is issued to a reservation station (F0 is busy, but not F2)
+- **第二个加法，ad，被发给另一个保留站**•	The second add, ad, is issued to another reservation station
+  - <font color="deeppink">如果A在乘法结束前从内存到达，第二个加法可能在第一个加法之前执行（失序执行</font>）。–	If A arrives from memory before the multiply finishes, the second add may execute before the first one (out-of-order execution)
+
+# 保留站例子2
+
+![](/static/2022-04-29-17-49-19.png)
+
+- 问题1：代码包含潜在的**并行性**，但**被繁忙位所抑制**•	Problem: the code contains potential parallelism that is inhibited by busy bits
+
+- 问题2：Loop1包含例3a的代码
+  - Loop1的每一次迭代都是独立的（因为它对数组的第i个元素进行操作），但繁忙位阻止了并行性 Each iteration of Loop1 is independent (because it operates on the ith elements of arrays), but busy bits prevent parallelism
+- 解决方案。**Loop2使循环平行，展开Loop1（使用不同的汇**）。•	Solution: Loop2 makes the loop parallel, unrolling Loop1 (uses different sinks)
+  - ![](/static/2022-04-29-17-51-46.png)
+  - 编译器循环展开
+
+# 公共数据总线：Common Data Bus (CDB), Difficulties with busy bits
+
+- **忙位集中在寄存器上，以及它们是否包含有效数据**•	Busy bits concentrate on the registers and whether they contain valid data
+  - 这使得该方法对机器语言程序使用寄存器的方式很敏感–	This makes the approach sensitive to the way the machine language program uses the registers
+    - 需要编译器辅助，，
+
+- 程序的全部重点是计算表达式•	The whole point of the program is to compute expressions
+  - 寄存器只是达到目的的一种手段–	The registers are just a means to an end
+
+- 解决方案：**专注于数据值，而不是包含它们的寄存器**•	Solution: focus on the data values, not the registers that contain them!
+  - 这个想法导致了**公共数据总线**的出现•	This idea leads to the Common Data Bus
+
+---
+
+> 执行单元的计算结果广播到 CDB上，**保留站里需要该结果的指令，会从 CDB 上接收该数据，FLR 和 SDB 如果是该计算结果的目的地，它们同样也会从 CDB上接收该数据**。CDB的使用使得可以直接将之前指令运行的结果送到需要使用该结果的指令那去，而不需要再去访问寄存器。同时寄存器也完成了更新。
+> 
+> 如果一条指令的操作数是来自存储器，访存完成之后，数据将会被送到 FLBs，**FLBs也可以将数据广播到 CDB上去，在保留站中等待该数据的指令也会接收该数据得到操作数**。
+> 
+> **执行单元和FLBs可以驱动数据发送到 CDB上去，FLRs 和 SDBs可以从CDB上接收数据**。
+
+- 理念•	Ideas
+  - 向功能单元发出操作（即使不知道数据）。–	Issue operations to functional units (even if the data is not known)
+  - 将数据值从它们创建的地方发送到需要它们的地方–	Send data values from wherever they create to wherever they are needed
+
+- 我们需要一个 "东西 "来**承载数据值**：**公共数据总线**•	We need a “something” to carry the data values: the common data bus
+
+- 我们需要一种**识别数据值**的方法：**标签**•	We need a way of identifying the data values: tags
+  - 把标签看成是一个值的名称而已–	Think of a tag as just a name for a value
+  - 标签是作为**产生该值的单元的ID号**来实现的•	Tags are implemented as an id number for the unit that originates the value
+
+# CDB结构：Structure of CDB
+
+![](/static/2022-04-29-18-06-38.png)
+
+- **源**（可以**发送数据到CDB**）：所有可以改变寄存器的来源•	Sources (can write values): all sources that can alter a register
+  - **FLB**（来自内存的数据）–	FLB (data coming from memory)
+  - **来自所有功能单元的结果**–	Results from all of the functional units
+- **目标（可以从CDB读取值）：所有可以从寄存器接收数据的单元**•	Destinations (can read values): all units that can receive data from a register
+  - 所有**保留站的操作数（包括源和汇**）。–	Operands of all the reservation stations (both source and sink)
+  - **FLR（浮点寄存器**）–	FLR (the floating point registers)
+  - **SDB（用于向内存写入的缓冲寄存器**）–	SDB (the buffer registers for writing to the memory)
+
+- **总线控制**：<font color="red">几个源可能同时请求在CDB上写入数据</font>•	Bus control: several sources may request to write at the same time on CDB
+  - 总线控制选择一个赢家，并延迟其他的。–	The bus control chooses a winner, and delays the others
+
+# CDB-指令发射：Issuing an instruction
+
+![](/static/2022-04-29-19-40-13.png)
+
+- 如果源（操作数）不忙•	If the operands are not busy
+  - 这些**值被发送到保留站**–	The values are sent to the reservation station
+  - **汇被设置为忙，汇寄存器标签被设置为保留站的ID**–	The sink is set to busy and its tag is set to the id of the reservation station
+  - 当FLOS发射一条指令时，**源操作数使用 FLRs 中的寄存器（src非忙），将其数值复制到保留站中，同时将目的寄存器对应的 FLR 寄存器中的 Busy 置1，表示该寄存器现在是一个待定的，待更新的，同时将该指令所在【保留站编号作为 tag 放到目的寄存器的 tag】 位置，指定该待定寄存器的来源**
+  - 如果下一条指令被 FLOS 发射，会检查**两个源操作数寄存器**的 Busy 位，如果 Busy 位为0，直接将该寄存器的值复制到保留站，**如果 Busy 位为1，表示该寄存器的结果还没计算完毕，将寄存器旁边的 tag 复制到保留站，保留站在后续会根据 tag 值接收计算完毕的操作数**。
+
+- 如果汇是忙的•	If the sink is busy
+  - **忙位为1，指令被发出，流水线继续进行(没有停顿**)–	Busy bit is 1, the instruction is issued and the pipeline continues (no stall)
+  - **汇标签（第一个操作数）被发送到保留站**–	The tag of the sink (first operand) is sent to the reservation station
+  - **忙位保持为1，但汇寄存器中的标签被改变为保留站的ID号**–	The busy bit remains 1, but the tag in the register is changed to the id number of the reservation station
+
+# CDB-功能单元完成: when a functional unit finishes
+
+- 它请求在CDB上写东西【**功能单元请求写入CDB**•	It requests to write on the CDB
+  - 请注意，几个功能单元可以同时这样做–	Note that several functional units could do it at the same time
+  - 执行单元完成，计算结果写入CDB总线
+
+- **如果CDB是空闲的，它将广播发送一对（标签，数据值**）。•	If CDB is free, it transmits a pair (tag, data value)
+  - 标签是保留站的ID号–	The tag is the id number of the reservation station
+
+- 每个可以**从CDB读取数据的单元（保留站操作数，FLR，SDB等）都会检查它是否包含一个与传输的标签匹配的标签**•	Every unit that can read from the CDB checks if it contains a tag that matches the transmitted tag
+  - 如果**是，该单元从CDB加载数据值，并设置控制位以表示它不忙**。–	If so, the unit loads the data value from the CDB and sets control bits to indicate it is not busy
+  - 保留站中等待待定操作数的指令，使用 tag 来监测 CDB 上的数据，一旦监测到自己的 tag 与总线上的 tag 匹配，那就说明待定操作数结果已出，保留站从总线上接收数据
+
+- **有可能几个【目标同时收到该值**】•	It is possible that several destinations receive the value simultaneously
+
+# CDB例子
+
+![](/static/2022-04-29-19-46-40.png)
+![](/static/2022-04-29-19-57-20.png)
+![](/static/2022-04-29-20-05-49.png)
+
+# 使用CDB意义->Registers are no longer a bottleneck
+
+- 寄存器的作用就像记号设备，帮助引导数据到需要的地方。•	Registers act like notational devices to help steer the data where is needed
+  - 请注意，WAW实际上是一种名称依赖（不是数据依赖）。–	Note that WAW is actually a name dependence (not a data dependence)
+
+- 机器不再服从于程序的字面意思•	The machine no longer obeys the program literally
+  - **因为指令可以不按顺序执行** –	Instructions can execute out-of-order
+
+- **一些指令现在可以在零时间内执行**!•	Some instructions can now execute in zero time!
+  - 如例2中的LDR F2, F0 –	As LDR F2, F0 in Example 2
+  - 简单加法本身需要1周期完成
+
+- **CDB与相联内存（CAM）有关** •	CDB is related to associative memory (CAM)
+  - **通过其值而不是地址来访问数据** –	Accessing data by its value rather than its address
+
 # ==========
+
+# 历史影响和当前意义：Historical impact and current significance
+
+- **超标量执行增加了指令级并行性（IPC ↑**）。•	Superscalar execution increases Instruction Level Parallelism (IPC ↑)
+  - 使用**多个功能单元并行运行**–	Using multiple functional units operating in parallel
+
+- 今天，一个芯片上可以有数以亿计的晶体管•	Today there can be hundreds of millions of transistors on a chip
+  - 高性能的微处理器使用超标量架构–	High performance microprocessors use superscalar architectures
+
+- CDB导致了另一个想法：数据流•	The CDB led to another idea: dataflow
+
+# 数据流：dataflow-beyond the CDB
+
+- **数据流是一种有影响力的计算形式，程序直接指定数据的依赖关系**•	Dataflow is an influential form of computing where the program specifies the data dependencies directly
+  - 而不是说数据值在机器中的位置–	Instead of saying where in the machine the data values are
+  - CDB如何实现的？？
+
+- **在其最纯粹的形式中，数据流程序是一个图形结构**•	In its most pure form, a dataflow program is a graph structure
+
+- **机器负责执行程序并跟踪数据的位置**•	The machine is responsible for executing the program and keeping track of where the data is
+
+- 这种方法**最大限度地提高了并行性**•	This approach maximises parallelism
+
+- 一些数据流机器已经建成，这些想法影响了现代RISC架构（如超线程）。•	Some dataflow machines have been built, and these ideas have influenced modern RISC architectures (e.g. hyperthreading)
+
+# 执行单元调度：Scheduling functional units
+
+**静态调度：按顺序执行指令**•	Static scheduling: in-order instruction execution
+
+- **流水线（硬件）：只检查2或3条指令的危险检测和转发**。–	Pipelining (hardware): just 2 or 3 instructions are examined for hazard detection and bypassing
+- **编译器调度（软件技术）：减少了依赖性的影响，但增加了编译器的复杂性；在编译时的信息也有限**–	Compiler scheduling (software): reduces impact of dependences, but increases compiler complexity; also limited information at compile time
+
+**动态调度：不按顺序执行指令**•	Dynamic scheduling: out-of-order instruction execution
+
+- **记分板（硬件）：检查一个大的指令窗口（10条或更多），并将指令安排到功能单元；没有转发的问题**–	Scoreboarding (hardware): examine a large window of instructions (10 or more) and schedule instructions to functional units; no bypassing
+- **Tomasulo算法（硬件）：等待功能单元的结果准备好，然后将它们转发给需要它们的电路**–	Tomasulo algorithm (hardware): wait until results from functional units are ready, and then forward them to the circuits that need them
+  - 多个circuit可以同时取值
+
 # ==========
