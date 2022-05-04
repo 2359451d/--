@@ -6,9 +6,9 @@ Carry Look-ahead Adder 超前进位加法器 (CLA
 * [map,fold,scan](#mapfoldscan)
 * [线性fold-O(n): sequential fold requires time O(n)](#线性fold-on-sequential-fold-requires-time-on)
 * [加法重排序: but we can rearrange the order of additions](#加法重排序-but-we-can-rearrange-the-order-of-additions)
-* [结合性：Associativity](#结合性associativity)
+* [关联性：Associativity](#关联性associativity)
 * [Scan](#scan)
-* [scan with associative operator](#scan-with-associative-operator)
+* [fold关联-scan with associative operator](#fold关联-scan-with-associative-operator)
 * [Logarithmic scan is harder](#logarithmic-scan-is-harder)
 * [二进制加法：Binary Addition](#二进制加法binary-addition)
 * [能使用并行scan来加速加法吗：Can we just use parallel scan for addition](#能使用并行scan来加速加法吗can-we-just-use-parallel-scan-for-addition)
@@ -20,6 +20,7 @@ Carry Look-ahead Adder 超前进位加法器 (CLA
 * [局限性：Problem](#局限性problem)
 * [转换2-传播函数：Propagation functions](#转换2-传播函数propagation-functions)
 * [意义](#意义)
+* [改进例子-流水线&超前进加法器](#改进例子-流水线超前进加法器)
 * [================](#)
 * [全加器carry传播](#全加器carry传播)
 * [超前进位加法器](#超前进位加法器)
@@ -60,7 +61,7 @@ Carry Look-ahead Adder 超前进位加法器 (CLA
 
 ![](/static/2022-04-30-15-41-31.png)
 
-# 结合性：Associativity
+# 关联性：Associativity
 
 ![](/static/2022-04-30-15-42-39.png)
 
@@ -79,7 +80,7 @@ Carry Look-ahead Adder 超前进位加法器 (CLA
 - 有时你想要所有的中间结果
   - **使用扫描：它产生所有的中间结果和最终结果**–	Use scan: it produces all the intermediate results and the final result
 
-# scan with associative operator
+# fold关联-scan with associative operator
 
 - 为了计算一个scan，我们必须计算大量的fold•	To compute a scan we must compute a lot of folds
 
@@ -91,6 +92,12 @@ Carry Look-ahead Adder 超前进位加法器 (CLA
 - 如果运算符是关联的（例如+），我们可以使用树状结构，**以对数时间并行计算所有的fold**•	If the operator is associative (e.g. +) we can use a tree structure to compute all the folds in parallel in logarithmic time
   - 每个fold都由一个树状电路计算，所以会有n个树状电路–	Each fold is computed by a tree circuit, so there would be n trees
 
+---
+
+(d) 让f :: a -> a -> a 和 xs :: [a]. 定义n = xs的长度。说明为什么如果f不是关联的，foldr1 f xs需要时间O(n)，但如果函数f是关联的，它可以在时间O(log n)内计算。简要讨论一下如何利用这一特性来加速二进制加法电路的速度。(d)	Let f :: a -> a -> a and xs :: [a]. Define n = length xs. Show why foldr1 f xs takes time O(n) if f is not associative, but it can be calculated in time O(log n) if the function f is associative. Discuss briefly how this property can be used to speed up a binary addition circuit.
+
+* 如果f不是关联的，定义就不能被优化，这就指定了一个线性的应用序列。为了写出infix符号，定义f = +（但它可能不是加法，这只是为了简化语法）。如果foldr1 f [a,b,c,d]的定义扩展为a + (b + (c+d))，因此计算从列表的右端开始，并重复地将最后的结果与左边的下一个元素结合起来。**然而，如果这个函数是关联的，我们可以把它重组为一棵树。(a+b) + (c+d)。现在子树可以被并行评估，将执行时间从O(n)减少到O(log n)。对二进制加法的应用是基于这个想法的，但并不直接了当**。(学生们应该能够回答到这一点，但不希望他们继续下面的内容)。进位传播被定义为bcarry函数的折叠。If f is not associative, the definition cannot be optimized, and this specifies a linear sequence of applications. In order to write infix notation, define f = + (but it might not be addition, this is just to simplify the syntax). The definition if foldr1 f [a,b,c,d] expands to a + (b + (c+d)), so the computation begins at the right end of the list, and repeatedly combines the last result with the next element to the left. However, if the function is associative, we can restructure it into a tree: (a+b) + (c+d). Now the subtrees can be evaluated in parallel, reducing the execution time from O(n) to O(log n). The application to binary addition is based on this idea, but is not straightforward. (The students should be able to answer up to this point, but they are not expected to continue with the following.) The carry propagation is defined as the fold of a bcarry function.
+* 然而，折叠是不够的，因为加法器中的每一个比特位置都需要到该点的套利，所以需要折叠的所有中间值，而不仅仅是最后的一个。 这个计算被称为f的扫描。并行扫描定理显示了如何利用并行性在对数时间内计算扫描（这不是并行折叠的一个微不足道的应用，因为中间结果的树都有不同的结构）。鉴于并行扫描定理，似乎可以使二进制加法器在对数时间内运行，因为波纹携带加法器被直接定义为mscanr fullAdd cin zs。然而，这并不奏效，因为bcarry函数不是关联的。事实证明，一连串的技术可以用来将问题转化为可以用关联函数的并行扫描来解决的形式。(这涉及到几个强大的技术，包括部分评估，部分应用的组合，以及另一个深度定理）。最后的结果是一个对数时间的加法电路。However, fold is insufficient because every bit position in the adder needs the carry up to that point, so all the intermediate values of the folds are required, not just the final one. This computation is called the scan of f. The parallel scan theorem shows how the scan can be calculated in logarithmic time, using parallelism (this is not a trivial application of parallel fold because the trees for the intermediate results all have different structures). Given the parallel scan theorem, it would appear that the binary adder can be made to run in log time, because a ripple carry adder is defined directly as mscanr fullAdd cin zs. However, that doesn’t work because the bcarry function is not associative. It turns out that a sequence of techniques can be applied to transform the problem into a form where it can be solved using a parallel scan of an associative function. (This involves several powerful techniques including partial evaluation, compositions of partial applications, and yet another deep theorem.) The final result is a logarithmic time addition circuit. 
 # Logarithmic scan is harder
 
 - 问题：**独立完成所有的fold需要大量的（+）电路**，因为我们没有重复使用中间结果 •	Problem: doing all the folds independently takes a lot of (+) circuits because we are not reusing the intermediate results
@@ -248,6 +255,31 @@ CLA，电路复杂换时间
 
 - 并行扫描是困难的，但也是强大的，加法器只是一个例子•	Parallel scan is difficult but powerful, the adder is just one example
   - 还有很多：关联搜索，并行最大/最小，扫描排序，...–	There are many more: associative search, parallel max/min, scansort, …
+
+---
+
+一个典型的处理器包含一个核心路径，从寄存器文件开始，经过选择操作数的多路复用器，通过包括加法器的ALU，结果再经过多路复用器，最后回到寄存器文件中。(这条路径是算术指令所需要的）。这个核心路径通常是关键路径，因为有地址解码器、一些多路复用器，而且**加法器的路径深度很高**。为了提高时钟速度，有必要减少关键路径。做到这一点的一个技术是**重定时，即在一个长路径中插入额外的锁存器，以便将一个长路径分成两个短路径。这减少了关键路径的深度，但代价是需要额外的时钟周期**。通过在ALU的输入和输出上放置锁存器，关键路径被限制在加法器上，这使得时钟速度加快。**一条算术指令将需要一到两个额外的时钟周期，但是如果数据路径是流水线式的，那么这个开销就可以消除(((其他方法，比如用fast adder，，超前进位加法器**。 A typical processor contains a core path starting from the register files, going through multiplexer for selecting operands, through the ALU including an adder, with the result going through further multiplexers and finally back into the register file. (This path is needed for arithmetic instructions). This core path will typically be the critical path because there are address decoders, a number of multiplexers, and the adder has a high path depth. To improve the clock speed, it is necessary to reduce the critical path. One technique to do this is retiming, which is the insertion of additional latches into a long path in order to break one long path into two shorter ones. This reduces the critical path depth at the expense of requiring additional clock cycles. By placing a latch on the inputs and output of the ALU, the critical path is limited to the adder, and this allows a faster clock speed. An arithmetic instruction will require one or two additional clock cycles, but that overhead may be eliminated if the datapath is pipelined.
+
+# 改进例子-流水线&超前进加法器
+
+(d) 考虑一个32位的处理器，其数据通路有4个阶段(IF, RF, OP, WR)，并假设。1) 一个**全加器的延迟是2ns**; 2) **关键路径的延迟是由ALU电路决定的，它在OP阶段**。使用性能方程(CPU时间=I x CPI x T)计算以下情况下单条指令的平均执行时间：
+
+* i)一个顺序处理器和用行波进位加法器实现的ALU；i) a sequential processor and the ALU implemented with a ripple carry adder;
+* ii)一个顺序处理器和用**超前进加法**器实现的ALU；ii) a sequential processor and the ALU implemented with a fast adder;
+* iii)一个流水线处理器(假设完美流水线)和用行波进位加法器实现的ALU； iii) a pipelined processor (assume perfect pipelining) and the ALU implemented with a ripple carry adder; 
+* iv)一个流水线处理器(假设完美流水线)和用快速加法器实现的ALU。iv) a pipelined processor (assume a perfect pipelining) and the ALU implemented with a fast adder. What is the fastest case? Explain why.
+
+什么是最快的情况？解释一下原因。
+
+* 时钟周期T是由关键路径的延迟给出的，**使用行波进位加法器是32 x 2ns = 64ns，使用快速加法器是log2 32 x 2ns = 10ns**。
+* **顺序处理器的CPI是4(4阶段数据通路)，而【完美】流水线处理器的CPI是1**。
+* 那么，四种情况下的CPU时间是： 
+  * i) 1 x 4 x 64ns = 256ns; 
+  * ii) 1 x 4 x 10ns = 40ns; 
+  * iii) 1 x 1 x 64ns= 64ns; 
+  * iv) 1 x 1 x 10ns = 10ns。
+
+最快的情况显然是iv），因为它使用了最好的电路设计技术，即完美的流水线和快速加法器。
 
 # ================
 

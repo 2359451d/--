@@ -3,8 +3,9 @@
 * [Content](#content)
 * [指令周期、机器周期和时钟周期](#指令周期机器周期和时钟周期)
 * [CPU性能方程-改进执行时间：Execution time](#cpu性能方程-改进执行时间execution-time)
+* [改进例子-流水线&超前进加法器](#改进例子-流水线超前进加法器)
 * [方法-减少执行时间:Approach for reducing execution time](#方法-减少执行时间approach-for-reducing-execution-time)
-* [硬件并行性：Parallelism in computer systems(hardware)](#硬件并行性parallelism-in-computer-systemshardware)
+* [硬件并行性-加速执行例子：Parallelism in computer systems(hardware)](#硬件并行性-加速执行例子parallelism-in-computer-systemshardware)
 * [==========](#)
 * [电路重定时(加快时钟频率）：Retiming](#电路重定时加快时钟频率retiming)
 * [重定时缩减关键路径例子](#重定时缩减关键路径例子)
@@ -40,9 +41,9 @@
 * [忙位策略局限：Limitations of busy bits scheme](#忙位策略局限limitations-of-busy-bits-scheme)
 * [无CDB（保留站）例子](#无cdb保留站例子)
 * [====================](#-2)
-* [保留站：Reservation stations](#保留站reservation-stations)
+* [改进-保留站：Reservation stations](#改进-保留站reservation-stations)
 * [保留站例子2](#保留站例子2)
-* [公共数据总线：Common Data Bus (CDB), Difficulties with busy bits](#公共数据总线common-data-bus-cdb-difficulties-with-busy-bits)
+* [CDB公共数据总线：Common Data Bus (CDB), Difficulties with busy bits](#cdb公共数据总线common-data-bus-cdb-difficulties-with-busy-bits)
 * [CDB结构：Structure of CDB](#cdb结构structure-of-cdb)
 * [CDB-指令发射：Issuing an instruction](#cdb-指令发射issuing-an-instruction)
 * [CDB-功能单元完成: when a functional unit finishes](#cdb-功能单元完成-when-a-functional-unit-finishes)
@@ -73,6 +74,8 @@
   - 而且它们实际上会使执行时间恶化 –	And they actually worsen the execution time
 
 ---
+
+# 改进例子-流水线&超前进加法器
 
 (d) 考虑一个32位的处理器，其数据通路有4个阶段(IF, RF, OP, WR)，并假设。1) 一个**全加器的延迟是2ns**; 2) **关键路径的延迟是由ALU电路决定的，它在OP阶段**。使用性能方程(CPU时间=I x CPI x T)计算以下情况下单条指令的平均执行时间：
 
@@ -112,7 +115,7 @@
 
 :orange: **最有效的方法涉及并行性**•	The most effective approaches involve parallelism
 
-# 硬件并行性：Parallelism in computer systems(hardware)
+# 硬件并行性-加速执行例子：Parallelism in computer systems(hardware)
 
 - **电路层面：使用硬件算法来降低关键路径**•	Circuit level: use hardware algorithms to lower critical path
   - **重定时，快速加法器**–	Retiming, fast adder
@@ -124,6 +127,12 @@
   - 芯片多处理器（多核）、加速器（如GPU、TPU)–	Chip-multiprocessors (multi-cores), accelerators (e.g. GPUs, TPUs)
 - **计算机水平：使用多台计算机**•	Computer Level: use multiple computers
   - 分布式系统，集群–	Distributed systems, clusters
+
+---
+
+其他
+
+**多核处理器**，它通过同时运行几个不同的线程来加快整体性能，但多核并不能加快单个指令序列的速度。例子包括。**pipelining**在处于控制算法不同阶段的相邻指令之间引入了并行性；**超标量**并行使用多个功能单元来并行执行指令所要求的长计算；**推测性并行**在条件性分支中遵循两种选择，并且只在分支解决后提交到需要的路径。**并行扫描**允许关联函数在对数时间而不是线性时间内被扫描，这有很多应用，包括**快速加法器和快速ALU**；关联搜索使用嵌入在小型存储器中的并行电路，以几乎O(1)时间而不是O(n)时间进行搜索；关联搜索的一个应用是在TLB电路中。还有更多的例子（使用并行解码树在一个寄存器文件上提供两个输出端口，为每个算术指令节省一个完整的时钟周期......）multicore processor, which speeds up overall performance by running several different threads simultaneously, but the multiple cores do not speed up a single sequence of instructions. Examples include: pipelining introduces parallelism between adjacent instructions which are in different phases of their control algorithms; superscalar parallelism uses multiple functional units to perform long calculations requested by instructions in parallel; speculative parallelism follows both alternatives in a conditional branch, and only commits to the path that is required once the branch is resolved; parallel scan allows associative functions to be scanned in logarithmic rather than linear time, and this has many applications including fast adders and fast ALUs; associative searching uses parallel circuits embedded in a small memory to perform searches in almost O(1) time rather than O(n) time; one application of associative searching is in TLB circuits. And there are many more examples (use of parallel decoder trees to provide two output ports on a register file, saving a full clock cycle for each arithmetic instruction…)
 
 # ==========
 
@@ -143,6 +152,17 @@
 - 思路：**将关键路径分成两部分，用锁存器(寄存器)分开**•	Idea: split the critical path into two parts, separated by a latch
   - **这缩短了关键路径，但需要两个时钟周期** –	This shortens the critical path but requires two clock cycles
 - 它为流水线引入了机会! •	It introduces opportunities for pipelining!
+
+---
+
+一个典型的处理器包含一个核心路径，从寄存器文件开始，经过选择操作数的多路复用器，通过包括加法器的ALU，结果再经过多路复用器，最后回到寄存器文件中。(这条路径是算术指令所需要的）。这个核心路径通常是关键路径，因为有地址解码器、一些多路复用器，而且**加法器的路径深度很高**。为了提高时钟速度，有必要减少关键路径。做到这一点的一个技术是**重定时，即在一个长路径中插入额外的锁存器，以便将一个长路径分成两个短路径。这减少了关键路径的深度，但代价是需要额外的时钟周期**。通过在ALU的输入和输出上放置锁存器，关键路径被限制在加法器上，这使得时钟速度加快。**一条算术指令将需要一到两个额外的时钟周期，但是如果数据路径是流水线式的，那么这个开销就可以消除(((其他方法，比如用fast adder，，超前进位加法器**。 A typical processor contains a core path starting from the register files, going through multiplexer for selecting operands, through the ALU including an adder, with the result going through further multiplexers and finally back into the register file. (This path is needed for arithmetic instructions). This core path will typically be the critical path because there are address decoders, a number of multiplexers, and the adder has a high path depth. To improve the clock speed, it is necessary to reduce the critical path. One technique to do this is retiming, which is the insertion of additional latches into a long path in order to break one long path into two shorter ones. This reduces the critical path depth at the expense of requiring additional clock cycles. By placing a latch on the inputs and output of the ALU, the critical path is limited to the adder, and this allows a faster clock speed. An arithmetic instruction will require one or two additional clock cycles, but that overhead may be eliminated if the datapath is pipelined.
+
+---
+
+:orange: 还是数据通路关键路径
+
+* 关键路径从寄存器文件中的触发器开始。它通过多路复用器树进行寄存器地址解码；然后通过多路复用器到x和y；然后进入包含波纹携带加法器的alu（它对关键路径的贡献最大，因为携带在字上传播；在这一点上，关键路径只涉及和的最有效位和携带输出。最后，p被广播（扇出）到寄存器文件中的寄存器，在那里它要经过另一个多路复用器（用于字的最重要位的那个）。时钟的设置必须提供一个至少足够长的时钟周期，以使关键路径上的所有信号都能沉淀。 The critical path starts with the flip flops in the register file. It goes through the multiplexer trees for register address decoding; then through multiplexers onto x and y; then into the alu which contains a ripple carry adder (which makes the largest contribution to the critical path as carry propagates across the word; at this point the critical path involves only the most significant bit of the sum and the carry output. The critical path then goes through two multiplexers onto p.	Finally, p is broadcast (fanout) to the registers in the register file, where it goes through another multiplexer (the one for the most significant bit of the word). The clock must be set to provide a clock cycle at least long enough to enable all signals on the critical path to settle.
+  * 我们可以引入两个缓冲寄存器，分别将x和y作为输入，并将其状态直接提供给alu。这将减少关键路径（通过寄存器文件解码树的深度和从a,b到x,y的路径上的其他多路复用器），代价是RRR指令将需要两个时钟周期，但改进的时钟速度将影响所有机器操作，而不仅仅是RRR。 We can introduce two buffer registers that take x and y as inputs respectively, and provide their states directly into the alu. This will reduce the critical path (by the depth of the register file decoder trees and other multiplexers on the path from a,b to x,y) The cost is that two clock cycles will be needed by the RRR instructions, but the improved clock speed will affect all machine operations, not just RRR.
 
 # 重定时缩减关键路径例子
 
@@ -279,6 +299,8 @@ IF、RF、OP、WR
 - RAW危险是指一条指令将结果写入寄存器，下一条指令读取该寄存器，但**获得了错误的值，因为结果在被获取时还没有到达目的寄存器**。A RAW hazard is a situation where an instruction writes a result into a register, and the next instruction reads that register but obtains the wrong value because the result has not yet reached the destination register by the time it is being fetched.
   - 例如：add **R1**,R2,R3; sub R4,**R1**,R5会导致一个RAW危险，因为sub指令是在add指令准备加载总和的同一周期内获取R1。For example: add R1,R2,R3; sub R4,R1,R5 causes an RAW hazard because the sub instruction is fetching R1 during the same cycle that the add instruction is preparing to load the sum into it.
   - **控制可以通过比较回写阶段的目标寄存器和执行阶段的两个操作数寄存器来检测**；如果其中任何一个相等，就有危险。在这种情况下，**控制器可以暂停流水线**，让加法完成，同时保留第二条指令。**另一种方法是使用转发：可以引入一个特殊的路径来连接ALU的输出（它有加法的结果）和子的操作数锁存器（绕过寄存器文件**）The control can detect this by comparing the destination register in the writeback stage with the two operand registers in the execute stage; if either of those is equal then there is a hazard. In this case the control can stall the pipeline, letting the add complete while holding back the second instruction. Another alternative is to use bypassing: a special path can be introduced to connect the output of the ALU (which has the result of the add) to the operand latch for the sub (bypassing the register file).
+  - 其他例子
+    - 当一条指令将一个值写入寄存器，随后的指令读取该值，但读取发生在写入之前，导致不正确的数据被用于第二条指令时，就会发生RAW危险。发生这种情况的原因是，从寄存器中读取数据发生在流水线的早期阶段，而结果的回写发生在最后。这个代码片段包含一个RAW危险：add R1,R2,R3; sub R5,R1,R6。问题是子程序会在add更新之前读取R1。这个代码片段不包含RAW危险，因为寄存器是不相连的：add R1,R2,R3; sub R4,R5,R6. A RAW hazard occurs when an instruction writes a value to a register, and a subsequent instruction reads that value, but the read occurs before the write, resulting in incorrect data being used in the second instruction. The reason this can happen is that reading data from the registers occurs in an early pipeline stage, while the writeback of the result occurs at the end. This code fragment contains a RAW hazard: add R1,R2,R3; sub R5,R1,R6. The problem is that the sub will read R1 before the add has updated it. This code fragment does not contain a RAW hazard, because the registers are disjoint: add R1,R2,R3; sub R4,R5,R6. 
 
 **先读后写相关性（WAR**）。	R1 :=R2+R3; R2 :=R4+R5 •	**Write after Read (WAR**)
 
@@ -457,6 +479,15 @@ ALU被限制在组合逻辑中可以在一个时钟周期内快速执行的操�
 
 - ALU中的复杂操作会使关键路径增加很多–	Complex operations in the ALU would increase a lot the critical path
 
+---
+
+:orange: 执行单元/功能单元对指令级并行性（流水线，超标量）的意义
+
+* **一个功能单元是一个顺序电路，在一个或多个时钟周期内计算一个函数。它有数据输入和一个启动控制输入；当start=1时，单元在下一个tick加载数据输入并开始计算。当它得到最终结果时，它将其放在一个输出信号上，并将一个准备输出信号设为1**。A functional unit is a sequential circuit that calculates a function in one or more clock cycles. It has data inputs and a start control input; when start=1 the unit loads the data inputs at the next tick and begins calculating. When it has the final result, it places that on an output signal and sets a ready output signal to 1.
+  * **一个组合乘法器有一个大的路径深度，需要一个较长的时钟周期**。一个功能单元可以采取一个可变的周期，一旦知道结果就终止计算，但组合电路不能这样做，因为时钟速度是固定的。**一个功能单元可以与指令流水线同时启动和运行，允许指令的并行执行**。 A combinational multiplier has a large path depth, and would require a longer clock period. A functional unit can take a variable number of cycles, terminating the calculation as soon as the result is known, but a combinational circuit cannot do this as the clock speed is fixed. A functional unit can be started and run concurrently with the instruction pipeline, allowing parallel execution of instructions.
+  * 当该单元在进行计算时，它在内部寄存器中保持其状态。如果在时钟滴答声中启动=1，该单元将加载输入数据并初始化内部寄存器。这样做的效果是放弃正在进行的计算。在开始新的计算时没有额外的开销。这种行为使该单元非常灵活。如果系统控制需要，它可以对新的计算进行缓冲，直到功能单元完成，控制甚至可以提供一个缓冲器。 While the unit is working on a calculation, it keeps its state in internal registers. If start = 1 at a clock tick, the unit will load the input data and initialize the internal registers. That has the effect of abandoning the calculation that was in progress. There is no additional overhead in starting the new calculation. This behavior makes the unit very flexible. If the system control wants, it can buffer the new calculation and wait until the functional unit has finished, and the control could even provide a buffer.
+* 然而，当有指令级并行时，**流水线发出的指令可能会变成不必要的指令，这取决于条件性分支的走向，是很有用的。这种功能单元允许开始进行推测性计算，但如果控制装置确定不需要这个结果，它就可以开始新的计算而不受到惩罚**。相反，如果功能单元被设计成承诺完成它所启动的一切，而计算有时需要许多时钟周期，那么在推测性计算中启动它将是潜在的浪费。However, when there is instruction level parallelism, it is useful for the pipeline to issue instructions that might turn out to be unnecessary, depending on which way conditional branches go. This kind of functional unit allows a speculative calculation to start, but if the control determines that this result is not needed, it can start a new calculation with no penalty. In contrast, if the functional unit were designed so that it commits to completing everything it starts, and the calculations sometimes required many clock cycles, it would be potentially wasteful to start it on a speculative calculation. 
+
 # 超标量控制：Superscalar control
 
 - 有了所有这些并行性，控制就变得至关重要！。•	With all this parallelism, control is critically important!
@@ -570,6 +601,8 @@ ALU被限制在组合逻辑中可以在一个时钟周期内快速执行的操�
 
 想法：**允许流水线以全速向功能单元发出指令，除非这将产生不正确的结果**•	Idea: allow the pipeline to issue instructions at full speed to the functional units unless this would produce incorrect results
 
+- 问题：如果一个操作已经开始，它的结果将写入一个寄存器，而随后的指令读取该寄存器，它将得到错误的值。然而，如果一条指令的所有操作数都在操作数寄存器中，指令应该继续执行。The problem: If an operation has started which will write its result into a register, and a subsequent instruction reads that register, it will get the wrong value. However, if all the operands for an instruction are present in the operand registers, the instruction should go ahead.
+  - 解决办法。当流水线向一个功能单元发出操作时，它将目标寄存器标记为忙。**当流水线遇到一个或两个操作数都很忙的指令时，它就会暂停，但如果两个操作数寄存器都不忙，指令的操作就会被发布到一个功能单元。当一个功能单元完成并将其结果发送到目标寄存器时，该寄存器被标记为不忙。这确保了正确的执行，并且仍然允许一些并行执行**。The solution: When the pipeline issues an operation to a functional unit, it marks the destination register as Busy. When the pipeline encounters an instruction where one or both operands are busy, it stalls, but if both operand registers are not busy the instruction’s operation is issued to a functional unit. When a functional unit finishes and sends its result to the destination register, that register is marked as Not Busy. This ensures correct execution and still allows some parallel execution.
 - <font color="deeppink">如果数据的依赖性会导致不正确的结果，则让流水线暂停</font>。–	Stall the pipeline if a data dependency could cause incorrect result
 
 - **每个浮点寄存器**（如F0）包含•	Each floating-point register (e.g. F0) contains
@@ -626,7 +659,7 @@ ALU被限制在组合逻辑中可以在一个时钟周期内快速执行的操�
 
 # 无CDB（保留站）例子
 
-在下面的指令序列中，请说明哪些操作可以立即发给一个功能单元，哪些操作会使流水线停滞，以及为什么。
+在下面的指令序列中，请说明哪些操作可以立即发给一个功能单元，哪些操作会使流水线停滞，以及为什么。 【【题目没提到CDB就是未改进的model，，，IBM 360 Model 91
 
 ```
 sub R3,R4 
@@ -645,7 +678,10 @@ sub R1,R5
 
 # ====================
 
-# 保留站：Reservation stations
+# 改进-保留站：Reservation stations
+
+> 问题是：**每个功能单元都有锁存器来保存操作数，当两个操作数都在时，单元就会启动**。当流水线向一个功能单元发出只有一个操作数的操作后，该单元必须等待，直到另一个操作数被送达。因此，一些功能单元可能会被闲置，这是有成本的。降低成本的一个方法是减少功能单元的数量，**但如果所有的功能单元都很忙，这将使流水线暂停**。The problem: Each functional unit has latch registers to hold operands, and the unit starts when both operands are present. After the pipeline has issued an operation with only one operand to a functional unit, the unit must wait until the other operand is delivered. Therefore a number of functional units may be idle, which is costly. One way to reduce the cost would be to reduce the number of functional units, but that would stall the pipeline if all the functional units are busy.
+> 解决办法。**每个功能单元有三个保留站**。预留站是一组锁存器，用于保存未来操作的操作数，**当一个站有所有操作数时，它就会向功能单元发出信号，让其在可用时启动**。重点是，**保留站等待操作数，但功能单元不需要等待【就是流水线不必暂停**。如果任何保留站都准备好了。The solution: Each functional unit has three reservation stations. A reservation station is a set of latch registers to hold the operands for a future operation, and when a station has all operands present it signals the functional unit to start when it becomes available. The point is that the reservation stations wait on operands, but the functional unit doesn’t need to wait if any reservation station is ready. 
 
 ![](/static/2022-04-29-17-29-24.png)
 
@@ -684,7 +720,12 @@ sub R1,R5
   - ![](/static/2022-04-29-17-51-46.png)
   - 编译器循环展开
 
-# 公共数据总线：Common Data Bus (CDB), Difficulties with busy bits
+# CDB公共数据总线：Common Data Bus (CDB), Difficulties with busy bits
+
+> 问题是：一个繁忙的位可能会使一条指令的流水线停滞，即使后面的指令可能已经准备好了所有的操作数。这意味着，潜在的并行性将被丢失。The problem: A busy bit could stall the pipeline on one instruction even though the following instructions might have all operands ready. This means that potential parallelism would be lost.
+>
+> 解决方案。当一条指令被发出时，目标寄存器被标记为忙，但有一个标签表明将执行操作的功能单元，其结果将进入该寄存器。**当功能单元完成一个操作时，它将结果和单元的标签一起在公共数据总线上广播。每个寄存器、存储缓冲器和保留站都会监听CDB，如果它正忙于等待一个与CDB上广播的（标签，值）相匹配的标签，该寄存器会锁住该值，并被标记为不忙**。实际上，这导致保留站动态地构建一个操作的有向无环图，**当所有操作数准备好时，这些操作就会启动。不再需要等待一个操作数在寄存器中可用**。The solution: When an instruction is issued, the destination register is marked as busy but with a tag indicating the functional unit that will perform the operation whose result will go into that register. When the functional unit completes an operation, it broadcasts the result, along with the unit’s tag, on the Common Data Bus. Every register, storage buffer, and reservation station listens to the CDB, and if it is busy waiting on a tag that matches the (tag, value) broadcast on the CDB, that register latches the value and is marked as not busy. In effect, this causes the reservation stations to construct dynamically a directed acyclic graph of operations, which fire when all operands become ready. It is no longer necessary to wait on an operand becoming available in a register.
+
 
 - **忙位集中在寄存器上，以及它们是否包含有效数据**•	Busy bits concentrate on the registers and whether they contain valid data
   - 这使得该方法对机器语言程序使用寄存器的方式很敏感–	This makes the approach sensitive to the way the machine language program uses the registers
@@ -767,7 +808,7 @@ sub R1,R5
 
 # CDB文字例子
 
-说明第一次除法的结果如何绕过R5，而直接进入保留站进行第二次除法。 = =、、什么b问法
+说明第一次除法的结果如何转发给R5，而直接进入保留站进行第二次除法。
 
 ```
 div R5,R2,R3; 
@@ -782,6 +823,23 @@ sub R5,R2,R2;
 3. 现在流水线发出sub指令（**第一个除法可能还在运行，因为它只过了两个时钟周期**）。sub指令发出了它的操作数，但是由于减法是一个更快的操作，<font color="red">它的结果将在第二次除法的结果**之前**（甚至可能在第一次除法完成之前）**出现**。这个结果被加载到R5中，R5不再繁忙</font>。 The pipeline now issues the sub instruction (and the first divide is probably still running, as it’s only two clock cycles later). The sub issues its operands, but since the substraction is a faster operation, its result will become available before the result of the second divide (and possibly even before the completion of the first divide).This result is loaded into R5, which is no longer busy.
 
 4. 同时，当**第一次除法完成**后，功能单元在**CDB上广播结果和标签，CDB与所有的保留站、寄存器和存储缓冲器相连**。分配给**第二次除法**的预留站将其第一个操作数的标签与CDB上的标签进行比较，**发现匹配，它就从CDB上加载数据值。这标志着操作数准备就绪，功能单元(第二个div)启动**。因此，架构已经将每个数据值传送到需要它的地方，但第一次除法的结果绕过了R5。  Meanwhile, when the first division finishes, the functional unit broadcasts the result and tag on the CDB, which is connected to all reservation stations, registers, and store buffers. The reservation station allocated to the second division compares its first operand tag with the tag on the CDB, finds a match, and it loads the data value from the CDB. This marks the operand as ready, the functional unit fires. Thus the architecture has transmitted each data value to where it is needed, but the result of the first divide bypasses R5.
+
+---
+
+2，，第一个mul结果如何转发R3，直接给到第二个mul相关的保留站
+
+```
+mul R3,R1,R2; 
+mul R4,R3,R1; 
+add R3,R1,R1.
+```
+
+* 管道通过将操作数发送到一个乘法器保留站来发布**第一个mul，它将R3标记为忙，并给它一个标签，以识别将产生结果的保留站**。The pipeline issues the first mul by sending the operands to a multiplier reservation station, and it marks R3 as busy and gives it a tag identifying the reservation station that will be producing the result.
+* 然后流水线发出**第二个mul，并将其操作数发送到一个（不同的）保留站**；现在R3的内容是标签，而不是实际的数字数据。 The pipeline then issues the second mul, and sends its operands to a (different) reservation station; the contents of R3 now are the tag, not actual numeric data.
+  * 特别是，**流水线不会因为R3在忙时被取走而停滞**。 In particular, the pipeline does not stall because R3 was fetched while busy.
+* 现在流水线发出了**add指令**（而第一个乘法可能还在运行，因为它只过了两个时钟周期）。加法指令发出了它的操作数，但是由于加法是一个更快的操作，**它的结果将在第二次乘法的结果之前（甚至可能在第一次乘法完成之前）出现**。 The pipeline now issues the add instruction (and the first multiply is probably still running, as it’s only two clock cycles later). The add issues its operands, but since the addition is a faster operation, its result will become available before the result of the second multiply (and possibly even before the completion of the first multiply)
+* 这个结果被加载到R3，R3不再繁忙。同时，当第一次乘法完成后，功能单元在CDB上广播结果和标签，CDB与所有保留站、寄存器和存储缓冲器相连。. This result is loaded into R3, which is no longer busy. Meanwhile, when the first multiplication finishes, the functional unit broadcasts the result and tag on the CDB, which is connected to all reservation stations, registers, and store buffers. 
+  * 分配给第二次乘法的预留站将其第一个操作数的标签与CDB上的标签进行比较，发现匹配，并从CDB上加载数据值。这标志着操作数准备就绪，功能单元启动。因此，架构已经将每个数据值传送到需要的地方，但第一次乘法的结果转发了R3 The reservation station allocated to the second multiplication compares its first operand tag with the tag on the CDB, finds a match, and it loads the data value from the CDB. This marks the operand as ready, the functional unit fires. Thus the architecture has transmitted each data value to where it is needed, but the result of the first multiply bypasses R3
 
 # 使用CDB意义->Registers are no longer a bottleneck
 

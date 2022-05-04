@@ -125,7 +125,16 @@
 
 对于一个**大得多的寄存器文件，不会比一个中等大小的文件有太大的好处，因为典型的循环不会使用数百个单独的标量变量**。但是**大的寄存器文件会降低时钟速度，因为它的地址解码树很可能在处理器的关键路径上**。此外，当一个**中断**发生时，它将需要更多的时间来保存状态。一般来说，**有必要将整个寄存器文件存储到内存中，所以如果寄存器的数量超过了实际需要，在每次中断时都会有很多不必要的内存访问。要有效地实现过程调用和返回，也可能变得更加复杂**。With a much larger register file, there won’t be much benefit over a moderate size one, as typical loops don’t use hundreds of individual scalar variables. But the large register file will slow down the clock speed, as its address decoder trees are likely to be on the critical path of the processor. Furthermore, it will take much more time to save state when an interrupt occurs. In general, it will be necessary to store the entire register file into memory, so if there are more registers than really needed, there will be a lot of unnecessary memory accesses on every interrupt. It may also become more complicated to implement procedure call and return efficiently.
 
-* 一个大的寄存器文件允许大量的变量保存在寄存器中，从而减少了所需的加载和存储指令的数量；这一点很重要，因为内存访问比寄存器中的算术慢得多。**一个大的寄存器文件需要更多的时间进行寄存器地址解码，需要更多的比特来指定一个寄存器，这可能会导致更大的指令大小，并产生更多的中断开销，因为寄存器的状态需要被保存和恢复。**  A large register file allows a large number of variables to be kept in registers, thus reducing the number of load and store instructions needed; this is significant since memory accesses are much slower than arithmetic in registers. A large register file requires more time for register address decoding, requires more bits to specify a register which could lead to larger instruction size, and produces more overhead for interrupts as the register state needs to be saved and restored.
+* 较大的寄存器文件的优点是：需要加载和存储的数量减少了；编程更容易，因为当前的变量可以保存在寄存器中；有了寄存器窗口，就有可能完全在寄存器中执行函数调用。Advantages of a larger register file: the number of loads and stores that are needed is reduced; programming is easier because current variables can be kept in registers; with register windows it may be possible to perform function calls entirely in the registers
+* 缺点
+  * 一个大的寄存器文件允许大量的变量保存在寄存器中，从而减少了所需的加载和存储指令的数量；这一点很重要，因为内存访问比寄存器中的算术慢得多。**一个大的寄存器文件需要更多的时间进行寄存器地址解码，需要更多的比特来指定一个寄存器，这可能会导致更大的指令大小，并产生更多的中断开销，因为寄存器的状态需要被保存和恢复。**  A large register file allows a large number of variables to be kept in registers, thus reducing the number of load and store instructions needed; this is significant since memory accesses are much slower than arithmetic in registers. A large register file requires more time for register address decoding, requires more bits to specify a register which could lead to larger instruction size, and produces more overhead for interrupts as the register state needs to be saved and restored.
+  * 由于地址**解码**树的深度增加，**关键路径**将变得更长，减缓**时钟速度**；在**指令格式中需要更多的比特来指定一个寄存器**；由于需要**保存和恢复更多的寄存器**，**中断**的成本将更大；无论如何在程序中很难有效地使用非常多的寄存器 Disadvantages include: the critical path will become longer, slowing down the clock speed, due to the increased depth of address decoding trees; more bits are needed in the instruction formats to specify a register; the cost of an interrupt will be larger as more registers need to be saved and restored; it’s difficult to use a very large number of registers effectively anyway in a program
+
+:orange: <font color="red">平衡大小，寄存器堆设计</font>
+
+* 为了找到一个好的平衡点，我们可以在一系列大小的寄存器文件（如2、3、4、5、6个地址位）上使用模拟进行实验。这应该使用现实的软件来完成，这些软件是根据每个寄存器文件的大小有效地编译的，而模拟器则考虑到对时钟速度的影响。To find a good tradeoff, we could run experiments using simulation on register files of a range of sizes (e.g. 2, 3, 4, 5, 6 address bits). This should be done using realistic software which is compiled efficiently to each register file size, and a simulator that accounts for effects on clock speed. 
+
+---
 
 # Register and memory
 

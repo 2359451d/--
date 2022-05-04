@@ -278,7 +278,7 @@ The convex hull of a set Of points (in the plane) is the smallest convex polygon
 
 类似建立多边形的算法，选择支点
 
-* 最大x坐标
+* **最大x坐标**
   * 如果存在多个，就进一步选取y最小的坐标
 
 Scan the remaining points in order of angle to the pivot 按与枢轴的角度顺序扫描剩余的点 （vertical line, anti-clockwise)

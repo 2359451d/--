@@ -43,6 +43,7 @@
 * [缓存算法(缓存满)](#缓存算法缓存满)
 * [缓存写模式（策略）：Cache Write Strategies](#缓存写模式策略cache-write-strategies)
 * [缓存写未命中情况](#缓存写未命中情况)
+* [查缓存过程](#查缓存过程)
 * [多级缓存：Multi-Level Caches](#多级缓存multi-level-caches)
 * [Summary缓存问题：Cache Issues](#summary缓存问题cache-issues)
 * [========](#-5)
@@ -53,13 +54,15 @@
 * [虚拟内存地址 & 物理内存地址：Virtual and Physical memory](#虚拟内存地址--物理内存地址virtual-and-physical-memory)
 * [页表:Page table](#页表page-table)
 * [DAT动态地址转换：Dynamic Address translation](#dat动态地址转换dynamic-address-translation)
+* [缺页（缺页故障）下访存](#缺页缺页故障下访存)
 * [DAT算法](#dat算法)
 * [问题：找到空闲物理帧 - finding an empty frame](#问题找到空闲物理帧---finding-an-empty-frame)
 * [页面置换算法：Page replacement policy](#页面置换算法page-replacement-policy)
 * [DAT页表访问开销：Accessing the page table](#dat页表访问开销accessing-the-page-table)
 * [TLB页表缓冲区-解决页表访问开销：Translation Lookaside buffer](#tlb页表缓冲区-解决页表访问开销translation-lookaside-buffer)
 * [实际：Further Complications](#实际further-complications)
-* [架构OS支持：Architecture must support OS](#架构os支持architecture-must-support-os)
+* [缓存vs虚存](#缓存vs虚存)
+* [架构OS支持（为什么虚存还需要OS软件支持）：Architecture must support OS](#架构os支持为什么虚存还需要os软件支持architecture-must-support-os)
 * [中断(OS,硬件)：Interrupts](#中断os硬件interrupts)
 * [中断实现：Implementing interrupts](#中断实现implementing-interrupts)
 * [PC值保存：Saving the pc](#pc值保存saving-the-pc)
@@ -160,13 +163,19 @@ CISC：复杂指令集计算机•	CISC: Complex Instruction Set Computer
 - **复杂而缓慢的解码=>变长指令**–	Complex and slow decoding => variable length instructions
 - **向后兼容的=>复杂性随时间增长**–	Backward compatibility => complexity grows over time
   - 如果架构提供可写的控制存储，就有可能根据应用的需要调整指令集 There is the potential for adjusting the instruction set to the needs of the application, if the architecture provides writable control store.
+- summary
+  - 实现一个程序所需的指令较少。需要**更少的内存访问取指令**。对象代码更小。fewer instructions are needed to implement a program. Fewer memory accesses for instructions are required. Object code is smaller.
+  - **编程通常更容易**。
+- **加载/存储结构**的优点包括：**处理器流水线更简单，可能更有效；处理器控制更简单；指令可以在一个小的固定时钟周期内执行** Programming is typically easier. Advantages of load/store architecture include: processor pipelining is simpler and likely to be more effective; the processor control is simpler; instructions can be executed in a small fixed number of clock cycles.
+  - 如果内存访问很慢，加载/存储架构所需的大量指令将在性能上占主导地位；**在这种情况下，高度编码的CISC指令将导致更快的执行【主要因为，，不用经常去内存取指令**。(这可能是早期机器采用CISC的原因，当时内存很慢，缓存还没有被引入）。 If memory accesses are slow, the larger number of instructions required by a load/store architecture will come to dominate performance; in this situation the highly encoded CISC instructions would lead to faster execution. (This is likely the reason that early machines were CISC, when memory was slow and before cache was introduced.) 
 
 RISC。精简指令集计算机•	RISC: Reduced Instruction Set Computer
 
 - **简单的指令（标准化的）=>复杂编译器(因为简单指令要转换成高级表达**–	Simple instructions (standarised) => complex compiler
-  - **但是RISC程序指令数量多**，，程序的大部分时间是在**循环**中度过的，而**指令缓存**使RISC机器几乎能以时钟速度获取指令；**由于这个原因，较多的指令数量并不会导致速度减慢** The crucial point is that programs spend most of their time in loops, and an instruction cache enables a RISC machine to fetch instructions at almost clock speed; for this reason the higher number of instructions does not lead to a slowdown.
+  - **但是RISC程序指令数量多【主要是取指令**，，程序的大部分时间是在**循环**中度过的，而**指令缓存**使RISC机器几乎能以时钟速度获取指令；**由于这个原因，较多的指令数量并不会导致速度减慢** The crucial point is that programs spend most of their time in loops, and an instruction cache enables a RISC machine to fetch instructions at almost clock speed; for this reason the higher number of instructions does not lead to a slowdown.
   - **需要更多【访存取指令**】，，RISC指令只执行一个操作，与CISC相比，执行一个计算需要更多的指令，有些指令执行几个操作。More memory accesses for instructions: RISC instructions perform just one operation, and more of them are needed to perform a computation than for CISC, where some instructions perform several operations.
-  - 需要高速缓存。因此，需要取用更多的RISC指令。**如果没有高速缓冲存储器，这将导致RISC的速度减慢，因为较慢的存储器访问将导致净减慢，而且流水线也不会有效，因为它将经常在存储器上停滞**。幸运的是，指令访问有很大的位置性，因为程序大部分时间都是在**循环**中度过的，这使得缓存存储器能够给指令提供有效的访问时间，从而使流水线的运行速度接近峰值。Need for cache: Therefore a larger number of RISC instructions need to be fetched. Without cache memory, this would cause a slowdown on RISC because the slower memory access would cause a net slowdown, and the pipeline wouldn’t be effective because it would frequently stall on the memory. Fortunately, instruction accesses have a great deal of locality because programs spend most of their time in loops, and that enables cache memory to give an effective access time for instructions that can keep the pipeline operating at close to peak speed.
+  - **需要高速缓存**。因为，需要取用更多的RISC指令。**如果没有高速缓冲存储器，这将导致RISC的速度减慢，因为较慢的存储器访问将导致净减慢，而且流水线也不会有效，因为它将经常在存储器上停滞**。幸运的是，指令访问有很大的位置性，因为程序大部分时间都是在**循环**中度过的，这使得缓存存储器能够给指令提供有效的访问时间，从而使流水线的运行速度接近峰值。Need for cache: Therefore a larger number of RISC instructions need to be fetched. Without cache memory, this would cause a slowdown on RISC because the slower memory access would cause a net slowdown, and the pipeline wouldn’t be effective because it would frequently stall on the memory. Fortunately, instruction accesses have a great deal of locality because programs spend most of their time in loops, and that enables cache memory to give an effective access time for instructions that can keep the pipeline operating at close to peak speed.
+  - RISC的重点是在少量的周期内执行指令，并且通过流水线在每个周期内执行大约一条指令，但是如果有效的内存访问时间远远超过一个周期，这是不可能的。因此，为了平衡有效内存访问时间和处理器获取下一条指令的时间，缓存是必不可少的。The point of RISC is to executed instructions in a small number of cycles, and with pipelining to execute approximately one instruction per cycle, but this is impossible if the effective memory access time is much longer than a cycle. Therefore cache is essential in order to balance effective memory access time with the time the processor needs to fetch the next instruction.
 - **大量的寄存器（访存操作非常慢）=>加载-存储架构**–	Large number of registers (memory very slow) => load-store architecture
   - <font color="red">更少的内存访问数据【访存取数据少】。RISC架构通常有一个较大的寄存器文件，允许在一长串指令中保持更多的变量在快速寄存器中被访问。CISC架构通常有从内存中获取一个或多个操作数的指令，这比寄存器到寄存器的操作要慢。</font>
   - 任何内存操作都需要涉及寄存器，，不能直接操作内存
@@ -219,6 +228,7 @@ ISA可以**按照指令中明确规定的操作数进行分类**•	ISAs may be 
   - 只包含操作码和数据的地址–	Contains only operation codes and addresses of data
 - **硬件（实现指令集的数字电路）必须在寄存器上提供堆栈操作**（pop, push）。•	The hardware (digital circuit implementing the instruction set) has to provide stack operations (pop, push) on the registers
   - 这并不困难–	This is not difficult
+- (优点）编译是直接的：机器语言基本上是反向波兰语符号。对象代码非常紧凑。(Advantages) Compilation is straightforward: the machine language is essentially reverse Polish notation. The object code is very compact. 
 
 ---
 
@@ -226,6 +236,7 @@ ISA可以**按照指令中明确规定的操作数进行分类**•	ISAs may be 
 
 - **压栈一个已经在快速寄存器（不在堆栈顶部）中的变量（具有缓慢的内存访问）是很浪费的**。–	It is wasteful to push a variable (with a slow memory access) that is already in a fast register (that is not at the top of the stack)
 - **优化代码是困难的**–	Optimising code is difficult
+- (缺点）一个多次使用的变量（如本语句中的a）需要在堆栈代码中推送几次(没途径存临时变量)，但在RISC机器上，变量可以被加载到一个寄存器中并多次使用。有可能用指令来增强堆栈机，以重复堆栈上的值，但**当值需要在堆栈内移动时，这就变得复杂和低效。堆栈结构使得跨越多个语句的代码难以优化，尤其是循环体可能难以优化**。(Disadvantages) A variable used several times (such as a in this statement) need to be pushed several times in the stack code, but on the RISC machine the variable can be loaded into a register and used several times. It is possible to augment the stack machine with instructions to duplicate values on the stack, but this becomes complicated and inefficient when values need to be moved within the stack. The stack architecture makes it difficult to optimize code that spans several statements, and in particular loop bodies may be difficult to optimize. 
 
 # 1-Address指令： 1-Address Instructions (Accumulator Machine)
 
@@ -615,6 +626,24 @@ ISA可以**按照指令中明确规定的操作数进行分类**•	ISAs may be 
   - 如果在不久的**将来不会发生对同一块的内存访问**，则是好事。–	Good if no memory access to the same block occur in the near future
   - 通常与**透写**一起使用–	Usually used with write-through
 
+# 查缓存过程
+
+(b) 一台计算机有一个直接映射的高速缓存，有**1024条高速缓存线**。一个指令被执行，在有效地址A处从内存中加载一个字，描述一下处理器电路是如何确定这个load是高速缓存命中还是高速缓存丢失的。说明如果load是高速缓存命中，电路会做什么，如果load是高速缓存丢失，电路会做什么。解释一组关联的高速缓存是如何减少高速缓存缺失的概率的。
+
+---
+
+直接映射算法例子
+
+地址的最右边10位指定缓存行地址（即缓存内的地址）。缓存行包含一个满/空标志，一个地址域和一个值域。只要标志表明缓存行已满，地址字段就会给出与数值相对应的内存地址。**当执行加载时，地址的最右边的10位被用来读取高速缓存行（这很快速）。如果缓存行是空的，就是一个缓存缺失。如果缓存行是满的，地址的上面几位将与缓存行的地址域进行比较（这也是快速的）。如果它们相同，那就是一个高速缓存命中，高速缓存行的值域就是加载的目标。如果它们不一样，这就是一个缓冲缺失**。在未命中的情况下，标志被设置为满，缓存行的地址域被设置为地址，并执行一次内存加载以获得数据，然后存储在值域。<font color="deeppink">一个直接映射的高速缓存将把地址具有相同低阶位的两个位置映射到同一高速缓存行中。如果这两个位置都在工作集中，对其中一个位置的访问就会把另一个位置从高速缓存中丢出来，从而导致频繁的高速缓存缺失</font>。The rightmost 10 bits of the address specify the cache line address (i.e. the address within the cache). The cache line contains a full/empty flag, an address field and a value field. Provided that the flag indicates the cache line is full, the address field gives the memory address corresponding to the value. When a load is executed, the rightmost 10 bits of the address are used to read the cache line (this is fast). If the cache line is empty, it is a cache miss. If the cache line is full, the upper bits of the address are compared with the address field of the cache line (this is also fast). If they are the same, it is a cache hit and the value field of the cache line is the target of the load. If they are different, this is a cache miss. In the event of a miss, the flag is set to full, the address field of the cache line is set to the address, and a primary memory load is performed to obtain the data which is then stored in the value field. A direct mapped cache will map two locations whose addresses have the same low order bits onto the same cache line. If both of these locations are in the working set, an access to one of them will throw the other out of the cache, resulting in frequent cache misses. 
+
+组相联高速缓存为**每一个10位行地址的值提供了一小组独立的高速缓存行**；这使得几个变量可以在高速缓存中共存，**即使它们的地址中有相同的低阶10位**。这就降低了缓存缺失的概率，而且整个工作集能够留在缓存中的概率更高，从而减少了缓存缺失。The set associative cache provides a small set of separate cache lines for each value of the 10-bit line address; this allows several variables to coexist in the cache even if they have the same low order 10 bits in their addresses. This lowers the probability of cache misses, and there is a higher probability that the entire working set can remain in the cache, resulting in fewer cache misses.
+
+---
+
+简化的直接映射差缓存，，&未命中情况
+
+* A的低k位决定了缓存行，其中缓存大小为2^k。缓存行包含实际在缓存中的数据的实际内存地址。当内存访问开始时，缓存控制将缓存行中A的实际地址与A的高位进行比较；由于它们不匹配，所以有一个缓存缺失。因此，高速缓存控制启动了内存访问操作来获取数据，并且流水线将停滞不前，直到数据从内存中到达。当它到达时，这个数据被单独放在高速缓存的行中，所以将来对这个地址的访问会在高速缓存中找到这个数据。The lower k bits of A determine the cache line, where the cache size is 2^k. The cache line contains the actual memory address of the data actually in the cache. When the memory access begins, the cache control compares the actual address in the cache line for A with the upper bits of A; since they do not match, there is a cache miss. Therefore the cache control initiates a real memory fetch to obtain the data, and the pipeline will stall until the data arrives from the memory. When it does, this data is placed in the cache line alone with A, so a future access to this address will find the data in the cache. 
+
 # 多级缓存：Multi-Level Caches
 
 低级别的缓存是否保留了高级别的块的副本？•	Do lower-level caches keep a copy of the blocks in higher-level?
@@ -777,6 +806,24 @@ ISA可以**按照指令中明确规定的操作数进行分类**•	ISAs may be 
   - 缺页错误（**虚拟内存未命中）：数据在磁盘上，必须启动I/O来获取数据（需要软件**）。–	Page fault (virtual memory miss): the data is on disk, and I/O must be started to get the data (requires software)
     - 当进程访问它的虚拟地址空间中的page时，如果这个page目前还不在物理内存中，此时CPU是不能工作的，Linux会产生一个hard page fault中断。系统需要从慢速设备（如磁盘）将对应的数据page读入物理内存，并建立物理内存地址与虚拟地址空间page的映射关系。然后进程才能访问这部分虚拟地址空间的内存。
 
+# 缺页（缺页故障）下访存
+
+:orange: 基本访存步骤
+
+- 首先，有效地址被分割成一个页号和偏移量（这基本上不需要时间）。通过将页号加到页表地址寄存器中来计算页表项的地址（1ns）。**需要一个硬件内存访问来获取页表条目（10ns**）。这将被分析并提供帧地址，并将其添加到偏移量中（1ns）。最后在**真实地址上访问数据（10ns**）。总时间约为22ns。First the effective address is split into a page number and offset (this takes essentially no time). The address of the page table entry is calculated by adding the page number to the page table address register (1ns). A hardware memory access is needed to fetch the page table entry (10ns). This is analyzed and provides the frame address, which is added to the offset (1ns). Finally the data is accessed at the real address (10ns). The total time is about 22ns;
+
+---
+
+(c) 估算一下，如果出现缓存缺失，内存访问将花费多少时间（与缓存命中的访问相比）。估算一下，**如果出现页面错误，一次内存访问将花费多少时间（与没有页面错误的访问相比）。解释一下为什么在虚拟内存中的颠簸远比频繁的高速缓存缺失更糟糕**。说明你所做的任何假设。Explain why thrashing in virtual memory is far worse than frequent cache misses.
+
+* 假设缓存命中为一个周期，而主存访问为10个周期。那么缓存缺失需要比缓存命中多10个周期。对于虚拟存储器，假设无故障访问需要10个周期。**如果有一个页面故障，会有一个中断，将控制权转移给操作系统，操作系统将启动磁盘I/O来处理故障**。假设磁盘访问时间为10ms，`~`10^7个时钟周期。I/O时间主导了页面故障的时间，因此第一时间可以忽略其他成本（中断的时间、操作系统算法的时间）。如果有惊动，一条指令的有效时间就会减慢几千万倍，但是如果有过度的高速缓存缺失，减慢的速度就只有10倍。Assume one cycle for a cache hit, and 10 cycles for a primary memory access. Then the cache miss would require 10 cycles longer than a cache hit. For virtual memory, assume a no-fault access takes 10 cycles. If there is a page fault, there will be an interrupt that transfers control to the operating system, which will initiate disk I/O to handle the fault. Assume 10ms for the disk access, ~10^7 clock cycles. The I/O time dominates the page fault time, so to a first approximation other costs (the time for the interrupt, the time for the OS algorithms) can be ignored. If there is thrashing, the effective time of an instruction is slowed down by a factor of 10s of millions, but if there are excessive cache misses the slowdown is only a factor of 10.
+
+---
+
+(b) 考虑一个有**虚拟内存**的处理器。(假设一条指令在有效地址A处从内存加载一个字，而这个字不在一个页框中。解释一下系统是如何确定有一个**页面故障**的，以及它的反应是什么。对于每个动作，说明它是由硬件还是由操作系统执行的。
+
+* A的高位（除k位外的所有位，其中页面大小为2^k）决定了页号。内存管理硬件在TLB中进行关联搜索来寻找这个页；如果存在，TLB中就包含了该页的页表条目，它是驻留的。然而，在这种情况下，我们假设位置A在一个不在框架内的页面中，所以TLB不会找到A的条目。在这个非常快速的TLB搜索之后，MMU硬件将访问内存中的页表，地址是页表开始和页号之和。这需要一个完整的内存访问，产生A的页表条目，其中包含一个驻留位，它是0（因为mem[A]不是驻留位）。**在这一点上，硬件产生了一个页面故障中断，完成了硬件的工作。下一条执行的指令将在操作系统的中断处理程序中，它将保存状态，分析中断的原因，并调用页面故障处理程序**。这些都是在软件中完成的。然后，处理程序将选择一个可用的页框，并开始一个I/O操作，从磁盘上读取该页。这将需要很长的时间，所以操作系统将阻止执行这个加载的进程，并将一个时间片给另一个进程。最终，磁盘读取将结束，产生一个中断，OK将更新页表，以表明这个页面现在是驻留的。原来的进程现在被标记为准备好了，在适当的时候它将收到一个时间片。加载指令将再次执行，但这一次不会出现页面故障。The upper bits of A (all but k bits, where the page size is 2^k) determine the page number. The memory management hardware does an associative search in the TLB to search for this page; if present, the TLB contains the page table entry for the page, which is resident. However, in this case we are assuming that location A is in a page that is not in a frame, so the TLB will not find an entry for A. After this very fast TLB search, the MMU hardware will access the page table in memory, at the address which is the sum of the page table start and the page number. That requires a full memory access, producing the page table entry for A. This contains a residency bit, which is 0 (because mem[A] is not resident). At this point the hardware generates a page fault interrupt, finishing the work done by the hardware. The next instruction to execute will be in the OS interrupt handler, which will save state, analyze the cause of the interrupt, and invoke the page fault handler. This is all done in software. The handler will then choose an available page frame and start an I/O operation to read the page from disk. This will take a long time, so the OS will block the process that performed this load, and give a time slice to another process. Eventually the disk read will finish, generate an interrupt, and the OK will update the page table to indicate this page is now resident. The original process is now marked as ready, and in due course it will receive a time slice. The load instruction will execute again, but this time there will not be a page fault.
+
 # DAT算法
 
 1. **给出一个虚拟地址（这是计算出来的有效地址**）1.	Given a virtual address (this is the calculated effective address)
@@ -866,7 +913,16 @@ DAT算法的每一次内存访问都需要一个**额外的内存访问**•	The
 - **页表可能很大（比物理主内存大**）。•	Page tables may be big (larger than the physical main memory)
   - **所以页表可能会被分页**!–	So the page tables may be paged themselves!
 
-# 架构OS支持：Architecture must support OS
+# 缓存vs虚存
+
+> 解释为什么缓存完全在硬件中实现。解释为什么虚拟存储器部分在硬件中实现，部分在软件中实现。讨论高速缓存缺失和页面错误的相对成本。
+>
+> 这有两个原因。**缓存不应该导致内存访问的时间比没有缓存的情况下内存硬件所需的时间长**；重点是使大多数访问更快，而不是使其中一些访问更慢。更关键的一点是，每次内存访问都必须检查缓冲区。如果有任何软件参与其中（哪怕只是执行一条指令），都会触发另一次缓存检查，结果就是无限循环。因此，整个高速缓存机制必须用硬件来实现。There are two reasons. The cache should never result in a memory access taking longer than the memory hardware would require without the cache; the point is to make most accesses faster, but not to make some of them slower. A more crucial point is that the cache must be checked on every memory access. If any software at all were involved (even just executing one instruction) that would trigger another cache check, and the result would be an infinite loop. Therefore the entire cache mechanism must be implemented in hardware.
+>
+> **对于虚拟内存来说，为了保持良好的性能，动态地址转换必须由硬件来完成。如果没有TLB，每次内存访问都需要额外的访问来获取页表条目；这将是100%的开销，这就是为什么引入TLB中的关联搜索，以减少动态地址转换对原来是常驻数据的平均时间**。 For virtual memory, the dynamic address translation must be carried out by hardware in order to maintain good performance. Without a TLB, each memory access would require an additional access to fetch the page table entry; this would be 100% overhead, which is why the associative search in a TLB is introduced to reduce the average amount of time required by the dynamic address translation for data that turns out to be resident. 
+> 然而，**如果有一个页面故障，那么就有必要进行I/O**。这需要操作系统，而且还需要这么长的时间，引入软件的开销相对来说是微不足道的。页面故障的开销是巨大的，而缓存缺失的速度并不比没有缓存的普通内存访问慢。因此，系统可以在相当高的缓存缺失比例下表现良好（例如10%），但除非页面故障很少，否则性能会很糟糕。However, if there is a page fault, then it is necessary to perform input/output. This requires the operating system, and it also takes so long the overhead of introducing software is relatively insignificant. The overhead of a page fault is enormous, while a cache miss is no slower than an ordinary memory access without cache. Therefore the system can perform well with a fairly high portion of cache misses (10% for example) but performance will be terrible unless page faults are rare. 
+
+# 架构OS支持（为什么虚存还需要OS软件支持）：Architecture must support OS
 
 - **动态地址转换。虚拟内存部分在硬件（TLB）中实现，部分在软件（中断）中实现**•	Dynamic address translation: Virtual memory is implemented partly in hardware (TLB), and partly in software (interrupts)
   - **架构和操作系统的相关部分必须一起设计**–	The relevant parts of the architecture and OS must be designed together
