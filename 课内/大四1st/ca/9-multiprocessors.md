@@ -19,6 +19,7 @@
 * [硬件并行性：Parallelism in Hardware](#硬件并行性parallelism-in-hardware)
 * [软件并行性：Parallelism in Software](#软件并行性parallelism-in-software)
 * [费林分类法:Flynn’s taxonomy of computers](#费林分类法flynns-taxonomy-of-computers)
+* [SIMD vs multicore](#simd-vs-multicore)
 * [=============](#-1)
 
 # Technology Trends
@@ -34,6 +35,8 @@
 
 ![](/static/2022-04-30-23-35-21.png)
 ![](/static/2022-04-30-23-33-09.png)
+
+摩尔定律是一种观察，即每块芯片的晶体管数量呈指数增长，每x个月翻一番（其中x通常约为12至24个月）。这不是一个自然法则；它是对芯片制造技术的各种改进所产生的累积效应的一种观察。在集成电路的早期，构建一个处理器需要很多芯片，ML的效果是降低了计算机的成本。从20世纪70年代到2000年左右，将一个完整的处理器放在一个芯片上是可能的，而ML使得使用越来越多的技术成为可能，这些技术以更多的晶体管为代价实现更高的速度（包括更宽的字、快速加法器、流水线、多功能单元和片上高速缓存）。到2000年，这些技术都已被普遍使用，所以更多的晶体管不再能自动带来更好的性能。此外，由于时钟分配导致的开销增加的速度比线性快，具有非常多的晶体管的芯片需要被组织成多个时钟域。**这两个因素都鼓励使用多核架构，而不是复杂性不断增加的单处理器**。Moore’s Law is an observation that the number of transistors per chip increases exponentially, doubling every x months (where x is typically around 12 to 24 months). This is not a law of nature; it’s an observation of the cumulative effects of a wide variety of improvements in chip fabrication technology. In the early years of integrated circuits, many chips were needed to build a processor, and the effect of ML was to reduce the cost of computers. From the 1970s through around 2000, it was possible to put a complete processor on a chip, and ML made it possible to use an increasing number of techniques that achieve greater speed at the expense of more transistors (including wider words, fast adders, pipelining, multiple functional units, and on-chip cache). By 2000 these techniques had all come into common use, so more transistors could no longer automatically lead to better performance. Furthermore, the overhead due to clock distribution increases faster than linearly, and chips with very large numbers of transistors need to be organized into multiple clock domains. Both of these factors encourage the use of multicore architectures, rather than single processors of ever increasing complexity. 
 
 <!-- # Recent chip multiprocessors (2018)
 
@@ -300,5 +303,11 @@
   - 通过把 "现成的 "处理器放在一起，更容易/更便宜地建立。–	Easier/cheaper to build by putting together “off-the-shelf ” processors
   - 多指令多数据，每个处理单元有独立指令和数据。
   - 这是并行处理系统中最常见的结构，现代流行的并行处理结构都可以划入这一类。
+
+# SIMD vs multicore
+
+(d) 比较在SIMD并行处理器和多核并行处理器上实现一个数据并行算法所需的技术。讨论该算法的哪些特征会导致更有效的SIMD执行，以及哪些特征会导致更有效的多核执行。(d)	Compare the techniques needed to implement a data parallel algorithm on a SIMD parallel processor and on a multicore parallel processor. Discuss what characteristics of the algorithm would lead to more efficient SIMD execution, and what characteristics would lead to more efficient multicore execution.
+
+一个SIMD架构要求所有的处理元素都执行相同的指令。因此，程序必须在指令层面上保持完全同步，而多核不需要这样做。此外，SIMD架构必须通过执行then部分和else部分来实现if-then-else结构，而多核将对每个数据元素只做其中之一。另一方面，SIMD架构可以有非常多的处理元素，而且时钟速度很快，而多核处理器的数量则要少得多。一般来说，一个可以用非常精细的同步操作和相对有限的条件实现的算法可以在SIMD架构上获得更好的加速，而一个根据数据值做不同工作的算法在多核上会有更好的表现 A SIMD architecture requires all processing elements to perform the same instruction. As a result, the program must remain perfectly synchronized at the instruction level, while a multicore does not need to do this. Furthermore, the SIMD architecture must implement if-then-else constructs by executing both the then-part and the else-part, while the multicore will do just one or the other for each data element. On the other hand, the SIMD architecture can have an extremely large number of processing elements with a fast clock speed, while the number of processors on a multicore is much lower. In general, an algorithm that can be implemented with very fine grain synchronized operations and relatively limited conditionals can obtain a better speedup on a SIMD architecture, while an algorithm that does different work depending on the data values will perform better on a multicore
                  
 # =============

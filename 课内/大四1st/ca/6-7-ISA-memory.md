@@ -3,6 +3,7 @@
 * [Content](#content)
 * [Review:三层次架构 Three Aspects of Computer Architecture](#review三层次架构-three-aspects-of-computer-architecture)
 * [ISA:硬件-软件接口: Hardware-software interface](#isa硬件-软件接口-hardware-software-interface)
+* [指令使用的寄存器类型->状态寄存器，通用寄存器](#指令使用的寄存器类型-状态寄存器通用寄存器)
 * [ISA设计： Design Considerations](#isa设计-design-considerations)
 * [========](#)
 * [历史：Historical context](#历史historical-context)
@@ -67,6 +68,7 @@
 * [中断实现：Implementing interrupts](#中断实现implementing-interrupts)
 * [PC值保存：Saving the pc](#pc值保存saving-the-pc)
 * [用户态: Saving the state](#用户态-saving-the-state)
+* [完整中断设计-需要解决的问题](#完整中断设计-需要解决的问题)
 * [禁止中断指令：Disabling interrupts](#禁止中断指令disabling-interrupts)
 * [中断丢失：Missing interrupt](#中断丢失missing-interrupt)
 * [内存保护：Basic Memory Protection](#内存保护basic-memory-protection)
@@ -74,7 +76,7 @@
 * [系统状态-用户/核心态：System State](#系统状态-用户核心态system-state)
 * [========](#-6)
 * [虚拟机：Virtual Machines](#虚拟机virtual-machines)
-* [系统虚拟化实现：Implementing system virtualisation](#系统虚拟化实现implementing-system-virtualisation)
+* [系统虚拟化实现-问题/挑战：Implementing system virtualisation](#系统虚拟化实现-问题挑战implementing-system-virtualisation)
 * [========](#-7)
 
 # Review:三层次架构 Three Aspects of Computer Architecture
@@ -114,6 +116,12 @@ ISA编码：每条指令有多少位？•	Encoding the ISA: How many bits per i
 
 - **固定的**：16/32/64 MIPS, arm, 等等 (16 in sigma16)–	Fixed: 16/32/64 MIPS, arm, etc (16 in sigma16)
 - **可变的**。英特尔x86–	Variable: Intel x86
+
+# 指令使用的寄存器类型->状态寄存器，通用寄存器
+
+一些计算机体系结构将比较的结果（小于、等于或大于）保存在一个特殊的条件代码寄存器（或状态寄存器）中，而其他体系结构的比较指令则将结果作为布尔值保存在一个普通的寄存器中。讨论一下这两种方法对指令集设计的影响。
+
+在数据路径中，将比较的结果保存在一个特殊的寄存器或一个普通的寄存器中，也同样有效和简单。条件代码允许一条比较指令可以有多个结果< = >，可以用来控制条件跳转。将完整的比较结果保存在一般的寄存器中是很尴尬的，除非有条件跳转可以由寄存器中的一个位来控制，这是不正常的，在简化比较的同时会使跳转复杂化。当比较结果是布尔值时，需要有几条比较指令（例如，cmplt计算`x<y`为布尔值）。如果要对布尔值进行逻辑运算，或者将结果保存在一个布尔变量中，那么通用寄存器的方法就更简单、更高效。使用通用寄存器还可以通过减少状态的数量来简化流水线和中断。It is equally efficient and simple in the datapath to save the result of a comparison in a special register or a general register. A condition code allows for a single compare instruction that can have multiple results < = > which can be used to control conditional jumps. It would be awkward to save a full comparison result in a general register unless there are conditional jumps that can be controlled by a single bit in a register, which is unusual and would complicate the jumps while simplifying the compares. When the comparison result is a Boolean, there need to be several compare instructions (e.g. cmplt to calculate `x<y` as a Boolean). If logic operations are to be performed on the Boolean, or the result is to be saved in a Boolean variable, then the general register approach is simpler and more efficient. The use of general registers also simplifies pipelining and interrupts by reducing the amount of state.
 
 # ISA设计： Design Considerations
 
@@ -173,8 +181,10 @@ RISC。精简指令集计算机•	RISC: Reduced Instruction Set Computer
 
 - **简单的指令（标准化的）=>复杂编译器(因为简单指令要转换成高级表达**–	Simple instructions (standarised) => complex compiler
   - **但是RISC程序指令数量多【主要是取指令**，，程序的大部分时间是在**循环**中度过的，而**指令缓存**使RISC机器几乎能以时钟速度获取指令；**由于这个原因，较多的指令数量并不会导致速度减慢** The crucial point is that programs spend most of their time in loops, and an instruction cache enables a RISC machine to fetch instructions at almost clock speed; for this reason the higher number of instructions does not lead to a slowdown.
+    - RISC架构一般在一条指令中只做一个操作，如算术操作或内存访问。由于CISC指令通常在一条指令中进行多项操作，因此一个程序可能需要较少的CISC指令。程序的执行速度取决于时钟速度和每条指令的平均周期数；它不取决于指令的数量。最关键的一点是，程序的大部分时间是在**循环**中度过的，而指令缓存使RISC机器几乎能以时钟速度获取指令；**由于这个原因，较多的指令数量并不会导致速度减慢**。RISC架构的设计是为了尽量减少时钟周期，并通过使用流水线和其他形式的指令级并行来减少每条指令的周期。**可以给出许多RISC可能会更快的理由：避免了会延长关键路径的操作；指令集被设计成使流水线有效并减少停顿；当流水线停顿时可以进行有用的工作（例如分支延迟槽**）。RISC architectures generally do only one operation in an instruction, such as an arithmetic operation or a memory access. Since CISC instructions often perform several operations in an instruction, a program may require fewer CISC instructions. The speed of program execution depends on the clock speed and the average number of cycles per instruction; it does not depend on the number of instructions. The crucial point is that programs spend most of their time in loops, and an instruction cache enables a RISC machine to fetch instructions at almost clock speed; for this reason the higher number of instructions does not lead to a slowdown. A RISC architecture is designed to minimize the clock period and to reduce cycles per instruction by using pipelining and other forms of instruction level parallelism. Many reasons can be given that RISC may be faster: operations that would lengthen the critical path are avoided; the instruction set is designed to make pipelining efficient and to reduce stalls; useful work can be done when the pipeline stalls (e.g. branch delay slots).
   - **需要更多【访存取指令**】，，RISC指令只执行一个操作，与CISC相比，执行一个计算需要更多的指令，有些指令执行几个操作。More memory accesses for instructions: RISC instructions perform just one operation, and more of them are needed to perform a computation than for CISC, where some instructions perform several operations.
   - **需要高速缓存**。因为，需要取用更多的RISC指令。**如果没有高速缓冲存储器，这将导致RISC的速度减慢，因为较慢的存储器访问将导致净减慢，而且流水线也不会有效，因为它将经常在存储器上停滞**。幸运的是，指令访问有很大的位置性，因为程序大部分时间都是在**循环**中度过的，这使得缓存存储器能够给指令提供有效的访问时间，从而使流水线的运行速度接近峰值。Need for cache: Therefore a larger number of RISC instructions need to be fetched. Without cache memory, this would cause a slowdown on RISC because the slower memory access would cause a net slowdown, and the pipeline wouldn’t be effective because it would frequently stall on the memory. Fortunately, instruction accesses have a great deal of locality because programs spend most of their time in loops, and that enables cache memory to give an effective access time for instructions that can keep the pipeline operating at close to peak speed.
+    - RISC程序将需要更多的内存访问指令。**如果没有高速缓存**，RISC程序的性能会很差，因为需要更多的指令内存访问。**有了高速缓存，循环中的指令将被保存在高速缓存中，所以大的RISC代码大小不会影响性能**。 the RISC program will require more memory accesses for instructions. Without a cache, the RISC program will perform poorly because many more instruction memory accesses are needed. With a cache, the instructions in a loop will be held in cache so the large RISC code size doesn’t impair performance.
   - RISC的重点是在少量的周期内执行指令，并且通过流水线在每个周期内执行大约一条指令，但是如果有效的内存访问时间远远超过一个周期，这是不可能的。因此，为了平衡有效内存访问时间和处理器获取下一条指令的时间，缓存是必不可少的。The point of RISC is to executed instructions in a small number of cycles, and with pipelining to execute approximately one instruction per cycle, but this is impossible if the effective memory access time is much longer than a cycle. Therefore cache is essential in order to balance effective memory access time with the time the processor needs to fetch the next instruction.
 - **大量的寄存器（访存操作非常慢）=>加载-存储架构**–	Large number of registers (memory very slow) => load-store architecture
   - <font color="red">更少的内存访问数据【访存取数据少】。RISC架构通常有一个较大的寄存器文件，允许在一长串指令中保持更多的变量在快速寄存器中被访问。CISC架构通常有从内存中获取一个或多个操作数的指令，这比寄存器到寄存器的操作要慢。</font>
@@ -192,6 +202,12 @@ RISC。精简指令集计算机•	RISC: Reduced Instruction Set Computer
 - **向后兼容更简单**–	Backward compatibility => much simpler
 - <font color="red">其他优点</font>
   - 避免了会延长关键路径的操作；指令集被设计成使流水线有效并减少停顿；当流水线停顿时可以进行有用的工作（例如分支延迟槽）. Many reasons can be given that RISC may be faster: operations that would lengthen the critical path are avoided; the instruction set is designed to make pipelining efficient and to reduce stalls; useful work can be done when the pipeline stalls (e.g. branch delay slots).
+  - 对比CISC某些指令（如call，保存所有寄存器状态），RISC没有call
+    - 调用指令简化了汇编语言编程，减少了目标代码的大小。然而，RISC方法有几个优点。**它允许流水线继续运行，而调用指令会使流水线停顿**。The call instruction simplifies assembly language programming and reduces the size of the object code. However, the RISC approach has several advantages. It allows the pipeline to continue running, while the call instruction would stall the pipeline.
+    - 虽然对机器语言程序员来说，**编写加载和存储不太方便，但这允许保存寄存器的一个子集，这反过来可以使调用和返回的动作大大加快**。有几种不同的方式来执行过程调用和返回；RISC很灵活，允许任何一种方式，但硬件调用指令会强制执行一种调用惯例。Although it’s less convenient to the machine language programmer to write the loads and stores, that allows a subset of the registers to be saved, which in turn can make the action of call and return significantly faster. There are several different ways to perform procedure call and return; RISC is flexible and allows any of them, but a hardware call instruction would force one calling convention.
+- 下面站Sigma16, RISC，3-address角度概括
+  - (1) 编程更容易，因为每个操作只需要一条指令；不需要加载和存储。(2) 不需要分配寄存器，如果有太多的变量，也不需要将寄存器溢出到内存中。(1) programming is easier because each operation requires just one instruction; there is no need for loads and stores. (2) There is no need for register allocation, or for spilling registers to memory if there are too many variables.
+  - 缺点包括 (1) 程序运行速度较慢，因为每条指令需要三次内存访问（除了获取指令本身）；相比之下，加载/存储风格的架构可以对一个变量进行一次加载，并多次使用，而无需进一步的内存访问。(2) 指令会更长，因为内存地址比寄存器需要更多的位来表示。(1) The program will run slower because each instruction requires three memory accesses (in addition to fetching the instruction itself); in contrast a load/store style architecture can load a variable once and use it several times without further memory accesses. (2) Instructions will be longer because memory addresses take more bits to represent than registers.
 
 # ========
 
@@ -315,6 +331,9 @@ ISA可以**按照指令中明确规定的操作数进行分类**•	ISAs may be 
 - **有了【合理数量的寄存器】（通常是32个），就有可能把常用的数据保存在寄存器中**•	With a reasonable number of registers (typically 32 of them), it is possible to keep commonly-used data in registers
   - 这就**减少了内存访问所花费的时间**–	This reduces the time spent on memory accesses
 - 通常情况下，3地址指令集的性能最好，因为（1）**多次使用的变量，如a，可以在整个计算过程中留在寄存器中**，（2）不需要临时变量，因为**中间结果可以留在寄存器**中。Usually the 3-address instruction set will perform best, because (1) variables that are used several times, such as a, can be left in a register throughout the computation, and (2) temporary variables are not needed because intermediate results can be left in registers.
+- 下面站Sigma16, RISC，3-address角度概括
+  - (1) 编程更容易，因为每个操作只需要一条指令；不需要加载和存储。(2) 不需要分配寄存器，如果有太多的变量，也不需要将寄存器溢出到内存中。(1) programming is easier because each operation requires just one instruction; there is no need for loads and stores. (2) There is no need for register allocation, or for spilling registers to memory if there are too many variables.
+  - 缺点包括 (1) 程序运行速度较慢，因为每条指令需要三次内存访问（除了获取指令本身）；相比之下，加载/存储风格的架构可以对一个变量进行一次加载，并多次使用，而无需进一步的内存访问。(2) 指令会更长，因为内存地址比寄存器需要更多的位来表示。(1) The program will run slower because each instruction requires three memory accesses (in addition to fetching the instruction itself); in contrast a load/store style architecture can load a variable once and use it several times without further memory accesses. (2) Instructions will be longer because memory addresses take more bits to represent than registers.
 
 # 寄存器&内存：Registers and Memory
 
@@ -401,6 +420,10 @@ ISA可以**按照指令中明确规定的操作数进行分类**•	ISAs may be 
   - 管道化、预取、OoO执行–	Pipelining, prefetching, OoO execution
 
 # 交叉存取内存(技术): Interleaved Memory
+
+> **交错式内存将内存地址空间划分为k个独立的空间，称为内存组。一个有效的地址a被转换为对bank（a mod 2^k）中的位置（a div 2^k）的访问；因此，低阶k位选择了bank，而高阶位被用来寻址该bank中的一个字**。An interleaved memory divides the memory address space into k separate spaces called memory banks. An effective address a is converted to an access to location (a div 2^k) in bank (a mod 2^k); thus the low order k bits select the bank and the upper bits are used to address a word in that bank.
+> 一个直接映射的高速缓存使用一个小的快速缓存存储器来保存最近访问的字，而其余的数据则保存在大的慢速主存储器中。一个高速缓存包含2^k个高速缓存行；每个高速缓存行包含两个字段，一个内存地址和该地址的内存内容。当机器访问有效地址a的内存时，会检查(a mod 2^k)的缓存线；如果地址字段与(a div 2^k)相匹配，那么就有一个缓存命中，缓存中的数据字段被使用；否则就有一个缓存错过，数据必须在主存中访问。 A direct mapped cache uses a small fast cache memory to hold recently accessed words, while the rest of the data is held in the large slow primary memory. A cache contains 2^k cache lines; each cache line contains two fields, a memory address and contents of memory at that address. When the machine accesses memory at effective address a, the cache line at (a mod 2^k) is checked; if the address field matches (a div 2^k) then there is a cache hit and the data field from the cache is used; otherwise there is a cache miss and the data must be accessed in primary memory.
+> 这有几个相似之处。两种技术都使用多个内存单元，都使用地址的低阶k位来选择要取用的内存。有几个区别。**交错内存使用具有相同性能的库；而高速缓存使用具有非常不同速度的内存。高速缓冲存储器需要进行一些计算来确定使用哪个存储器（比较行的地址域）；交错存储器则不需要。交错存储器很适合访问连续的地址序列，因为一组k的访问将进入不同的库，可以并行操作。缓存存储器很适合于使用小型工作集的程序**。
 
 ![](/static/2022-04-24-23-54-33.png)
 
@@ -518,6 +541,7 @@ ISA可以**按照指令中明确规定的操作数进行分类**•	ISAs may be 
   - 我们只需要**在相应的缓存项集合中进行搜索**–	We need to search only in the corresponding set of cache entries
   - 大多采用这个方式
   - 主空间中的每个地址都被映射到高速缓存空间中的一小部分可能的地址。对于一个4-way set associative cache来说，这可以通过生成一个初步的cache地址来完成，就像直接映射一样，但是要尝试所有2位的组合，这样每个内存地址就可以被放置在cache中4个可能的位置之一。set associative. Each address in primary space is mapped to a small set of possible addresses in the cache space. For a 4-way set associative cache, this may be done by generating a preliminary cache address as in direct mapped, but then by trying all combinations of a two bit field, so that each memory address could be placed in one of four possible locations in the cache.
+  - 在一个**组相联**的高速缓存中，每个高速缓存行可以存储在一组高速缓存的位置，而不仅仅是一个位置。让f(a)为有效地址a中的低阶k位。在一个大小为2^k的直接映射缓存中，任何有效地址为a的字都必须存储在缓存的f(a)位置。在一个大小为`m*2^k`的组相联高速缓存中，任何具有有效地址a的字都可以存储在高速缓存中的任何m个位置。因为有效地址并不能唯一地定义缓存的位置，缓存必须在可能的位置集合中进行关联搜索。这是通过比较有效地址和缓存中每一行的存储地址来完成的；**比较是平行进行的，但它们需要缓存硬件中的额外逻辑。这样做的好处是，一个程序可以在其工作集中有几个具有相同低地址位的位置，而不会造成过多的高速缓冲区失误**。In a set associative cache, each cache line can be stored in a set of cache locations, not just one location. Let f(a) be the lower order k bits in an effective address a. In a direct mapped cache of size 2^k, any word with effective address a must be stored in the cache at location f(a). In a set associative cache of size m*2^k, any word with effective address a may be stored in any of m locations in the cache. Because the effective address does not uniquely define the cache location, the cache must perform an associative search in the set of possible locations. This is done by comparing the effective address with the stored address field in each cache line in the set; the comparisons are done in parallel but they require additional logic in the cache hardware. The benefit is that a program can have several locations with the same lower address bits in its working set without causing excessive cache misses.
 
 # 直接映射缓存：Direct Mapped Cache
 
@@ -555,6 +579,10 @@ ISA可以**按照指令中明确规定的操作数进行分类**•	ISAs may be 
 # 3个对比
 
 直接映射需要简单的硬件，但是工作集中的几个字很有可能映射到同一个高速缓存行，从而导致该行重复的高速缓存丢失。这个问题在集合关联高速缓存中会大大减少，而且所需的额外硬件也相当小，因为每个地址在高速缓存中都只有一小部分可能的位置。一个完全关联的高速缓存可以确保由内存位置冲突引起的额外的高速缓存失误数量最小，但是它要求每一个高速缓存行都有一个比较器来检查该行的地址和一个广播内存地址。这就导致了在高速缓存中增加了大量的逻辑门，而且还需要一些额外的时间来检查高速缓存。因此，完全关联式通常在硬件复杂性和门延迟方面的成本太高，以至于无法证明它比集合关联式高速缓存更有优势。Direct mapped requires simple hardware, but there is a high probability that several words in the working set might map to the same cache line, resulting in repeated cache misses on that line. This problem is significantly reduced in a set associative cache, and the additional hardware required is fairly small because each address has only a small set of possible locations it could go in the cache. A fully associative cache ensures the minimal number of additional cache misses caused by memory placement conflicts, but it requires every cache line to have a comparator to check the line address against a broadcast memory address. This results in a very large amount of additional logic gates in the cache, and also takes some additional time for checking the cache. Thus fully associative is usually too costly, in both hardware complexity and gate delay, to justify its benefits over set associative cache.
+
+---
+
+在一个**组相联**的高速缓存中，每个高速缓存行可以存储在一组高速缓存的位置，而不仅仅是一个位置。让f(a)为有效地址a中的低阶k位。在一个大小为2^k的直接映射缓存中，任何有效地址为a的字都必须存储在缓存的f(a)位置。在一个大小为`m*2^k`的组相联高速缓存中，任何具有有效地址a的字都可以存储在高速缓存中的任何m个位置。因为有效地址并不能唯一地定义缓存的位置，缓存必须在可能的位置集合中进行关联搜索。这是通过比较有效地址和缓存中每一行的存储地址来完成的；**比较是平行进行的，但它们需要缓存硬件中的额外逻辑。这样做的好处是，一个程序可以在其工作集中有几个具有相同低地址位的位置，而不会造成过多的高速缓冲区失误**。In a set associative cache, each cache line can be stored in a set of cache locations, not just one location. Let f(a) be the lower order k bits in an effective address a. In a direct mapped cache of size 2^k, any word with effective address a must be stored in the cache at location f(a). In a set associative cache of size m*2^k, any word with effective address a may be stored in any of m locations in the cache. Because the effective address does not uniquely define the cache location, the cache must perform an associative search in the set of possible locations. This is done by comparing the effective address with the stored address field in each cache line in the set; the comparisons are done in parallel but they require additional logic in the cache hardware. The benefit is that a program can have several locations with the same lower address bits in its working set without causing excessive cache misses.
 
 # CAM内容可寻址存储器: content addressable memory
 
@@ -824,6 +852,23 @@ ISA可以**按照指令中明确规定的操作数进行分类**•	ISAs may be 
 
 * A的高位（除k位外的所有位，其中页面大小为2^k）决定了页号。内存管理硬件在TLB中进行关联搜索来寻找这个页；如果存在，TLB中就包含了该页的页表条目，它是驻留的。然而，在这种情况下，我们假设位置A在一个不在框架内的页面中，所以TLB不会找到A的条目。在这个非常快速的TLB搜索之后，MMU硬件将访问内存中的页表，地址是页表开始和页号之和。这需要一个完整的内存访问，产生A的页表条目，其中包含一个驻留位，它是0（因为mem[A]不是驻留位）。**在这一点上，硬件产生了一个页面故障中断，完成了硬件的工作。下一条执行的指令将在操作系统的中断处理程序中，它将保存状态，分析中断的原因，并调用页面故障处理程序**。这些都是在软件中完成的。然后，处理程序将选择一个可用的页框，并开始一个I/O操作，从磁盘上读取该页。这将需要很长的时间，所以操作系统将阻止执行这个加载的进程，并将一个时间片给另一个进程。最终，磁盘读取将结束，产生一个中断，OK将更新页表，以表明这个页面现在是驻留的。原来的进程现在被标记为准备好了，在适当的时候它将收到一个时间片。加载指令将再次执行，但这一次不会出现页面故障。The upper bits of A (all but k bits, where the page size is 2^k) determine the page number. The memory management hardware does an associative search in the TLB to search for this page; if present, the TLB contains the page table entry for the page, which is resident. However, in this case we are assuming that location A is in a page that is not in a frame, so the TLB will not find an entry for A. After this very fast TLB search, the MMU hardware will access the page table in memory, at the address which is the sum of the page table start and the page number. That requires a full memory access, producing the page table entry for A. This contains a residency bit, which is 0 (because mem[A] is not resident). At this point the hardware generates a page fault interrupt, finishing the work done by the hardware. The next instruction to execute will be in the OS interrupt handler, which will save state, analyze the cause of the interrupt, and invoke the page fault handler. This is all done in software. The handler will then choose an available page frame and start an I/O operation to read the page from disk. This will take a long time, so the OS will block the process that performed this load, and give a time slice to another process. Eventually the disk read will finish, generate an interrupt, and the OK will update the page table to indicate this page is now resident. The original process is now marked as ready, and in due course it will receive a time slice. The load instruction will execute again, but this time there will not be a page fault.
 
+---
+
+3种情况，，(c) 一台具有虚拟内存和转换旁观缓冲器(TLB)的计算机正在对虚拟地址A进行内存获取。说明在下列情况下发生的事件顺序：(1)**有一个页命中，TLB搜索成功；(2)有一个页命中，TLB搜索不成功；(3)有一个页丢失**。对于这三种情况，请估计内存访问的总耗时（延迟）。(c)	A computer with virtual memory and a Translation Lookaside Buffer (TLB) is performing a memory fetch to virtual address A. State the sequence of events that occur if (1) there is a page hit and the TLB search is successful; (2) there is a page hit and the TLB search is unsuccessful; (3) there is a page miss. For all three situations, estimate the total elapsed time (latency) for the memory access.
+
+* 当指令开始时，有效地址被计算出来，通过从地址寄存器中提取字段直接得到页号和偏移量。As the instruction starts, the effective address is calculated, and the page number and offset are obtained directly from this by extracting the fields from the address register.
+* (1) **在TLB中搜索页号并找到匹配的页号。页面表的条目被获取（因为它在寄存器中，所以速度很快），这个条目将表明这个页面是驻留的。 真正的地址是用页框地址和偏移量计算出来的。这可以在一个时钟周期内完成，假设TLB不需要一个完整的周期**。。(1) The TLB is searched associatively for the page number and a match is found. The page table entry is fetched (quickly because it’s in a register), and this entry will indicate that the page is resident.  The real address is calculated using the page frame address and the offset. This can be performed in one clock cycle, assuming that the TLB doesn’t require a full cycle. 
+* (2) **TLB搜索失败**，**页表条目必须从内存中获取**。然后像以前一样计算真实地址。这将需要几个时钟周期，取决于内存的延迟。(2) The TLB search fails, and the page table entry must be fetched from memory. The real address is then calculated as before. This will require several clock cycles, depending on the memory latency. 
+* (3) **页表项表明该页不是常驻的，所以产生一个中断，操作系统必须执行一个页面故障。这将需要10-100ms，取决于磁盘的速度** (3) The page table entry indicates that the page is not resident, so an interrupt is generated and the OS must perform a page fault . This will take 10-100ms depending on the disk speed.
+
+---
+
+(c) 如果1%的加载/存储指令导致缓存缺失（与没有缓存缺失相比），估计一个处理器的速度会减慢。如果1%的加载/存储指令导致一个页面错误（与没有页面错误相比），估计速度会减慢。说明你所做的假设。讨论一下这些结果如何影响计算机系统的设计。
+[5](c)	Estimate the slowdown of a processor if 1% of the load/store instructions cause a cache miss (compared with no cache misses). Estimate the slowdown if 1% of the load/store instructions cause a page fault (compared with no page faults). State the assumptions you make. Discuss how these results affect the design of computer systems.
+[5]
+
+* 假设每ns有1个周期，内存访问有10个周期，缓存访问有1个周期，那么100条指令将需要99+10ns，速度大约为10%。假设磁盘访问时间约为50ms，操作系统计算约为1000条指令，100条指令中的一个页面错误将需要99 ns+1000 ns+5 * 10^6 ns，速度约为10,000倍。因此，1%的缓存缺失率是可以的，但是页面故障率必须非常低。由于这个原因，拥有一个比主内存小得多的高速缓存是很有用的，但是虚拟内存一般不应该比物理主内存大得多（通常是2倍或更少），而且必须仔细注意位置性问题Assuming 1 cycle per ns, 10 cycles for memory access and 1 cycle for cache access, 100 instructions would take 99 + 10 ns for a slowdown of about 10%. Assuming about 50ms for a disk access, and about 1000 instructions for operating system computations, 100 instructions with one page fault would take 99 ns plus 1000 ns + 5 * 10^6 ns for a slowdown of about a factor of 10,000. Thus a cache miss rate of 1% is fine, but the page fault rate must be extremely low. For this reason, it is useful to have a cache that is much smaller than the primary memory, but virtual memory should generally not be too much larger than physical primary memory (typically a factor of 2 or less) and careful attention must be paid to locality
+
 # DAT算法
 
 1. **给出一个虚拟地址（这是计算出来的有效地址**）1.	Given a virtual address (this is the calculated effective address)
@@ -900,6 +945,7 @@ DAT算法的每一次内存访问都需要一个**额外的内存访问**•	The
   - **对于快速时钟来说，要小于一个时钟周期**–	Less than a clock cycle, for a fast clock
 - 唯一切实可行的解决方案是**在TLB中使用相联内存（CAM**）。•	The only practical solution is to use associative memory (CAM) for the TLB
   - 转换检测缓冲区(Translation Lookaside Buffer, TLB),有时又称为相联存储器(associate memory)或快表
+  - 一个关联内存包含代表元组的字（或者说，它们包含有几个字段的字）。通过指定一个元组元素的值来访问内存，内存中每一个与其对应的元组元素中的值相匹配的单元被标记。然后，被标记的单元可以被逐一读出，如果一个独特的单元被标记，它可以被立即读出。每个单元包含一些逻辑以及内存，当进行访问时，元组字段的比较是并行进行的。存储器还包含一个折叠或扫描网络，执行诸如在对数时间内解决多个响应者的操作。在TLB中，页表条目并不密集，也不按顺序排列，所以页号不能用来寻址TLB条目。相反，每个TLB条目包含一个页号和其对应的页表条目，TLB被关联地搜索。缓存内存控制器也是类似的：每个单元都包含一个内存地址和相应的缓存行内容，所以缓存可以被关联地搜索，而不是按地址搜索。一个关联存储器由一组单元组成，每个单元包含状态的触发器，一个比较器，以及一个与树形或前缀电路的接口，以执行并行折叠和扫描。  一个有n个单元的关联存储器的访问时间是O(log n)，这与传统可寻址存储器的访问时间相同。An associative memory contains words that represent tuples (alternatively, they contain words with several fields). Memory is accessed by specifying the value of one tuple element, and every cell in the memory that matches the value in its corresponding tuple element is marked. The marked cells can then be read out one by one, and if a unique cell is marked it can be read out immediately. Each cell contains some logic as well as memory, and when an access is performed, the comparisons of tuple fields are carried out in parallel. The memory also contains a fold or scan network that performs operations such as resolving multiple responders in logarithmic time. In a TLB, the page table entries are not dense or in order, so the page number cannot be used to address a TLB entry. Instead, each TLB entry contains a page number and its corresponding page table entry, and the TLB is searched associatively. A cache memory controller is similar: each cell contains a memory address and a corresponding cache line contents, so the cache can be searched associatively rather than by address. An associative memory consists of a set of cells, each containing flip flops for the state, a comparator, and an interface to a tree or prefix circuit that performs parallel folds and scans.   The access time for an associative memory with n cells is O(log n), which is the same as the access time for a conventional addressable memory.
 
 # 实际：Further Complications
 
@@ -962,6 +1008,10 @@ DAT算法的每一次内存访问都需要一个**额外的内存访问**•	The
 - **在指令获取/执行循环的开始，控制算法检查中断请求（处理器的一个输入**）。•	At the beginning of the instruction fetch/execute loop, the control checks the interrupt request (an input to the processor)
   - M1中不存在 –	Not present in M1
 
+---
+
+
+
 # PC值保存：Saving the pc
 
 ![](/static/2022-04-26-00-41-47.png)
@@ -982,6 +1032,12 @@ DAT算法的每一次内存访问都需要一个**额外的内存访问**•	The
 - 对此有两种方法•	Two approaches to this
 - **软件**：**中断处理程序**来做（灵活，**需要能访问所有状态的指令，如savepc寄存器的状态**）。–	Software: interrupt handler does it (flexible, requires instructions that can access all state, e.g, the savepc register)
 - **硬件**：在**控制算法中保存**所有状态（简单、可靠）。–	Hardware: save all state in the control algorithm (simple, reliable)
+
+# 完整中断设计-需要解决的问题
+
+需要有一个控制状态位来指示中断是否被启用；如果没有这个，中断可能在中断处理程序保存状态之前就把控制权拿走。控制算法在指令获取/执行周期的初始状态下检查（and2 irq enabled）；如果这是真的，它就会进入中断的控制算法，否则就会获取并执行下一条指令。中断控制将pc保存在一个特殊的寄存器savepc中；它将使能标志设置为0；它将中断处理程序的地址加载到pc中（这可以是一个固定的地址，也可以在一个寄存器中提供）。然后，下一条执行的指令将是中断处理程序的开始。这将把处理器的其他状态保存在内存中；这必须在不修改任何寄存器的情况下实现，Sigma16指令集的设计使之成为可能。寄存器可以被写到一个固定的位置；然后这些寄存器可以被处理程序使用，然后处理程序就可以将这些值移到堆栈或其他合适的数据结构中。需要一条指令将savepc移到一个普通的寄存器中，这样它也可以被保存在数据结构中。当状态被保存后，处理程序就可以重新启用中断。除此以外，应该有另一个控制位来指示处理器是处于用户状态（仅限于安全指令）还是系统状态（可以执行任何指令）。用户程序将在用户状态下运行；在一个中断中，控制算法将使处理器进入系统状态。
+当操作系统将控制权返回给用户时，它必须将状态重新设置为用户。There needs to be a control state bit to indicate whether interrupts are enabled; without this an interrupt could take control away from the interrupt handler before it has saved state. The control algorithm checks (and2 irq enabled) at the initial state of the instruction fetch/execute cycle; if this is true it enters the control algorithm for an interrupt and otherwise it fetches and executes the next instruction. The interrupt control saves the pc in a special register savepc; it sets the enabled flag to 0; it loads the address of the interrupt handler into the pc (this could be a fixed address, or it could be provided in a register). The next instruction to execute will then be the beginning of the interrupt handler. This will save the rest of the state of the processor in memory; this must be possible without modifying any of the registers, and the Sigma16 instruction set is designed to make that possible. The registers can be written to a fixed location; then these registers can be used by the handler, which will then be able to move the values to a stack or other suitable data structure. An instruction is needed to move savepc to an ordinary register, so it can be saved in the data structure as well. When state has been saved, the handler can then reenable interrupts. In addition to this, there should be another control bit indicating whether the processor is in user state (limited to safe instructions) or system state (can execute any instruction). The user program will run in user state; in an interrupt the control algorithm will put the processor into system state.
+When the OS returns control to the user it must set the state back to user.
 
 # 禁止中断指令：Disabling interrupts
 
@@ -1022,6 +1078,8 @@ DAT算法的每一次内存访问都需要一个**额外的内存访问**•	The
 # 特权指令：Privileged Instructions
 
 > 因此将能引起损害的机器指令作为特权指令（privileged instruction）。如果在用户模式下试图执行特权指令，那么硬件并不执行该指令，而是认为该指令非法，并将其以陷阱（trap）的形式通知操作系统
+> 
+> **特权指令是指操作系统需要的指令，但允许用户程序执行是不安全的，因为它可能危及系统的安全**。例子包括执行I/O和控制内存保护的指令。处理器控制有一个位，表示系统状态或用户状态。如果控制处于用户状态并解码了一条特权指令，它不会执行该指令，而是执行一个中断，该中断设置了系统状态并将控制权转移给操作系统。然后，操作系统可以根据其政策决定做什么。在操作系统通过给用户进程一个时间片将控制权转移回用户进程之前，控制权被设置为用户状态。没有任何非特权指令可以改变该状态，所以用户不能进入系统状态。(然而，操作系统中的一个错误可能会允许这种情况发生）。A privileged instruction is one that is needed by the operating system, but which is unsafe to allow a user program to execute as it could compromise the security of the system. Examples include instructions that perform I/O and control memory protection. The processor control has a bit that indicates System State or User State. If the control is in User state and decodes a privileged instruction, it does not execute the instruction, but instead performs an interrupt which sets System State and transfers control to the operating system. The OS can then decide what to do, according to its policies. Before the OS transfers control back to a user process by giving it a time slice, the control is set back to User State. There is no unprivileged instruction that can change the state, so the user cannot get into system state. (However, a bug in the operating system could allow that to happen.)
 
 许多指令可以执行有**潜在危险的操作**•	Many instructions can perform operations that are potentially dangerous
 
@@ -1048,6 +1106,9 @@ DAT算法的每一次内存访问都需要一个**额外的内存访问**•	The
 
 # 虚拟机：Virtual Machines
 
+> 虚拟机进程是一个架构的模拟器（如JVM），它作为一个普通用户进程在主机架构（如X86上的Linux）的操作系统下运行。虚拟机进程使用普通的系统请求执行I/O，并且不能访问主机架构的特权方面。在系统虚拟化中，虚拟架构与主机架构相同，但它不在操作系统上运行。相反，虚拟架构提供中断、I/O和所有其他由主机架构提供的低层次服务。这使得一个完整的操作系统可以在虚拟机上运行，而不是像通常那样在裸硬件上运行。把系统虚拟机作为一个纯仿真器来实现是很直接的，但这将导致速度下降一个数量级或更多。其目的是在主机的裸硬件上执行虚拟机中的普通用户指令，同时模拟特权指令。这导致了复杂的中断处理程序，如果主机架构有在用户模式下操纵系统状态的指令，可能就无法实现。为了干净地支持虚拟化，架构需要在执行需要仿真安全虚拟化的指令时产生一个陷阱。A virtual machine process is an emulator for one architecture (e.g. JVM) that runs as an ordinary user process under an operating system on a host architecture (e.g. Linux on an x86). The virtual machine process performs I/O using ordinary system requests, and does not have access to privileged aspects of the host architecture. In system virtualization, the virtual architecture is the same as the host architecture, but it does not run on an operating system. Instead, the virtual architecture provides interrupts, I/O, and all the other low level services provided by the host architecture. This allows for a complete operating system to run on a virtual machine, rather than on the bare hardware as normal. It is straightforward to implement a system virtual machine as a pure emulator, but this will result in a slowdown by an order of magnitude or more. The aim is to execute ordinary user instructions in the virtual machine on the bare hardware of the host machine, while emulating privileged instructions. This leads to complex interrupt handlers, and may not be possible if the host architecture has instructions that manipulate the system state in user mode. To support virtualization cleanly, the architecture needs to generate a trap whenever an instruction is executed that would require emulation for safe virtualization.
+
+
 计算机的 "硬件 "是 "难以 "使用的•	The “hardware” of a computer is “hard” to use
 
 - 例如，**即使做简单的I/O也需要大量的代码**。–	E.g. even doing simple I/O requires a lot of code
@@ -1062,7 +1123,7 @@ DAT算法的每一次内存访问都需要一个**额外的内存访问**•	The
   - **提供一个完整的虚拟 "真机"，有中断、特权指令和I/O硬件** –	Provides a complete virtual “real machine” with interrupts, privileged instructions, and I/O hardware
   - 虚拟机可以运行一个完整的操作系统（我们可以在一台机器里有好几个）。–	The VM can run a full operating system (we can have several in a machine)
 
-# 系统虚拟化实现：Implementing system virtualisation
+# 系统虚拟化实现-问题/挑战：Implementing system virtualisation
 
 一种理论上的可能性是模拟一切•	A theoretical possibility is to emulate everything
 

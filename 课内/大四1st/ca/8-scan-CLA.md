@@ -8,7 +8,7 @@ Carry Look-ahead Adder 超前进位加法器 (CLA
 * [加法重排序: but we can rearrange the order of additions](#加法重排序-but-we-can-rearrange-the-order-of-additions)
 * [关联性：Associativity](#关联性associativity)
 * [Scan](#scan)
-* [fold关联-scan with associative operator](#fold关联-scan-with-associative-operator)
+* [foldr关联-scan with associative operator](#foldr关联-scan-with-associative-operator)
 * [Logarithmic scan is harder](#logarithmic-scan-is-harder)
 * [二进制加法：Binary Addition](#二进制加法binary-addition)
 * [能使用并行scan来加速加法吗：Can we just use parallel scan for addition](#能使用并行scan来加速加法吗can-we-just-use-parallel-scan-for-addition)
@@ -21,6 +21,7 @@ Carry Look-ahead Adder 超前进位加法器 (CLA
 * [转换2-传播函数：Propagation functions](#转换2-传播函数propagation-functions)
 * [意义](#意义)
 * [改进例子-流水线&超前进加法器](#改进例子-流水线超前进加法器)
+* [其他问题](#其他问题)
 * [================](#)
 * [全加器carry传播](#全加器carry传播)
 * [超前进位加法器](#超前进位加法器)
@@ -80,7 +81,7 @@ Carry Look-ahead Adder 超前进位加法器 (CLA
 - 有时你想要所有的中间结果
   - **使用扫描：它产生所有的中间结果和最终结果**–	Use scan: it produces all the intermediate results and the final result
 
-# fold关联-scan with associative operator
+# foldr关联-scan with associative operator
 
 - 为了计算一个scan，我们必须计算大量的fold•	To compute a scan we must compute a lot of folds
 
@@ -94,10 +95,11 @@ Carry Look-ahead Adder 超前进位加法器 (CLA
 
 ---
 
-(d) 让f :: a -> a -> a 和 xs :: [a]. 定义n = xs的长度。说明为什么如果f不是关联的，foldr1 f xs需要时间O(n)，但如果函数f是关联的，它可以在时间O(log n)内计算。简要讨论一下如何利用这一特性来加速二进制加法电路的速度。(d)	Let f :: a -> a -> a and xs :: [a]. Define n = length xs. Show why foldr1 f xs takes time O(n) if f is not associative, but it can be calculated in time O(log n) if the function f is associative. Discuss briefly how this property can be used to speed up a binary addition circuit.
+(d) 让f :: a -> a -> a 和 xs :: [a]. 定义n = xs的长度。说明为什么如果f不是关联的，foldr1 f xs需要时间O(n)，但**如果函数f是关联的，它可以在时间O(log n)内计算。简要讨论一下如何利用这一特性来加速二进制加法电路的速度**。(d)	Let f :: a -> a -> a and xs :: [a]. Define n = length xs. Show why foldr1 f xs takes time O(n) if f is not associative, but it can be calculated in time O(log n) if the function f is associative. Discuss briefly how this property can be used to speed up a binary addition circuit.
 
 * 如果f不是关联的，定义就不能被优化，这就指定了一个线性的应用序列。为了写出infix符号，定义f = +（但它可能不是加法，这只是为了简化语法）。如果foldr1 f [a,b,c,d]的定义扩展为a + (b + (c+d))，因此计算从列表的右端开始，并重复地将最后的结果与左边的下一个元素结合起来。**然而，如果这个函数是关联的，我们可以把它重组为一棵树。(a+b) + (c+d)。现在子树可以被并行评估，将执行时间从O(n)减少到O(log n)。对二进制加法的应用是基于这个想法的，但并不直接了当**。(学生们应该能够回答到这一点，但不希望他们继续下面的内容)。进位传播被定义为bcarry函数的折叠。If f is not associative, the definition cannot be optimized, and this specifies a linear sequence of applications. In order to write infix notation, define f = + (but it might not be addition, this is just to simplify the syntax). The definition if foldr1 f [a,b,c,d] expands to a + (b + (c+d)), so the computation begins at the right end of the list, and repeatedly combines the last result with the next element to the left. However, if the function is associative, we can restructure it into a tree: (a+b) + (c+d). Now the subtrees can be evaluated in parallel, reducing the execution time from O(n) to O(log n). The application to binary addition is based on this idea, but is not straightforward. (The students should be able to answer up to this point, but they are not expected to continue with the following.) The carry propagation is defined as the fold of a bcarry function.
 * 然而，折叠是不够的，因为加法器中的每一个比特位置都需要到该点的套利，所以需要折叠的所有中间值，而不仅仅是最后的一个。 这个计算被称为f的扫描。并行扫描定理显示了如何利用并行性在对数时间内计算扫描（这不是并行折叠的一个微不足道的应用，因为中间结果的树都有不同的结构）。鉴于并行扫描定理，似乎可以使二进制加法器在对数时间内运行，因为波纹携带加法器被直接定义为mscanr fullAdd cin zs。然而，这并不奏效，因为bcarry函数不是关联的。事实证明，一连串的技术可以用来将问题转化为可以用关联函数的并行扫描来解决的形式。(这涉及到几个强大的技术，包括部分评估，部分应用的组合，以及另一个深度定理）。最后的结果是一个对数时间的加法电路。However, fold is insufficient because every bit position in the adder needs the carry up to that point, so all the intermediate values of the folds are required, not just the final one. This computation is called the scan of f. The parallel scan theorem shows how the scan can be calculated in logarithmic time, using parallelism (this is not a trivial application of parallel fold because the trees for the intermediate results all have different structures). Given the parallel scan theorem, it would appear that the binary adder can be made to run in log time, because a ripple carry adder is defined directly as mscanr fullAdd cin zs. However, that doesn’t work because the bcarry function is not associative. It turns out that a sequence of techniques can be applied to transform the problem into a form where it can be solved using a parallel scan of an associative function. (This involves several powerful techniques including partial evaluation, compositions of partial applications, and yet another deep theorem.) The final result is a logarithmic time addition circuit. 
+
 # Logarithmic scan is harder
 
 - 问题：**独立完成所有的fold需要大量的（+）电路**，因为我们没有重复使用中间结果 •	Problem: doing all the folds independently takes a lot of (+) circuits because we are not reusing the intermediate results
@@ -125,6 +127,12 @@ RCA
 - 目前的计算机至少有64位的加法器–	Current computers have at least 64-bit adders
   - 这就导致了一个大的路径深度 •	That results in a large path depth
 - 加法器几乎总是在关键路径上，所以它产生了一个缓慢的时钟速度–	The adder is almost always on the critical path, so it produces a slow clock speed
+
+定义一个组合电路的时间复杂性。给出一个n位RCA的时间复杂性。解释如何使用并行扫描来降低时间复杂性。Define time complexity of a combinational circuit. Give the time complexity of an n-bit ripple carry adder. Explain how parallel scan can be used to reduce the time complexity.
+
+* 时间复杂度是一个从电路大小到其路径深度的函数，它决定了电路需要多少时间才能使其输出有效，反过来，这将对最大时钟速度产生限制。RCA从每个全加器引入了一个门延迟，因此其时间复杂度为O(n)。然而，该加法器可以转化为使用顺序扫描的步骤。顺序扫描定义了携带输入的矢量，这需要O(n)时间。该电路可以被转换为使用携带传播函数的扫描，然后可以给出一个一阶数字表示。传播函数是关联的，所以电路可以转化为使用并行扫描，这是O(log n)，还有几个地图是O(1)。最终的时间复杂度已经从O(n)转变为O(log n)。The time complexity is a function from the circuit size to its path depth, which determines how much time the circuit will require to make its outputs valid, and in turn that will place a limit on the maximum clock speed. The ripple carry adder introduces a gate delay from each full adder, so its time complexity is O(n). However, the adder can be transformed to use parallel scan in a sequence of steps. The sequential scan defines the vector of carry inputs, and this takes O(n) time. The circuit can be transformed to use a scan over the carry propagation function, which can then be given a first order digital representation. The propagation function is associative, so the circuit can be transformed to use parallel scan, which is O(log n), along with several maps which are O(1). The final time complexity has been transformed from O(n) to O(log n).
+
+---
 
 ---
 
@@ -280,6 +288,25 @@ CLA，电路复杂换时间
   * iv) 1 x 1 x 10ns = 10ns。
 
 最快的情况显然是iv），因为它使用了最好的电路设计技术，即完美的流水线和快速加法器。
+
+# 其他问题
+
+(d) 让f :: a -> a -> a 和 xs :: [a]. 定义n = xs的长度。说明为什么如果f不是关联的，foldr1 f xs需要时间O(n)，但**如果函数f是关联的，它可以在时间O(log n)内计算。简要讨论一下如何利用这一特性来加速二进制加法电路的速度**。(d)	Let f :: a -> a -> a and xs :: [a]. Define n = length xs. Show why foldr1 f xs takes time O(n) if f is not associative, but it can be calculated in time O(log n) if the function f is associative. Discuss briefly how this property can be used to speed up a binary addition circuit.
+
+* 如果f不是关联的，定义就不能被优化，这就指定了一个线性的应用序列。为了写出infix符号，定义f = +（但它可能不是加法，这只是为了简化语法）。如果foldr1 f [a,b,c,d]的定义扩展为a + (b + (c+d))，因此计算从列表的右端开始，并重复地将最后的结果与左边的下一个元素结合起来。**然而，如果这个函数是关联的，我们可以把它重组为一棵树。(a+b) + (c+d)。现在子树可以被并行评估，将执行时间从O(n)减少到O(log n)。对二进制加法的应用是基于这个想法的，但并不直接了当**。(学生们应该能够回答到这一点，但不希望他们继续下面的内容)。进位传播被定义为bcarry函数的折叠。If f is not associative, the definition cannot be optimized, and this specifies a linear sequence of applications. In order to write infix notation, define f = + (but it might not be addition, this is just to simplify the syntax). The definition if foldr1 f [a,b,c,d] expands to a + (b + (c+d)), so the computation begins at the right end of the list, and repeatedly combines the last result with the next element to the left. However, if the function is associative, we can restructure it into a tree: (a+b) + (c+d). Now the subtrees can be evaluated in parallel, reducing the execution time from O(n) to O(log n). The application to binary addition is based on this idea, but is not straightforward. (The students should be able to answer up to this point, but they are not expected to continue with the following.) The carry propagation is defined as the fold of a bcarry function.
+* 然而，折叠是不够的，因为加法器中的每一个比特位置都需要到该点的套利，所以需要折叠的所有中间值，而不仅仅是最后的一个。 这个计算被称为f的扫描。并行扫描定理显示了如何利用并行性在对数时间内计算扫描（这不是并行折叠的一个微不足道的应用，因为中间结果的树都有不同的结构）。鉴于并行扫描定理，似乎可以使二进制加法器在对数时间内运行，因为波纹携带加法器被直接定义为mscanr fullAdd cin zs。然而，这并不奏效，因为bcarry函数不是关联的。事实证明，一连串的技术可以用来将问题转化为可以用关联函数的并行扫描来解决的形式。(这涉及到几个强大的技术，包括部分评估，部分应用的组合，以及另一个深度定理）。最后的结果是一个对数时间的加法电路。However, fold is insufficient because every bit position in the adder needs the carry up to that point, so all the intermediate values of the folds are required, not just the final one. This computation is called the scan of f. The parallel scan theorem shows how the scan can be calculated in logarithmic time, using parallelism (this is not a trivial application of parallel fold because the trees for the intermediate results all have different structures). Given the parallel scan theorem, it would appear that the binary adder can be made to run in log time, because a ripple carry adder is defined directly as mscanr fullAdd cin zs. However, that doesn’t work because the bcarry function is not associative. It turns out that a sequence of techniques can be applied to transform the problem into a form where it can be solved using a parallel scan of an associative function. (This involves several powerful techniques including partial evaluation, compositions of partial applications, and yet another deep theorem.) The final result is a logarithmic time addition circuit. 
+
+---
+
+解释foldr和scanr函数的作用。说明如何使用scanr来实现RCA加法器。解释为什么不能简单地用并行扫描代替scanr来提高RCA的速度，并给出使用并行扫描**实现对数时间加法器(超前进位adder**的主要思路 Explain what the foldr and scanr functions do. Show how a ripple carry adder can be implemented using a scanr. Explain why a ripple carry adder cannot be made faster simply by replacing the scanr with a parallel scan, and give the main ideas in the implementation of a logarithmic time adder using parallel scan.
+
+* foldr高阶函数接受一个由两个参数组成的函数f，一个初始累加器值和一个值列表。它使用 f 来组合数据，一次一个元素，从累加器开始，从右到左遍历列表。(类型和定义可以给定，但不是必须的。) 当foldr遍历列表时，它产生一连串的中间结果；scanr返回这些中间结果以及最终的折叠结果。可以用(foldr bcarry)来定义一个波纹加法器，来执行进位传播，其中bcarry是进位函数。foldr的泛化，mscanr，在每个列表位置输出一个单独的结果，可以用来产生和；这使得波纹携带加器可以简单地定义为rippleAdd = mscanr fullAdd。并行扫描使用树状电路在对数时间内计算出一个折叠，前提是f是关联的。fullAdd函数不是联想的，所以使用并行扫描来执行加法是不直接的。然而，这可以通过使用部分评估来计算携带传播函数的列表，使用关联折叠，这可以用并行扫描完成。这就需要使用符号函数表示（因为电路中的信号携带的是具体数值，而不是函数）。The foldr higher order function takes a function f of two arguments, an initial accumulator value, and a list of values. It uses f to combine the data one element at a time, starting with the accumulator and traversing the list from right to left. (The type and definition may be given but are not required.) As foldr traverses the list it produces a sequence of intermediate results; scanr returns those intermediates as well as the final fold result. A ripple carry adder can be defined using (foldr bcarry) to perform the carry propagation, where bcarry is the carry function. A generalization of foldr, mscanr, outputs a separate result in each list position, which can be used to produce the sum; this enables a ripple carry adder to be defined simuply as rippleAdd = mscanr fullAdd. A parallel scan uses a tree circuit to calculate a fold in logarithmic time, provided that f is associative. The fullAdd function is not associative, so it is not straightforward to use parallel scan to perform addition. However, this can be done by using partial evaluation to calculate a list of carry propagation functions using an associative fold, which can be done with parallel scan. This then requires using a symbolic function representation (because signals in a circuit carry concrete values, not functions).
+
+---
+
+(d) 假设一个算法与可表示为数值序列的聚合数据结构（如list, vector或树的叶子序列）一起工作。举出**三个适合数据并行实现的关于这种聚合体的函数的例子**，并说明这些函数的时间复杂度。说明如何用扫描函数来表达二进制加法，并解释为什么用并行扫描来执行二进制加法的速度比线性时间快，是不直接的。(d)	Suppose an algorithm works with aggregate data structures that can be represented as a sequence of values (e.g. a list, vector, or the sequence of leaves of a tree). Give three examples of functions over such aggregates that are suitable for data parallel implementation, and state the time complexity of these functions. Show how binary addition can be expressed using a scan function, and explain why it is not straightforward to perform binary addition faster than linear time using parallel scan.
+
+* Map将一个函数f应用于一个聚合体xs的每个元素。如果f是一个电路，那么map f xs可以在O(1)时间内并行地计算出聚合结果。Fold1将一个两个参数的函数成对地应用于一个聚合体的元素，树形版本tfold1将此作为一个平衡的二叉树计算。如果f是关联的，那么tfold1 f给出的结果与fold1 f相同。虽然fold1是一个线性遍历，对于大小为n的聚合体需要O(n)的时间，但tfold1可以在O(log n)的时间内使用并行方式得到相同的结果（对于关联的f）。Scanr与foldr相关；它在O(n)的时间内计算整个集合的折叠结果以及中间结果列表。二进制加法涉及到进位传播，扫描函数可以使用bcarry函数计算每个比特位置的进位输出。Scanr需要线性时间；有一个相应的并行的tscanr，需要对数时间，只要f是关联的，（tscanr f）得到的结果与（scanr f）相同。**困难的是，二进制加法需要（scanr bcarry），而bcarry函数不是关联的。因此，应用平行扫描并不简单。然而，有可能通过几个步骤来转换加法函数，最终使平行扫描适用，从而形成一个对数时间的电路**。Map applies a function f to each element of an aggregate xs. If f is a circuit, then map f xs can calculate the aggregate result in parallel in O(1) time. Fold1 applies a function of two arguments pairwise to the elements of an aggregate, and a tree version tfold1 does this as a balanced binary tree calculation. If f is associative, then tfold1 f gives the same result as fold1 f. While fold1 is a linear traversal taking time O(n) for an aggregate of size n, tfold1 can get the same result (for associative f) in time O(log n) using parallelism. Scanr is related to foldr; it calculates a fold result across the aggregate as well as the list of intermediate results, in time O(n). Binary addition involves carry propagation, which can be calculated by the scan function using a bcarry function to calculate the carry output in each bit position. Scanr takes linear time; there is a corresponding parallel tscanr which takes logarithmic time, and (tscanr f) gets the same result as (scanr f) provided that f is associative. The difficulty is that binary addition requires (scanr bcarry) and the bcarry function is not associative. Therefore it is not straightforward to apply parallel scan. It is however possible to transform the addition function through several steps that eventually make parallel scan applicable, resulting in a logarithmic time circuit.
 
 # ================
 

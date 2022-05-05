@@ -3,6 +3,8 @@
 * [Content](#content)
 * [Register Transfer Machine](#register-transfer-machine)
 * [Register File](#register-file)
+* [状态寄存器，通用寄存器](#状态寄存器通用寄存器)
+* [取消寄存器堆？](#取消寄存器堆)
 * [寄存器堆大小](#寄存器堆大小)
 * [Register and memory](#register-and-memory)
 * [寄存器文件的端口:Ports to the register file](#寄存器文件的端口ports-to-the-register-file)
@@ -119,6 +121,24 @@
 
 ---
 
+# 状态寄存器，通用寄存器
+
+一些计算机体系结构将比较的结果（小于、等于或大于）保存在一个特殊的条件代码寄存器（或状态寄存器）中，而其他体系结构的比较指令则将结果作为布尔值保存在一个普通的寄存器中。讨论一下这两种方法对指令集设计的影响。
+
+在数据路径中，将比较的结果保存在一个特殊的寄存器或一个普通的寄存器中，也同样有效和简单。条件代码允许一条比较指令可以有多个结果< = >，可以用来控制条件跳转。将完整的比较结果保存在一般的寄存器中是很尴尬的，除非有条件跳转可以由寄存器中的一个位来控制，这是不正常的，在简化比较的同时会使跳转复杂化。当比较结果是布尔值时，需要有几条比较指令（例如，cmplt计算`x<y`为布尔值）。如果要对布尔值进行逻辑运算，或者将结果保存在一个布尔变量中，那么通用寄存器的方法就更简单、更高效。使用通用寄存器还可以通过减少状态的数量来简化流水线和中断。It is equally efficient and simple in the datapath to save the result of a comparison in a special register or a general register. A condition code allows for a single compare instruction that can have multiple results < = > which can be used to control conditional jumps. It would be awkward to save a full comparison result in a general register unless there are conditional jumps that can be controlled by a single bit in a register, which is unusual and would complicate the jumps while simplifying the compares. When the comparison result is a Boolean, there need to be several compare instructions (e.g. cmplt to calculate `x<y` as a Boolean). If logic operations are to be performed on the Boolean, or the result is to be saved in a Boolean variable, then the general register approach is simpler and more efficient. The use of general registers also simplifies pipelining and interrupts by reducing the amount of state.
+
+# 取消寄存器堆？
+
+(c) 典型的架构有算术指令，其中一些或所有的操作数都在寄存器中。一个可能的替代方案是取消寄存器文件，并提供类似于add x,y,z的指令，其中y+z的总和存储在x中。的总和存储在x中，而所有三个操作数都在内存中。讨论一下这种方法对机器语言代码的简单性和大小以及执行速度的影响。(c)	Typical architectures have arithmetic instructions where some or all of the operands are in registers. A possible alternative would be to eliminate the register file, and to provide instructions like add x,y,z where the sum of y+z is stored in x, and all three operands are in memory. Discuss the impact this approach would have on simplicity and size of machine language code, and on speed of execution.
+
+也可以用来答2-address vs 3-address
+
+拟议的指令将简化机器语言编程，因为加载和存储指令（占所有指令的很大一部分）将被取消。此外，没有必要管理哪些数据被保存在寄存器中，编译器中也不需要寄存器分配算法。这条指令可能会因为避免了两次加载和一次存储而节省时间，但事实并非如此，因为数据路径仍然需要执行相同数量的加载和存储；这些都是由控制算法发出的。也就是说，机器语言代码将不需要加载和存储的指令，但这些操作仍然是必要的。有了流水线，要求明确的加载和存储指令的开销就很少或没有。然而，还有另一个原因，拟议的指令会导致速度减慢：在较大的算术表达式中，每个操作都需要三次内存访问，而通常的寄存器架构可以在数据全部在寄存器中的情况下执行一长串计算。
+因此，建议的指令将大大增加内存访问，而内存访问是很慢的。
+The proposed instruction would simplify machine language programming, as load and store instructions (which account for a large portion of all instructions) would be eliminated. Furthermore, it would not be necessary to manage which data is kept in registers, and register allocation algorithms would not be needed in compilers. It might appear that this instruction would save time by avoiding two loads and a store, but that is not the case because it would still be necessary for the datapath to perform the same number of loads and stores; these would be issued by the control algorithm. That is, the machine language code would not require instructions for the loads and stores, but those operations would still be necessary. With pipelining, there is little or no overhead in requiring the explicit load and store instructions. However, there is another reason that the proposed instruction would result in a slowdown: in larger arithmetic expressions every operation would require three memory accesses, while the usual register architecture can perform a long sequence of calculations with the data all in registers.
+Thus the proposed instruction would significantly increase memory accesses which are slow.
+
+
 # 寄存器堆大小
 
 在一个**小的寄存器文件**中，不会有足够的寄存器来容纳所有常用的变量。**程序将需要在内存中保存中间结果，并将其加载回来使用。这将导致执行许多额外的加载和存储指令，这特别昂贵，因为内存地址比处理器操作慢**。With a small register file, there won’t be enough registers to hold all the commonly used variables. The program will need to save intermediate results in memory, and load them back to use them. This will result in the execution of many additional load and store instructions, which is particularly expensive because memory addresses are slower than processor operations.
@@ -129,10 +149,12 @@
 * 缺点
   * 一个大的寄存器文件允许大量的变量保存在寄存器中，从而减少了所需的加载和存储指令的数量；这一点很重要，因为内存访问比寄存器中的算术慢得多。**一个大的寄存器文件需要更多的时间进行寄存器地址解码，需要更多的比特来指定一个寄存器，这可能会导致更大的指令大小，并产生更多的中断开销，因为寄存器的状态需要被保存和恢复。**  A large register file allows a large number of variables to be kept in registers, thus reducing the number of load and store instructions needed; this is significant since memory accesses are much slower than arithmetic in registers. A large register file requires more time for register address decoding, requires more bits to specify a register which could lead to larger instruction size, and produces more overhead for interrupts as the register state needs to be saved and restored.
   * 由于地址**解码**树的深度增加，**关键路径**将变得更长，减缓**时钟速度**；在**指令格式中需要更多的比特来指定一个寄存器**；由于需要**保存和恢复更多的寄存器**，**中断**的成本将更大；无论如何在程序中很难有效地使用非常多的寄存器 Disadvantages include: the critical path will become longer, slowing down the clock speed, due to the increased depth of address decoding trees; more bits are needed in the instruction formats to specify a register; the cost of an interrupt will be larger as more registers need to be saved and restored; it’s difficult to use a very large number of registers effectively anyway in a program
+    * 然而，更大的寄存器文件需要在用于解码寄存器号的多路复用器和解复用器中增加级别，而这很可能是在关键路径上，所以有可能降低时钟速度。另外，如果有中断，保存状态的开销也会变得更大  However, a larger register file requires extra levels in the multiplexers and demultiplexers used to decode the register number, and this is likely to be on the critical path, so there is a risk of decreasing the clock speed.
 
 :orange: <font color="red">平衡大小，寄存器堆设计</font>
 
 * 为了找到一个好的平衡点，我们可以在一系列大小的寄存器文件（如2、3、4、5、6个地址位）上使用模拟进行实验。这应该使用现实的软件来完成，这些软件是根据每个寄存器文件的大小有效地编译的，而模拟器则考虑到对时钟速度的影响。To find a good tradeoff, we could run experiments using simulation on register files of a range of sizes (e.g. 2, 3, 4, 5, 6 address bits). This should be done using realistic software which is compiled efficiently to each register file size, and a simulator that accounts for effects on clock speed. 
+* 我们可以计算具有不同k值的设计的时钟速度，我们可以通过采取不同k值产生的具有代码的现实程序的组合来测量加载和存储所需的周期数，这些信息给出了不同k值的性能估计（这取决于用于基准测试的程序）。 We can calculate the clock speed of designs with various values of k, and we can measure the numbers of cycles needed for loads and stores by taking a mix of realistic programs with code generated for different values of k. This information gives a performance estimate for various values of k (it depends on the programs used for benchmarking).
 
 ---
 
@@ -234,6 +256,10 @@ effect & outputs
 
 ![](/static/2021-11-09-19-57-47.png)
 
+- 下面站Sigma16, RISC，3-address角度概括
+  - (1) 编程更容易，因为每个操作只需要一条指令；不需要加载和存储。(2) 不需要分配寄存器，如果有太多的变量，也不需要将寄存器溢出到内存中。(1) programming is easier because each operation requires just one instruction; there is no need for loads and stores. (2) There is no need for register allocation, or for spilling registers to memory if there are too many variables.
+  - 缺点包括 (1) 程序运行速度较慢，因为每条指令需要三次内存访问（除了获取指令本身）；相比之下，加载/存储风格的架构可以对一个变量进行一次加载，并多次使用，而无需进一步的内存访问。(2) 指令会更长，因为内存地址比寄存器需要更多的位来表示。(1) The program will run slower because each instruction requires three memory accesses (in addition to fetching the instruction itself); in contrast a load/store style architecture can load a variable once and use it several times without further memory accesses. (2) Instructions will be longer because memory addresses take more bits to represent than registers.
+
 # 数据类型：Data types
 
 ![](/static/2021-11-09-20-00-58.png)
@@ -263,9 +289,21 @@ S16只有一种内存访问的寻址模式，由一个索引寄存器和一个16
   * 这使用了R0总是包含0的不变性。 
 * 访问一个数组x[i]的元素：load R1,i[R0]，load R2,x[R1]。
   * 这里的有效地址是x+i，也就是x[i]的位置。
-* 访问一个指针p的目标：load R1,p[R0], load R2,0[R1]。这里的有效地址是指针的值。
-  * R1 = 指针p指向的地址，，R1= mem[p]
+* **访问一个指针p的目标：load R1,p[R0], load R2,0[R1]。这里的有效地址ad是指针的值**。
+  * R1 = 指针p的内存地址，，R1= mem[p]
   * R2 = 解引p，值载入R2
+  * 其他指针例子。。
+    * loadind R1,x[R2]
+    * reg[1] := mem[mem[x+reg[2]]
+    * 假设p是一个指向int的指针。如果没有loadind，要加载p所指向的值需要两条指令：load R1,p[R0]; load R1,0[R1] （解引）。
+    * 有了loadind，这可以在一条指令中完成：loadind R1,p[R0]。为了获取指令，需要以下步骤： 
+      * ir := mem[pc], pc++; case ir_op of ...; 
+      * 那么这个指令的控制是 
+      * adr := mem[pc], pc++;
+      * adr := adr + reg[ir_sa]; # 有效地址，，p指针存储位置
+      * adr := mem[adr]; # p指针指向的地址
+      * reg[d] := mem[adr] 。
+      * 这与加载指令类似，但在adr包含有效地址后还有一个额外的步骤来获取mem[adr]。
 
 # 指令格式：Instruction formats
 
@@ -512,6 +550,14 @@ RX
 
 ![](/static/2021-11-10-04-01-47.png)
 
+(1) 下一条指令被取走，ir := mem[pc]，pc被递增。(2) 控制对操作码字段和d字段进行调度，因为这条指令使用了一个扩展操作码。	(3) 指令的第二个字被取走：adr := mem[pc], pc++. (4) 计算有效地址。(5) 如果ir_d寄存器为真，那么adr寄存器被加载到pc寄存器中。(也可以提前一个周期检查，所以在没有跳转的情况下，有效地址的计算被跳过，尽管这在有流水线的情况下是不可行的)。(1) The next instruction is fetched, ir := mem[pc], and the pc is incremented. (2) The control performs a dispatch on the opcode field and on the d field, because this instruction uses an expanding opcode.	(3) The second word of the instruction is fetched: adr := mem[pc], pc++. (4) The effective address is calculated. (5) If the ir_d register is true, then the adr register is loaded into the pc register. (It is also possible to check for this a cycle earlier, so the effective address calculation is skipped in case of no jump, although that would not work in the presence of pipelining.)
+
+---
+
+(b) 给出Sigma16的基本数据通路（没有流水线）执行条件跳转指令的步骤顺序。讨论如何在流水线中处理条件跳转而不造成错误的执行。(b)	Give the sequence of steps executed by the basic datapath (without a pipeline) for Sigma16 as it executes a conditional jump instruction. Discuss how a conditional jump can be handled in a pipeline without causing incorrect execution.
+
+* (1) 下一条指令被取走，ir := mem[pc]，pc被递增。(2) 控件对操作码字段和d字段进行调度，因为这条指令使用了一个扩展操作码。	(3) 指令的第二个字被取走：adr := mem[pc], pc++. . (4) 计算有效地址。(5) 取出源寄存器，与0进行比较，控制执行一个调度。 (6) 如果要进行跳转，有效地址被移到pc寄存器中。**流水线的问题是，在确定是否应该跳转之前，存在修改pc的风险。如果流水线的结构允许这种危险，那么最简单的解决方案就是通过插入一个气泡来阻滞流水线的运行**。(1) the next instruction is fetched, ir := mem[pc], and the pc is incremented. (2) the control performs a dispatch on the opcode field and on the d field, because this instruction uses an expanding opcode.	(3) the second word of the instruction is fetched: adr := mem[pc], pc++. . (4) the effective address is calculated. (5) the source register is fetched, compared with 0 and the control performs a dispatch.  (6) if the jump should take place, the effective address is moved into the pc register. The problem with a pipeline is that there is a risk of modifying the pc before it is determined whether the jump should take place. If the structure of the pipeline would allow this hazard, then the simplest solution is to stall the pipeline by inserting a bubble. 
+
 # M1控制信号：Middle level: M1 control signal settings
 
 ![](/static/2021-11-10-04-03-57.png)
@@ -523,6 +569,8 @@ RX
 ## Load
 
 ![](/static/2021-11-10-04-09-08.png)
+
+(1) 下一条指令被取走，ir := mem[pc]，pc被递增。(2) 控制对操作码字段和d字段进行调度，因为这条指令使用了一个扩展操作码。	(3) 指令的第二个字被取走：adr := mem[pc], pc++. (4) 有效地址被计算出来。(5) 有效地址的内存内容被获取并加载到目标寄存器中，控制算法停顿直到数据到达。为了实现这一点，存储器提供一个就绪信号，控制算法循环进行，直到就绪信号被断言。 (1) The next instruction is fetched, ir := mem[pc], and the pc is incremented. (2) The control performs a dispatch on the opcode field and on the d field, because this instruction uses an expanding opcode.	(3) The second word of the instruction is fetched: adr := mem[pc], pc++. (4) The effective address is calculated. (5) The contents of memory at the effective address is fetched and loaded into the destination register, and the control algorithm stalls until the data has arrived. To implement this, the memory provides a ready signal, and the control algorithm cycles until ready is asserted. 
 
 ## Jumpc0
 
