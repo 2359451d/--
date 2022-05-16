@@ -43,9 +43,16 @@ How do hosts share the network to communicate at the same time?。主机如何�
 
 Mutliplexing 多路复用
 
-* Synchronous **Time** Division Mutliplexing (STDM)- divide time equally inRound-Robin 同步时分多路复用 (STDM) - 在循环中均分时间
+* Synchronous **Time** Division Mutliplexing (STDM)- divide time equally inRound-Robin 同步时分多路复用 (STDM) - **在循环中均分时间片**
 * **Frequency** Division Multiplexing (FDM)-e.g. TV transmission 频分复用 (FDM) - 例如电视传输
-* Statistical multiplexing (avoid idle time) 统计复用（避免空闲时间）
+* **STDM &FDM存在某流（主机对）没有数据发送，占用的物理链路会空闲**
+* Statistical multiplexing (avoid idle time) **统计复用（避免空闲时间**）
+  * 最常用多路复用形式
+  * 然而，不 同于STDM的是，每个流的数据是根据需要传输的，而不是在一个预先规定的时间片进 行传输。这样，如果只有一个流有数据要发送，那么它不必等到它的时间片到来就可以发 送数据，这样，也就不会岀现分配给其他流的时间片白白浪费的情况。正是这种避免空闲 时间的方法使分组交换具有较高的效率
+  * **统计复用，需要机制来限制发送，使其他流有机会传输数据**
+    * 统计多路复用定义每 个流在给定的时间内允许传输的数据块大小的上界。这个限定大小的数据块通常称为一个 分组(packet) 9用以与应用程序可能传输的任意大小的消息】message)作区分。因为分 组交换网限制分组的最大尺寸，所以主机可能无法用一个分组发送一条完整的消息。源节 点可能需要将消息分划为几个分组，接收者再把这些分组重新组装成原始消息。
+* ，由多个用户发送的数据可在构成网络的多条物理链路上被多路复用。
+  * ![](/static/2022-05-15-21-50-10.png)
 
 Packet switching 分组交换
 
