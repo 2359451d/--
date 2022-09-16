@@ -9,7 +9,7 @@
 * [封装，多路分解，协议标准：Encapsulation, Demultiplexing, Conformance](#封装多路分解协议标准encapsulation-demultiplexing-conformance)
 * [分层不仅是抽象概念：Layring:more than an abstract concept](#分层不仅是抽象概念layringmore-than-an-abstract-concept)
 * [网络两个关键概念: Two Key concepts in Networking](#网络两个关键概念-two-key-concepts-in-networking)
-* [数据包交换：Packet Switching](#数据包交换packet-switching)
+* [分组交换：Packet Switching](#分组交换packet-switching)
 * [最小生成树算法-避免环路：Avoiding Loops, Spanning Tree Algorithm](#最小生成树算法-避免环路avoiding-loops-spanning-tree-algorithm)
 * [互联路由：Internetworking](#互联路由internetworking)
 * [Global Internet](#global-internet)
@@ -159,7 +159,7 @@ Addressing
 * Different scopes: in LAN(switching), over the globallnternet (routing) 不同的范围：局域网（交换），全球互联网（路由）
   * LAN如何尽快的将数据包从一个输入端口发送到另一个
 
-# 数据包交换：Packet Switching
+# 分组交换：Packet Switching
 
 Aswitch allows to interconnect links to form a larger network
 
@@ -396,6 +396,7 @@ Global routing between AS border routers AS **边界路由器之间的全局路�
 * eventually, a backbone' router will know how to reach everything **最终，骨干路由器将知道如何访问所有内容**
 * internally each AS can use any routing protocol they choose **在内部，每个 AS 可以使用他们选择的任何路由协议**
 * Scale problematic: even with CIDR,~150Kprefixes for Internet backbones **规模问题：即使使用 CIDR，互联网骨干网的前缀约为 150K**
+  * 需要有一张路由表以提供对任何合法 IP地址的匹配。虽然CIDR有助于控制因特网的主干网路由中携带的不同前缀的数目，但 是仍不能避免大量路由信息的传递——至编写此书时大约达到300 000个前缀
 
 interdomain routing only concerned with (loop-free) reachability (optimality too hard) **域间路由只关心（无环路）可达性（最优性太难）**
 
