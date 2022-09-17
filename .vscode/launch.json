@@ -5,6 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "type": "java",
+            "name": "Launch LCS",
+            "request": "launch",
+            "mainClass": "karat.LCS",
+            "projectName": "--_3c767273"
+        },
+        {
             "name": "gcc.exe - 生成和调试活动文件",
             "type": "cppdbg",
             "request": "launch",
