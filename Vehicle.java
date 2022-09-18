@@ -1,13 +1,13 @@
 package vehicle.types;
 
 public abstract class Vehicle {
-	private String name;
+	/**private String name;
 	private Type type;
 	private Direction direction;
 	private boolean stopped;
-	private double currentSpeed;
+	private double currentSpeed;**/
 	
-	public void drive(Direction direction, double speed) {}
+	/**public void drive(Direction direction, double speed) {}
 	public void streer(double degree, double speed) {}
 	
 	public abstract String printSpeed();
@@ -57,4 +57,5 @@ enum Type {
 
 enum Direction {
 	FORWARD, BACKWARD, LEFT, RIGHT, STATIONARY
+	 **/
 }

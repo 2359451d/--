@@ -1,0 +1,12 @@
+{
+    "C_Cpp.intelliSenseEngineFallback": "Disabled",
+    "C_Cpp.dimInactiveRegions": true,
+    "C_Cpp.errorSquiggles": "Enabled",
+    "files.associations": {
+        "*.html": "html",
+        "*.py": "python",
+        "limits": "c"
+    },
+    "vscode_vibrancy.opacity": 75,
+    "vscode_vibrancy.theme": "Default Dark"
+}

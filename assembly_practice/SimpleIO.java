@@ -2,7 +2,7 @@ import java.util.Scanner;
 
 public class SimpleIO {
     /* read the input and print out the corresponding words in terms of the given table */
-    public static void printCommand(Scanner sc){
+    /**public static void printCommand(Scanner sc){
         while(!sc.hasNext("?")){
             String inpu = sc.next();
             // transfer into Character
@@ -36,6 +36,6 @@ public class SimpleIO {
         SimpleIO.printCommand(sc);
 
     }
-
+**/
 
 }

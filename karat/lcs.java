@@ -1,7 +1,12 @@
-public class MainClass {
-    public static String stringToString(String input) {
+package karat;
+
+import java.io.IOException;
+import java.util.Arrays;
+
+public class lcs {
+    /**public static String stringToString(String input) {
         return JsonArray.readFrom("[" + input + "]").get(0).asString();
-    }
+    }**/
     
     public static void main(String[] args) throws IOException {
         /**BufferedReader in = new BufferedReader(new InputStreamReader(System.in));

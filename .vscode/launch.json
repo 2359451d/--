@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Launch FindCoursePairs",
+            "request": "launch",
+            "mainClass": "karat.FindCoursePairs",
+            "projectName": "--_3c767273"
+        },
+        {
+            "type": "java",
             "name": "Launch LCS",
             "request": "launch",
             "mainClass": "karat.LCS",
