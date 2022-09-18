@@ -1,7 +1,0 @@
-[
-{
-  "directory": "D:/study2021/NetworkSys/lab01/build",
-  "command": "C:\\MinGW\\bin\\g++.exe    -g   -o CMakeFiles\\lab1-cmake.dir\\main.cpp.obj -c D:\\study2021\\NetworkSys\\lab01\\main.cpp",
-  "file": "D:/study2021/NetworkSys/lab01/main.cpp"
-}
-]
