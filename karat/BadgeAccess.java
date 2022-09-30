@@ -62,7 +62,6 @@ public class BadgeAccess {
             System.out.printf("%s: %s\n", name, res.get(name).toString());
         }
     }
-
     public static boolean isWithinOneHour(int time1, int time2){
         if (time2==-1) return false;
 
